@@ -152,6 +152,10 @@ EOF
         } >> "$top_level_sample"
     done
 
+    # Remove trailing blank lines and collapse multiple blank lines into one
+    awk 'BEGIN{blank=0} NF{blank=0; print; next} !blank{blank=1; print}' \
+        "$top_level_sample" > "${top_level_sample}.tmp" && mv "${top_level_sample}.tmp" "$top_level_sample"
+
     echo "Sample files generated, including top-level: $top_level_sample"
 }
 
