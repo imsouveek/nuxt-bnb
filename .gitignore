@@ -21,4 +21,4 @@ db/postgres/*
 !db/postgres/.gitkeep
 
 backups
-__TODOS.md
+TODOs.md
