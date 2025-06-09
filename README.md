@@ -59,17 +59,23 @@ Experienced developers can pass any Docker/Compose flags (`--build`, `--rmi`, et
 This tool helps maintain a clean, reproducible, and platform-independent development experience.
 
 ## Env setup
-* Step 1: Configure env files in tooling folder 
-* Step 2: Verify nuxt-bnb.targets files in tooling folder
-* Step 3: Start the dependency services with the command below
+* Step 1: Locate the `tooling/dev/.env.dev.merged.sample`
+* Step 2: Update entries with xxxxx. You may need to create Razorpay, GCP accounts and keys
+* Step 3: Rename `tooling/dev/.env.dev.merged.sample` to `tooling/dev/.env.dev.merged`
+
+> `envtool` is a lightweight utility script that helps manage `.env` files across services. It can **merge** service-specific `.env` files into a single view, **split** them back into per-service files, and generate masked `.env.*.sample` files for sharing. Run it from `./scripts/envtool`.
+
+* Step 4: Run `./scripts/envtool dev --split`
+* Step 5: Verify contents in `tooling/dev/targets.json`
+* Step 6: Start the dependency services with the command below
 ```bash
 ./scripts/dev-env start services -d
 ```
-* Step 4: Build and start the app with the command below
+* Step 7: Build and start the app with the command below
 ```bash
 ./scripts/dev-env start app -d
 ```
-* Step 5: Unit testing can be done using the command below (for test-runner container). Note that unit tests are built so that specific sections of the app can be tested individually
+* Step 8: Unit testing can be done using the command below (for test-runner container). Note that unit tests are built so that specific sections of the app can be tested individually
 ```bash
 ./scripts/dev-env test api
 ```
