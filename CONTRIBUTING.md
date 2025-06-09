@@ -15,7 +15,6 @@ You’re welcome to:
 
 > Note that I have used a Raspberry Pi for the entire development. The `./scripts/dev-env` script should abstract away this quirk, but let me know if it doesn't 
 
-## Env setup
 * Step 1: Locate the `tooling/dev/.env.dev.merged.sample`
 * Step 2: Update entries with xxxxx. You may need to create Razorpay, GCP accounts and keys
 * Step 3: Rename `tooling/dev/.env.dev.merged.sample` to `tooling/dev/.env.dev.merged`
