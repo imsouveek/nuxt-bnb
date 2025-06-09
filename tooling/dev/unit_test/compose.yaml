@@ -1,0 +1,11 @@
+services:
+  unit-test:
+    build:
+      context: ../../../
+      dockerfile: tooling/dev/unit_test/Dockerfile.test
+      args:
+        PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      NODE_ENV: test

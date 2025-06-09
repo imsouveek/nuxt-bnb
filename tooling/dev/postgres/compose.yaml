@@ -1,0 +1,27 @@
+services:
+  postgresdb:
+    image: postgres
+    restart: always
+    ports:
+      - ${POSTGRES_LOCAL_PORT}:${POSTGRES_PORT}
+    volumes:
+      - ../../../db/postgres:/var/lib/postgresql/data
+    env_file: ./.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - ${PGADMIN_LOCAL_PORT}:${PGADMIN_PORT}
+    env_file: ./.env
+    volumes:
+      - ../../../db/pgadmin:/var/lib/pgadmin
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+        restart: true

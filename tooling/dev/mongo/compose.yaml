@@ -1,0 +1,27 @@
+services:
+  mongodb:
+    image: 'mongo'
+    volumes:
+      - ../../../db/mongodb:/data/db
+    ports:
+      - ${MONGO_LOCAL_PORT}:${MONGO_DB_PORT}
+    env_file: ./.env
+    healthcheck: 
+      test: echo 'db.runCommand({serverStatus:1}).ok' | mongosh mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@${MONGO_HOST}:${MONGO_DB_PORT}/ --quiet | grep 1
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    attach: false
+    
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - ${DBADMIN_LOCAL_PORT}:${DBADMIN_PORT}
+    env_file: ./.env
+    attach: false
+    depends_on:
+      mongodb:
+        condition: service_healthy
+        restart: true

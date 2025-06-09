@@ -1,0 +1,46 @@
+services:
+  app:
+    build: 
+      context: ../../../
+      dockerfile: tooling/dev/app/Dockerfile.app
+      args:
+        PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
+    ports:
+      - "${NUXT_LOCAL_PORT}:${NUXT_PORT}"
+    develop:
+      watch:
+        - path: ../../../
+          action: sync
+          target: /app
+          ignore:
+            - db
+            - migrations
+    env_file: ./.env
+    command: npm run dev
+    depends_on:
+      mailserver:
+        condition: service_healthy
+        restart: true
+      mongodb:
+        condition: service_healthy
+        restart: true
+      postgresdb:
+        condition: service_healthy
+        restart: true
+  
+  app-utils:
+    build: 
+      context: ../../../
+      dockerfile: tooling/dev/app/Dockerfile.app
+      args:
+        DATABASE_URL: "${PAYMENT_DB_URL}${PAYMENT_DB_NAME}"
+        PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
+    volumes:
+      - ../../../:/app
+      - /app/node_modules
+    env_file: ./.env
+    environment:
+      DATABASE_URL: ${PAYMENT_DB_URL}${PAYMENT_DB_NAME}
+    stdin_open: true
+    tty: true
+    command: sh

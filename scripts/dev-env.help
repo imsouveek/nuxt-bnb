@@ -1,0 +1,98 @@
+## index
+dev-env: Developer environment CLI for Nuxt BnB
+
+Usage:
+  ./scripts/dev-env <command> <target> [options]
+
+Commands:
+  start     Start a container or group
+  stop      Stop a container or group
+  test      Run tests in an isolated test container
+  run       Run a command in a shell or utils container
+  connect   Open an interactive shell in a running container
+  status    Show container status
+  help      Show help (or help for a specific command)
+
+Run './scripts/dev-env help <command>' for detailed help.
+## start
+start - Start a container or group. Pass docker compose flags after target name
+
+Usage:
+  ./scripts/dev-env start <target> [docker compose up options] [--base <build options>]
+
+Examples:
+  ./scripts/dev-env start app --watch
+  ./scripts/dev-env start services -d
+  ./scripts/dev-env start app --watch --base --no-cache -q
+
+- Use [--base <build options>] to pass options to the base image build.
+Note: Any options to the base image build must come after --base. Compose flags go directly after the target.
+## stop
+stop - Stop a container or group. Pass docker compose flags after target name
+
+Usage:
+  ./scripts/dev-env stop <target> [docker compose down options]
+
+Examples:
+  ./scripts/dev-env stop app --rmi local
+
+## test
+test - Run tests in an isolated container. The container is deleted after test completes. Coverage is on by default unless test args are passed.
+
+Usage:
+  ./scripts/dev-env test <target> [docker compose run options] [--jest <jest options>] [--base <build options>]
+
+Examples:
+  ./scripts/dev-env test api
+  ./scripts/dev-env test api -q --jest --runInBand --testNamePattern='auth'
+  ./scripts/dev-env test api --jest --runInBand --testNamePattern='auth' --base --no-cache -q
+  ./scripts/dev-env test api --jest /app/server/api/tests/bootstrap/connectDb.test.js
+
+- Use [--base <build options>] to pass options to the base image build.
+- Use [--jest <jest options>] to customize Jest behavior.
+Note: Any options to the base image build must come after --base. Compose flags go directly after the target.
+## run
+run - Run arbitrary commands in a utility container. These containers are deleted when done. Not specifying a command starts a shell.
+
+Usage:
+  ./scripts/dev-env run utils <command> [--base <build options>]
+  ./scripts/dev-env run shell <command>
+
+Examples:
+  ./scripts/dev-env run utils npx eslint --ext .vue,.js .
+  ./scripts/dev-env run utils npx prisma migrate dev
+  ./scripts/dev-env run utils npx eslint . --base --no-cache 
+
+- Use [--base <build options>] to pass options to the base image build.
+Note: Any options to the base image build must come after --base. Compose flags go directly after the target.
+## connect
+connect - Open a shell in a running container
+
+Usage:
+  ./scripts/dev-env connect <target>
+## status
+status - Show container status
+
+Usage:
+  ./scripts/dev-env status
+## targets
+
+The `targets.json` file defines reusable container groups and command mappings.
+
+"api": {        <-- Target Name
+    "commands": ["test"],       <-- Supported commands
+    "containers": ["unit-test"],        <-- Containers to use. If multiple, omit 'connect' command
+    "requires_base": true,          <-- Whether this target needs the base image (default: false)
+    "jest_config": "server/api/tests/jest.config.mjs"       <-- Mandatory and supported for test targets only
+}
+
+It also supports a shorthand syntax as
+"mongodb": ["start", "stop", "connect"]
+
+which is equivalent to:
+{
+    "commands": [...],
+    "containers": ["mongodb"]
+}
+
+If "containers" is omitted, it defaults to [target_name].

@@ -1,0 +1,9 @@
+{
+    "watch": [
+        "server",
+        "modules",
+        "nuxt.config.js"
+    ],
+    "ext": "js,json",
+    "exec": "nuxt"
+}

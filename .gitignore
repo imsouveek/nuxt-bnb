@@ -1,0 +1,23 @@
+# Ignore all .env files in subfolders but keep sample files
+**/.env
+**/.env.*.merged
+
+# Ignore secrets and certs
+keys.json
+sslCerts/*
+!sslCerts/.gitkeep
+
+# Node modules
+node_modules/
+
+# DB files
+db/mongodb/*
+!db/mongodb/.gitkeep
+
+db/pgadmin/*
+!db/pgadmin/.gitkeep
+
+db/postgres/*
+!db/postgres/.gitkeep
+
+backups

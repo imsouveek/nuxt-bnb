@@ -1,0 +1,9 @@
+services:
+  mailserver:
+    image: axllent/mailpit
+    restart: always
+    ports:
+      - ${SMTP_PORT}:${MAILSERVER_SMTP_PORT}
+      - ${MAILSERVER_UI}:${MAILSERVER_HTTP_PORT}
+    env_file: ./.env
+    attach: false

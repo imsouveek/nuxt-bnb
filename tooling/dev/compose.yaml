@@ -1,0 +1,34 @@
+# A compose file to create a node app
+# This is a utility compose file - not one to be used for final production use
+# It is used to initialize any nodejs / npm based app
+# USAGE: docker compose run -i shell sh
+# RECOMMENDATION: Create a new directory for project, copy this file into the directory, and run docker compose
+# NOTE: After building project, run sudo chown -R user:group * to update permissions for any new crated files
+#
+# To run commands within a container, add interactivity, auto removal, and volume mapping
+# Note: package installation within container updates package.json but docker will still re-install 
+#       all packages next time the image is used
+# docker compose run -i --rm -v $(pwd):/app -v /app/node_modules app sh
+#
+# To run commands within a running container, do
+# docker compose exec app sh
+name: nuxt-bnb 
+
+include:
+  - ./mailpit/compose.yaml
+  - ./mongo/compose.yaml
+  - ./postgres/compose.yaml
+  - ./app/compose.yaml
+  - ./unit_test/compose.yaml
+services:
+      
+  shell:
+    image: node:current-alpine
+    working_dir: /app
+    volumes:
+      - ../../:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+    command: sh
+

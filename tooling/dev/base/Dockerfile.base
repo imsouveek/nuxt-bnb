@@ -1,0 +1,27 @@
+# Use lightweight Alpine-based Node image with musl libc
+FROM node:current-alpine
+
+# Set working directory
+WORKDIR /app
+
+# -------- Build args with defaults --------
+ARG NODE_ARCH=arm64
+ARG NODE_PLATFORM=linuxmusl
+ARG NODE_LIBC=musl
+
+# -------- npm config for platform-specific builds --------
+ENV npm_config_arch=$NODE_ARCH \
+    npm_config_platform=$NODE_PLATFORM \
+    npm_config_libc=$NODE_LIBC \
+    npm_config_legacy_peer_deps=true
+
+# -------- Global tooling --------
+RUN echo "Installing global tools for $npm_config_platform/$npm_config_arch ($npm_config_libc)" \
+  && npm install -g nodemon
+
+# -------- Install dependencies with layer caching --------
+COPY package.json ./
+RUN echo "Installing project dependencies for $npm_config_platform/$npm_config_arch ($npm_config_libc)" \
+  && npm install
+
+# Note: app files and CMD are handled in service-specific Dockerfiles

@@ -1,0 +1,71 @@
+@import '~vuetify/src/styles/styles.sass';
+
+$border-radius-root: 10px;
+
+$btn-text-transform: capitalize !default;
+
+$white: #FFFFFF;
+
+$material-light: (
+    'calendar': (
+        'text-color': #3b210c,
+        'past-color': rgba(#3b210c, .38)
+    ),
+    'code': (
+        'background': rgba(#3b210c, 0.05)
+    ),
+    'chips': rgba(#3b210c, .12),
+    'dividers': rgba(#3b210c, 0.12),
+    'icons': (
+        'active': rgba(#3b210c, 0.54),
+        'inactive': rgba(#3b210c, 0.38)
+    ),
+    'inputs': (
+        'box': rgba(#3b210c, 0.04),
+        'solo-inverted': rgba(#3b210c, 0.06)
+    ),
+    'buttons': (
+        'disabled': rgba(#3b210c, 0.26),
+        'focused': rgba(#3b210c, 0.12)
+    ),
+    'selection-controls': (
+        'disabled': rgba(#3b210c, 0.26),
+        'track': (
+        'inactive': rgba(#3b210c, 0.38),
+        'disabled': rgba(#3b210c, 0.12)
+        )
+    ),
+    'slider': (
+        'active': rgba(#3b210c, 0.38),
+        'inactive': rgba(#3b210c, 0.26),
+        'disabled': rgba(#3b210c, 0.26),
+        'discrete': #3b210c
+    ),
+    'toggle-buttons': (
+        'color': #3b210c
+    ),
+    'text-fields': (
+        'filled': rgba(#3b210c, 0.06),
+        'filled-hover': rgba(#3b210c, 0.12),
+        'outlined': rgba(#3b210c, 0.38),
+        'outlined-disabled': rgba(#3b210c, 0.26),
+        'outlined-hover': rgba(#3b210c, 0.86)
+    ),
+    'input-bottom-line': rgba(#3b210c, 0.42),
+    'stepper': (
+        'completed': rgba(#3b210c, 0.87),
+        'hover': rgba(#3b210c, 0.54)
+    ),
+    'fg-color': #3b210c,
+    'text-color': #3b210c,
+    'text': (
+        'primary': rgba(#3b210c, 0.87),
+        'secondary': rgba(#3b210c, 0.6),
+        'disabled': rgba(#3b210c, 0.38)
+    ),
+);
+
+$material-dark: (
+    'background': #3b210c,
+    'surface': #3b210c
+);
