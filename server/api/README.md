@@ -163,7 +163,7 @@ To run tests with coverage, use the following command from project root:
 ```
 or, for specific files:
 ```bash
-./scripts/dev-env test api --jest-params="/app/server/api/tests/bootstrap/connectDb.test.js"
+./scripts/dev-env test api --jest server/api/tests/bootstrap/connectDb.test.js
 ```
 ---
 
@@ -174,9 +174,7 @@ Below are the required `.env` variables for the API service:
 | Variable                       | Description                                                                 |
 |--------------------------------|-----------------------------------------------------------------------------|
 | `HOST`                         | Hostname for app server (typically `localhost` in dev)                      |
-| `NUXT_HOST`                    | Internal network binding host for Nuxt/Express (`0.0.0.0` in Docker)        |
 | `NUXT_PORT`                    | External port exposed by the Nuxt/Express server                            |
-| `NUXT_LOCAL_PORT`              | Port exposed to localhost, may be same as `NUXT_PORT`                       |
 | `API_DB_URL`                   | MongoDB connection string (including credentials and host)                  |
 | `API_DB_NAME`                  | Name of the MongoDB database                                                |
 | `SMTP_HOST`                    | SMTP server hostname (e.g., `mailserver` for Mailpit)                       |
@@ -187,17 +185,14 @@ Below are the required `.env` variables for the API service:
 | `REFRESH_COOKIE`               | Name of the HTTP-only cookie used for storing the refresh token             |
 | `REFRESH_LIFE`                 | Refresh token expiry duration (e.g., `1w`, `7d`)                            |
 | `GOOGLE_AUTH_CLIENT_ID`        | Client ID for Google OAuth login                                            |
-| `NODE_TLS_REJECT_UNAUTHORIZED` | Disables SSL cert validation (set to `1` in dev with self-signed certs)     |
-| `NODE_EXTRA_CA_CERTS`          | Path to self-signed certificate file for dev SSL trust                      |
 
 
 ---
 
 ## Future Improvements
 
-- Add rate limiting middleware
 - Add payment integration (for booking flow)
-- Improve error handling
+- Implement structured error classes and logging
 
 ---
 

@@ -3,6 +3,7 @@ import getStrategies from './strategies.js'
 import getMiddleware from '../middleware/index.js'
 
 import orderController from '../resources/orders/controller.js'
+import webhookController from '../resources/webhooks/controller.js'
 
 export default (config, dbClient) => {
     const strategies = getStrategies(config)
@@ -10,6 +11,7 @@ export default (config, dbClient) => {
 
     return {
         order: orderController(services),
-        middleware: getMiddleware()
+        webhook: webhookController(services),
+        middleware: getMiddleware(config.auth)
     }
 }

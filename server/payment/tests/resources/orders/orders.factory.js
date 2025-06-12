@@ -1,43 +1,54 @@
 import { faker } from '@faker-js/faker'
+import dbModule from '../../../strategies/db.js'
+import razorpayFactory from '../testFactories/razorpay/order.js'
 
-export const createOrder = async (gatewayType = '', overrides = {}) => {
-    const Order = globalThis.__TEST_STATE__.dbClient.order
-
-    let gatewayInclude = {}
-    switch (gatewayType) {
-        case 'Razorpay':
-            gatewayInclude = await razorpay()
-            break;
+export default () => {
+    const gatewayFactories = {
+        razorpay: razorpayFactory()
     }
 
-    return await Order.create({
-        data: {
-            bookingId: faker.database.mongodbObjectId(),
-            amount: parseFloat(faker.finance.amount()),
-            status: ['New', 'Pending', 'Success', 'Failed'][faker.number.int({
-                min: 0,
-                max: 3
-            })],
-            ...gatewayInclude,
-            ...overrides
+    const createOrder = async (gatewayType = '', overrides = {}) => {
+        const Order = globalThis.__TEST_STATE__.dbClient.order
+        const gatewayKey = gatewayType.toLocaleLowerCase()
+        const gatewayFactory = gatewayFactories[gatewayKey]
+        const gatewayDbModel = gatewayFactory ? dbModule(gatewayKey) : null
+
+        const query = {
+            data: {
+                bookingId: overrides.bookingId ?? faker.database.mongodbObjectId(),
+                amount: overrides.amount ?? parseFloat(faker.finance.amount()),
+                status: overrides.status ?? ['New', 'Pending', 'Success', 'Failed'][faker.number.int({
+                    min: 0,
+                    max: 3
+                })],
+                createdAt: overrides.createdAt ?? new Date(Date.now())
+            }
         }
-    })
-
-}
-
-const razorpay = async () => {
-    return {
-        gateway: {
-            create: {
-                type: 'Razorpay',
-                razorpay: {
-                    create: {
-                        razorpayOrderId: faker.string.alphanumeric(15),
-                        razorpayPaymentId: faker.string.alphanumeric(15),
-                        razorpaySignature: faker.string.alphanumeric(15)
-                    }
+        if (gatewayFactory) {
+            query.data.gateway = {
+                create: {
+                    type: gatewayType,
+                    ...gatewayFactory.createOrder(overrides)
+                }
+            }
+            query.include = {
+                gateway: {
+                    include: gatewayDbModel.select()
                 }
             }
         }
+        return await Order.create(query)
+    }
+
+    const verifyOrder = async (gatewayType, { responseBody, payload, status }) => {
+        const gatewayKey = gatewayType.toLocaleLowerCase()
+        const gatewayFactory = gatewayFactories[gatewayKey]
+
+        return await gatewayFactory.verifyOrder({ responseBody, payload, status })
+    }
+
+    return {
+        createOrder,
+        verifyOrder
     }
 }

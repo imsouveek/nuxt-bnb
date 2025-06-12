@@ -7,7 +7,12 @@ export default function () {
         const { controllers } = await bootstrapServer(this.options)
 
         const router = express.Router()
-        router.use(express.json({ limit: '20mb' }))
+        router.use(express.json({
+            limit: '20mb',
+            verify: (req, res, buf) => {
+                req.rawBody = buf.toString()
+            }
+        }))
         router.use(createApiRouter(controllers))
 
         app.use('/payment', router)

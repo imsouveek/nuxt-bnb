@@ -1,5 +1,6 @@
 import express from 'express'
 import orderRouter from './resources/orders/route.js'
+import webhookRouter from './resources/webhooks/route.js'
 import { sendJSON } from './utils/response.js'
 
 export default function createApiRouter(controllers) {
@@ -7,6 +8,7 @@ export default function createApiRouter(controllers) {
 
     router.use(controllers.middleware.queryparams)
     router.use('/orders', orderRouter(controllers))
+    router.use('/webhooks', webhookRouter(controllers))
 
     // Catch errors
     // eslint-disable-next-line no-unused-vars

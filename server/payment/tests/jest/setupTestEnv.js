@@ -15,6 +15,7 @@ beforeAll(async () => {
         // error: jest.fn(),
     }
 
+    global.__MOCK_CONFIG__ = {}
     const dbCfg = await startTestDb()
     const { dbClient, app, config } = await createApp(dbCfg)
 

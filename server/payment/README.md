@@ -1,28 +1,32 @@
 # NuxtBnB — Payment Service
 
-This is the payment service for NuxtBnB, a simplified Airbnb clone built with **Express**, **Prisma**, **Postgres**, and a modular, resource-based architecture with a strategy pattern for supporting multiple payment gateways. This service powers payment integration.
+This is the payment microservice for **NuxtBnB**, a simplified Airbnb clone. It is built with **Express**, **Prisma**, and **PostgreSQL**, following a modular, resource-based architecture with a strategy pattern to support multiple payment gateways.
+
+This service is designed to **separate core application logic from gateway-specific integration**, enabling maintainable and scalable multi-gateway support. Currently supports Razorpay.
 
 ---
 
 ## Folder Structure
 
 ```
-server/payment
-├── bootstrap
-│   └── prisma
-│       ├── generated
-│       │   └── prisma-client
-│       │       └── runtime
-│       └── migrations
-│           └── 20250530220419_nuxtbnb_01
+server/payment/                 # Payment service directory
+├── bootstrap                   # Bootstraps db connection, services, controllers
+│   └── prisma                  # Prisma schema and migrations
 ├── middleware
-├── resources
-│   └── orders
-├── strategies
-├── tests
-│   ├── jest
-│   └── resources
-└── utils
+├── resources                   # RESTful resources (orders, webhooks)
+│   ├── orders
+│   └── webhooks
+├── strategies                  # Gateway orchestration code
+│   └── razorpay
+├── tests                       # Unit tests directory
+│   ├── bootstrap               # Unit tests for Prisma and Postgres connection
+│   ├── jest                    # Setup for unit tests
+│   └── resources               # Gateway agnostic unit tests and factories for each resource
+│       ├── orders
+│       ├── testFactories       # Gateway specific factories and verifications
+│       │   └── razorpay
+│       └── webhooks
+└── utils                       # Stateless helper utilities for payment services
 ```
 
 ---
@@ -40,7 +44,7 @@ Which does the following:
 - Connects to Postgres using `connectDb.js`
 - Uses Prisma ORM for modeling the database
 - Builds services → controllers
-- Injects shared middleware (e.g., query parsing)
+- Injects shared middleware (e.g., auth, query parsing)
 
 Exported entry:
 
@@ -52,27 +56,26 @@ export async function bootstrapServer(config)
 
 ## Authentication
 
-- TBD - Build authentication for server to server API calls
+- Currently, uses key based authentication for service to service. Get and List services for bookings are not authenticated, but this service is expected to be standalone and appropriately secured through infrastructure to protect against unauthorized access and DDoS attacks
 
 ---
 
-## Routes (Ongoing work)
+## Routes 
 
 ### Authenticated
 
 | Method | Path                                  | Description                         |
 |--------|---------------------------------------|-------------------------------------|
 | POST   | `/orders`                             | Create Payment Order                |
-| GET    | `/orders`                             | Search Payment Order                |
-| GET    | `/orders/:id`                         | Get specific payment order          |
-
 
 ### Public (no auth)
-_Note: No unauthenticated public routes are currently exposed._
 
-| Method | Path                                     | Description                   |
-|--------|------------------------------------------|-------------------------------|
-
+| Method | Path                                     | Description                      |
+|--------|------------------------------------------|----------------------------------|
+| GET    | `/orders`                                | Search Payment Order             |
+| GET    | `/orders/:id`                            | Get specific payment order       |
+| POST   | `/webhooks/:gateway`                     | Gateway specific webhook handler |
+| POST   | `/webhooks/:gateway/client`              | Gateway specific client handler  |
 
 ---
 
@@ -83,41 +86,58 @@ Located in `server/middleware/`:
 | File            | Purpose                                             |
 |-----------------|-----------------------------------------------------|
 | `queryparams.js`| Parses `limit`, `sort`, etc. into `req.queryparams` |
+| `auth.js`       | Built for key based authentication                  | 
 
 ---
 
-### Testing (In Progress)
+### Testing
 
-This backend is fully tested using **Jest** and **supertest**, with isolated test containers for Postgres.
+> Testing is managed through custom CLI (`./scripts/dev-env`).  to manage the Docker-based development environment. See root README for details.
 
+This backend is fully tested using **Jest** and **supertest**, with isolated test containers for Postgres. The tests are built for maximum coverage so that it can be used for 
+1. Refactor with confidence
+2. Ensure that edge cases are never broken
+3. Identify redundant validations (and remove them)
+
+Additional notes:
 - `server/tests/` contains the full test suite
-- xx automated tests across all resources
-- Coverage: xx% lines/functions/statements
+- Coverage report
+  - Statements: 98.63 %
+  - Branches: 94.5 %
+  - Functions: 97.82 % 
+  - Lines: 99.03 %
 
 To run tests with coverage, use the following command from project root:
 ```bash
 ./scripts/dev-env test payment
 ```
+or, for specific files:
+```bash
+./scripts/dev-env test payment  --jest server/payment/tests/bootstrap/connectDb.test.js
+```
 ---
 
 ## Environment Variables
 
-Stored in `.env` files in `tooling` directory. Required keys include:
+Below are the required `.env` variables for the API service:
 
-```env
-PORT=3000
-PAYMENT_DB_URL=postgres://test:secret@postgres:5432
-PAYMENT_DB_NAME=nuxtbnb
-RAZORPAY_KEY_ID=xxxxx
-RAZORPAY_KEY_SECRET=yyyy
-```
+| Variable                       | Description                                                                 |
+|--------------------------------|-----------------------------------------------------------------------------|
+| `PAYMENT_AUTH_HEADER`          | Authentication header for order creation requests from booking service      |
+| `PAYMENT_AUTH_KEY`             | Authentication key for order creation requests from booking service         |
+| `PAYMENT_DB_URL`               | Postgres connection string (including credentials and host)                 |
+| `PAYMENT_DB_NAME`              | Name of the Postgres database                                               |
+| `RAZORPAY_KEY_ID`              | Key Id for Razorpay integration                                             |
+| `RAZORPAY_KEY_SECRET`          | Key Secret for Razorpay integration                                         |
+| `WEBHOOK_SECRET`               | Webhook Secret for Razorpay integration                                     |
 
 ---
 
 ## Future Improvements
 
-- Add rate limiting middleware
-- Improve error handling
+- Implement structured error classes and logging
+- Add API usage metrics for payment/order activity
+- Evaluate PCI-DSS readiness checklist
 
 ---
 

@@ -150,10 +150,10 @@ This roadmap tracks functional and architectural development. Infra/config-level
 - [x] Update Admin Home editor to use Vuex and other Vue patterns     
 - [x] Implement Availability save
 - [x] Implement Razorpay payments  
-- [ ] Handle Razorpay webhook with idempotency logic  
+- [x] Handle Razorpay webhook with idempotency logic  
 - [ ] Build booking summary / confirmation page  
-- [ ] Add test coverage for booking and payment
-- [ ] Deploy to GitHub
+- [x] Add test coverage for booking and payment
+- [x] Deploy to GitHub
 - [ ] Add support for DevContainers for GitHub Codespaces
 - [ ] Build test-env and prod-env scripts to provision UX, API and Payment separately
 - [ ] Deploy to K3s cluster

@@ -29,9 +29,9 @@ model Gateway {
 
 model Razorpay {
   id                    String      @id @default(cuid())
-  razorpayOrderId       String
-  razorpayPaymentId     String
-  razorpaySignature     String
+  razorpayOrderId       String      @default("")
+  razorpayPaymentId     String      @default("")
+  razorpaySignature     String      @default("")
   createdAt             DateTime    @default(now())
   updatedAt             DateTime    @updatedAt
 
@@ -49,4 +49,13 @@ model Order {
 
   gateway               Gateway?    @relation("GatewayToOrder", fields: [gatewayId], references: [id])
   gatewayId             String?     @unique
+}
+
+model WebhookEvent{
+  id                    String      @id @default(cuid())
+  eventId               String      @unique
+  gateway               GatewayType
+  status                String
+  rawBody               Json
+  createdAt             DateTime    @default(now())
 }

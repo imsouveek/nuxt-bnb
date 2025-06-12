@@ -1,4 +1,4 @@
-import razorpayStrategy from '../strategies/razorpay.js'
+import razorpayStrategy from '../strategies/razorpay/index.js'
 
 export default (config) => {
     return {

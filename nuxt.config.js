@@ -76,6 +76,9 @@ export default {
         map: {
             key: process.env.GOOGLE_MAPS_API_KEY
         },
+        razorpay: {
+            key_id: process.env.RAZORPAY_KEY_ID
+        },
         url: {
             app: `https://${process.env.HOST}:${process.env.NUXT_PORT}/`,
             api: `https://${process.env.HOST}:${process.env.NUXT_PORT}/api/`,
@@ -94,17 +97,21 @@ export default {
             refresh_cookie: process.env.REFRESH_COOKIE,
             refresh_life: process.env.REFRESH_LIFE,
         },
-        smtp: {
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT
+        paymentAuth: {
+            auth_header: process.env.PAYMENT_AUTH_HEADER,
+            auth_key: process.env.PAYMENT_AUTH_KEY
         },
         paymentDb: {
             dbUrl: process.env.PAYMENT_DB_URL,
             dbName: process.env.PAYMENT_DB_NAME,
         },
         razorpay: {
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET
+            key_secret: process.env.RAZORPAY_KEY_SECRET,
+            webhook_secret: process.env.WEBHOOK_SECRET
+        },
+        smtp: {
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT
         }
     }
 }

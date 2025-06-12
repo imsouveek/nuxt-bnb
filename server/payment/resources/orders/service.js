@@ -9,28 +9,41 @@ export default (strategies, dbClient) => {
                 bookingId,
                 amount,
                 status,
-                gateway: strategy.prepare()
-            }
-        })
-
-        return await dbClient.order.update({
-            where: {
-                id: order.id
-            },
-            data: {
-                status: 'Pending',
                 gateway: {
-                    update: {
-                        data: await strategy.createOrder(data)
+                    create: {
+                        type: strategy.name,
+                        ...strategy.db.create()
                     }
                 }
             },
             include: {
                 gateway: {
-                    include: strategy.queryInclude()
+                    include: strategy.db.select()
                 }
             }
         })
+        try {
+            const gatewayPayload = await strategy.order.create({ bookingId, amount, orderId: order.id })
+            return await dbClient.order.update({
+                where: { id: order.id },
+                data: {
+                    status: 'Pending',
+                    gateway: {
+                        update: {
+                            ...strategy.db.update(gatewayPayload)
+                        }
+                    }
+                },
+                include: {
+                    gateway: {
+                        include: strategy.db.select()
+                    }
+                }
+            })
+        } catch (error) {
+            console.log(error)
+            return order
+        }
     }
 
     const get = async (id) => {
@@ -45,12 +58,18 @@ export default (strategies, dbClient) => {
 
         const strategyKey = base.gateway?.type?.toLowerCase()
         const strategy = strategies[strategyKey]
+        if (!strategy) return base
 
-        if (strategy && strategy.enrich) {
-            return await strategy.enrich(base, dbClient)
+        const gatewayId = base.gateway?.id
+        const extra = await strategy.db.find(dbClient, { gatewayId }, true)
+
+        return {
+            ...base,
+            gateway: {
+                ...base.gateway,
+                [strategyKey]: extra
+            }
         }
-
-        return base
     }
 
     const list = async (queryparams) => {
@@ -86,7 +105,7 @@ export default (strategies, dbClient) => {
 
         const include = {
             gateway: {
-                include: strategy?.queryInclude?.() || {},
+                include: strategy?.db?.select?.() || {},
             },
         }
 

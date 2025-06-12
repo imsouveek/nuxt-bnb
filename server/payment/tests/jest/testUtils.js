@@ -7,7 +7,6 @@ import { GenericContainer } from 'testcontainers'
 let pgContainer
 
 export const startTestDb = async (inPort = 5432) => {
-    console.log("HERE")
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = path.dirname(__filename)
 

@@ -1,5 +1,7 @@
 import request from 'supertest'
-import { createOrder } from './orders.factory.js'
+import create from '../orders/orders.factory.js'
+
+const { createOrder } = create()
 
 let app, orders, now
 
