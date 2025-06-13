@@ -20,6 +20,8 @@ include:
   - ./postgres/compose.yaml
   - ./app/compose.yaml
   - ./unit_test/compose.yaml
+  - ./ngrok/compose.yaml
+  
 services:
       
   shell:

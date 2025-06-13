@@ -9,6 +9,7 @@
         "RAZORPAY_KEY_SECRET",
         "WEBHOOK_SECRET",
         "PAYMENT_AUTH_HEADER",
-        "PAYMENT_AUTH_KEY"
+        "PAYMENT_AUTH_KEY",
+        "NGROK_AUTHTOKEN"
     ]
   }

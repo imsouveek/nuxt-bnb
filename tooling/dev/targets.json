@@ -8,6 +8,7 @@
     "postgresdb": ["start", "stop", "connect"],
     "pgadmin": ["start", "stop", "connect"],
     "mailserver": ["start", "stop", "connect"],
+    "ngrok": ["start", "stop", "connect"],
     "utils": {
         "commands": ["run"],
         "containers": ["app-utils"],
@@ -24,7 +25,7 @@
     },
     "services": {
         "commands": ["start", "stop"],
-        "containers": ["mailserver", "mongodb", "mongo-express", "postgresdb", "pgadmin"]
+        "containers": ["mailserver", "mongodb", "mongo-express", "ngrok", "postgresdb", "pgadmin"]
     },
     "api": {
         "commands": ["test"],
