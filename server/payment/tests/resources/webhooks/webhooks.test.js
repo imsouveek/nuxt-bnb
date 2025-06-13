@@ -83,7 +83,6 @@ describe('Webhooks API', () => {
                     headers,
                     orderInDb: updatedOrder
                 })
-                console.log(extracted.eventId)
                 const webhookInDb = await db.webhookEvent.findUnique({
                     where: {
                         eventId: extracted.eventId
@@ -116,7 +115,6 @@ describe('Webhooks API', () => {
                     orderInDb: updatedOrder
                 })
 
-                console.log(extracted.eventId)
                 const webhookInDb = await db.webhookEvent.findUnique({
                     where: {
                         eventId: extracted.eventId
@@ -154,7 +152,6 @@ describe('Webhooks API', () => {
 
                 expect(res.statusCode).toBe(200);
 
-                console.log(extracted.eventId)
                 const webhookInDb = await db.webhookEvent.findUnique({
                     where: {
                         eventId: extracted.eventId

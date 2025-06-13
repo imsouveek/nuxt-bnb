@@ -137,7 +137,7 @@ describe('Orders API', () => {
 
         it('returns 401 if auth is missing', async () => {
             const testOrder = await createOrder()
-            const res = await request(app)
+            await request(app)
                 .get(`/payment/orders/${testOrder.id}`)
                 .expect(401)
         })
