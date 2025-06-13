@@ -26,12 +26,13 @@ export default (strategies, dbClient) => {
         if (!result) throw new Error('Invalid signature')
 
         // Update payment and save webhook event
-        await updateOrder(gateway, result)
+        const gatewayId = await updateOrder(gateway, result)
 
         await dbClient.webhookEvent.create({
             data: {
                 eventId,
                 gateway: strategy.name,
+                gatewayId,
                 status: result.status,
                 rawBody: req.rawBody
             }
@@ -50,10 +51,10 @@ export default (strategies, dbClient) => {
         const strategy = strategies[gateway]
         const orderStatus = (status === 'payment.captured') ? 'Success' : 'Failed'
 
-        const gatewayRecord = await strategy.db.find(dbClient, strategy.orderIdMatch(orderId), true)
+        const gatewayRecord = await strategy.db.find(dbClient, strategy.orderIdMatch(orderId))
         if (!gatewayRecord) {
             console.log("No order found")
-            return {}
+            return ''
         }
 
         if (orderStatus === 'Success') {
@@ -62,7 +63,7 @@ export default (strategies, dbClient) => {
         }
 
         // Step 2: Update Order using gatewayId (which is unique and indexed)
-        return await dbClient.order.update({
+        await dbClient.order.update({
             where: { gatewayId: gatewayRecord.gatewayId },
             data: {
                 status: orderStatus,
@@ -73,6 +74,9 @@ export default (strategies, dbClient) => {
                 }
             }
         })
+
+        return gatewayRecord.gatewayId
+
     }
 
     return {

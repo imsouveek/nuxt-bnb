@@ -56,7 +56,7 @@ export async function bootstrapServer(config)
 
 ## Authentication
 
-- Currently, uses key based authentication for service to service. Get and List services for bookings are not authenticated, but this service is expected to be standalone and appropriately secured through infrastructure to protect against unauthorized access and DDoS attacks
+- Currently, uses key based authentication for service to service. This service is expected to be standalone and appropriately secured through infrastructure to protect against unauthorized access and DDoS attacks
 
 ---
 
@@ -67,13 +67,12 @@ export async function bootstrapServer(config)
 | Method | Path                                  | Description                         |
 |--------|---------------------------------------|-------------------------------------|
 | POST   | `/orders`                             | Create Payment Order                |
+| GET    | `/orders/:id`                            | Get specific payment order       |
 
 ### Public (no auth)
 
 | Method | Path                                     | Description                      |
 |--------|------------------------------------------|----------------------------------|
-| GET    | `/orders`                                | Search Payment Order             |
-| GET    | `/orders/:id`                            | Get specific payment order       |
 | POST   | `/webhooks/:gateway`                     | Gateway specific webhook handler |
 | POST   | `/webhooks/:gateway/client`              | Gateway specific client handler  |
 
@@ -102,10 +101,10 @@ This backend is fully tested using **Jest** and **supertest**, with isolated tes
 Additional notes:
 - `server/tests/` contains the full test suite
 - Coverage report
-  - Statements: 98.63 %
-  - Branches: 94.5 %
-  - Functions: 97.82 % 
-  - Lines: 99.03 %
+  - Statements: 99.4 %
+  - Branches: 96.07 %
+  - Functions: 100 % 
+  - Lines: 99.35 %
 
 To run tests with coverage, use the following command from project root:
 ```bash

@@ -3,10 +3,6 @@ export default (gatewayName) => {
         [gatewayName]: obj ? { ...obj } : true
     })
 
-    const where = (obj) => ({
-        [gatewayName]: { ...obj }
-    })
-
     const create = (obj) => ({
         [gatewayName]: {
             create: {
@@ -25,21 +21,14 @@ export default (gatewayName) => {
         }
     })
 
-    const find = async (dbClient, obj, findFirst = false) => {
-        if (findFirst) {
-            return dbClient[gatewayName].findFirst({
-                where: { ...obj }
-            })
-        } else {
-            return dbClient[gatewayName].findMany({
-                where: { ...obj }
-            })
-        }
+    const find = async (dbClient, obj) => {
+        return dbClient[gatewayName].findFirst({
+            where: { ...obj }
+        })
     }
 
     return {
         select,
-        where,
         create,
         update,
         find

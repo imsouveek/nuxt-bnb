@@ -55,6 +55,7 @@ model WebhookEvent{
   id                    String      @id @default(cuid())
   eventId               String      @unique
   gateway               GatewayType
+  gatewayId             String      @default("")
   status                String
   rawBody               Json
   createdAt             DateTime    @default(now())

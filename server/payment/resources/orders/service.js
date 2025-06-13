@@ -61,7 +61,7 @@ export default (strategies, dbClient) => {
         if (!strategy) return base
 
         const gatewayId = base.gateway?.id
-        const extra = await strategy.db.find(dbClient, { gatewayId }, true)
+        const extra = await strategy.db.find(dbClient, { gatewayId })
 
         return {
             ...base,
@@ -72,57 +72,8 @@ export default (strategies, dbClient) => {
         }
     }
 
-    const list = async (queryparams) => {
-        const {
-            bookingId,
-            status,
-            gatewayType,
-            createdAt
-        } = queryparams
-
-        const {
-            limit = 20,
-            skip = 0,
-            orderBy = {
-                createdAt: 'desc'
-            }
-        } = queryparams.options
-
-        // Build dynamic WHERE clause
-        const where = {}
-        if (bookingId) where.bookingId = bookingId
-        if (status) where.status = status
-        if (gatewayType) {
-            where.gateway = { type: gatewayType }
-        }
-        if (createdAt) {
-            where.createdAt = createdAt
-        }
-
-        // Resolve strategy if gatewayType is provided
-        const strategyKey = gatewayType?.toLowerCase()
-        const strategy = strategyKey ? strategies[strategyKey] : null
-
-        const include = {
-            gateway: {
-                include: strategy?.db?.select?.() || {},
-            },
-        }
-
-        const orders = await dbClient.order.findMany({
-            where,
-            include,
-            skip: Number(skip),
-            take: Number(limit),
-            orderBy
-        })
-
-        return orders
-    }
-
     return {
         create,
-        get,
-        list
+        get
     }
 }

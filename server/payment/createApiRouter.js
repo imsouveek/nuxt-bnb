@@ -6,7 +6,6 @@ import { sendJSON } from './utils/response.js'
 export default function createApiRouter(controllers) {
     const router = express.Router()
 
-    router.use(controllers.middleware.queryparams)
     router.use('/orders', orderRouter(controllers))
     router.use('/webhooks', webhookRouter(controllers))
 

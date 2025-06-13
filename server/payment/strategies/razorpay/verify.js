@@ -3,10 +3,10 @@ import crypto from 'crypto'
 export default ({ webhook_secret, key_secret }) => {
 
     const extractHeaders = (headers) => {
-        return {
-            signature: headers['x-razorpay-signature'],
-            eventId: headers['x-razorpay-event-id']
-        }
+        const signature = headers['x-razorpay-signature']
+        const eventId = headers['x-razorpay-event-id']
+        if (!signature || !eventId) throw new Error("Request is missing required headers")
+        return { signature, eventId }
     }
 
     const webhook = ({ rawBody, signature }) => {

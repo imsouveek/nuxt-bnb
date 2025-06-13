@@ -98,6 +98,7 @@ describe('Orders API', () => {
 
                 const res = await request(app)
                     .get(`/payment/orders/${created.id}`)
+                    .set(auth.auth_header, auth.auth_key)
                     .expect(200)
 
                 expect(res.body).toMatchObject({
@@ -115,6 +116,7 @@ describe('Orders API', () => {
             const testOrder = await createOrder() // empty gatewayType
             const res = await request(app)
                 .get(`/payment/orders/${testOrder.id}`)
+                .set(auth.auth_header, auth.auth_key)
                 .expect(200)
 
             expect(res.body).toMatchObject({
@@ -129,7 +131,15 @@ describe('Orders API', () => {
         it('returns 404 for non-existent order', async () => {
             await request(app)
                 .get('/payment/orders/99999')
+                .set(auth.auth_header, auth.auth_key)
                 .expect(404)
+        })
+
+        it('returns 401 if auth is missing', async () => {
+            const testOrder = await createOrder()
+            const res = await request(app)
+                .get(`/payment/orders/${testOrder.id}`)
+                .expect(401)
         })
     })
 })

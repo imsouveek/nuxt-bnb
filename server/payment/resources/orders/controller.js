@@ -32,19 +32,8 @@ export default (services) => {
         }
     }
 
-    async function list(req, res, next) {
-        try {
-            const result = await services.order.list(req.queryparams)
-
-            sendJSON(res, result, result.length > 0 ? 200 : 404);
-        } catch (e) {
-            next(e)
-        }
-    }
-
     return {
         create,
-        get,
-        list
+        get
     }
 }

@@ -62,7 +62,7 @@ describe('Webhooks API', () => {
         describe(`/payment/webhooks/${gateway}`, () => {
 
             it(`should successfully process a valid ${gateway} payment.captured webhook`, async () => {
-                const { rawBody, headers } = gatewayFactory.createWebhook(webhook_secret, {
+                const { rawBody, headers, extracted } = gatewayFactory.createWebhook(webhook_secret, {
                     order: createdOrder
                 })
 
@@ -83,11 +83,18 @@ describe('Webhooks API', () => {
                     headers,
                     orderInDb: updatedOrder
                 })
+                console.log(extracted.eventId)
+                const webhookInDb = await db.webhookEvent.findUnique({
+                    where: {
+                        eventId: extracted.eventId
+                    }
+                })
+                expect(webhookInDb.gatewayId).toBe(extracted.gatewayId)
             })
 
             // Add test for payment.failed
             it(`should correctly process a ${gateway} payment.failed webhook`, async () => {
-                const { rawBody, headers } = gatewayFactory.createWebhook(webhook_secret, {
+                const { rawBody, headers, extracted } = gatewayFactory.createWebhook(webhook_secret, {
                     order: createdOrder,
                     status: 'Failed'
                 })
@@ -108,11 +115,19 @@ describe('Webhooks API', () => {
                     headers,
                     orderInDb: updatedOrder
                 })
+
+                console.log(extracted.eventId)
+                const webhookInDb = await db.webhookEvent.findUnique({
+                    where: {
+                        eventId: extracted.eventId
+                    }
+                })
+                expect(webhookInDb.gatewayId).toBe(extracted.gatewayId)
             })
 
             it(`should correctly fail a ${gateway} webhook if verification against gateway fails`, async () => {
                 global.__MOCK_CONFIG__[gatewayName] = { fetchPaymentStatusShouldFail: true }
-                const { rawBody, headers } = gatewayFactory.createWebhook(webhook_secret, {
+                const { rawBody, headers, extracted } = gatewayFactory.createWebhook(webhook_secret, {
                     order: createdOrder
                 })
                 const res = await request(app)
@@ -121,20 +136,35 @@ describe('Webhooks API', () => {
                     .send(rawBody)
 
                 expect(res.statusCode).toBe(500);
+
+                const webhookInDb = await db.webhookEvent.findUnique({
+                    where: {
+                        eventId: extracted.eventId
+                    }
+                })
+                expect(webhookInDb).toBeNull()
             })
 
             it(`should correctly process a ${gateway} webhook with mismatched order`, async () => {
-                const { rawBody, headers } = gatewayFactory.createWebhook(webhook_secret)
+                const { rawBody, headers, extracted } = gatewayFactory.createWebhook(webhook_secret)
                 const res = await request(app)
                     .post(`/payment/webhooks/${gateway}`)
                     .set(headers)
                     .send(rawBody)
 
                 expect(res.statusCode).toBe(200);
+
+                console.log(extracted.eventId)
+                const webhookInDb = await db.webhookEvent.findUnique({
+                    where: {
+                        eventId: extracted.eventId
+                    }
+                })
+                expect(webhookInDb.gatewayId).toBe('')
             })
 
             it(`should return 500 for ${gateway} webhook with invalid signature`, async () => {
-                const { rawBody, headers } = gatewayFactory.createWebhook(webhook_secret, {
+                const { rawBody, headers, extracted } = gatewayFactory.createWebhook(webhook_secret, {
                     signature: 'invalid-signature-123'
                 })
 
@@ -144,6 +174,29 @@ describe('Webhooks API', () => {
                     .send(rawBody)
 
                 expect(res.statusCode).toBe(500)
+
+                const webhookInDb = await db.webhookEvent.findUnique({
+                    where: {
+                        eventId: extracted.eventId
+                    }
+                })
+                expect(webhookInDb).toBeNull()
+            })
+
+            it(`should return 500 for ${gateway} webhook with missing signature`, async () => {
+                const { rawBody, headers } = gatewayFactory.createWebhook(webhook_secret)
+
+                for (const key of Object.keys(headers)) {
+                    const testHeaders = { ...headers }
+                    delete testHeaders[key]
+
+                    const res = await request(app)
+                        .post(`/payment/webhooks/${gateway}`)
+                        .set(testHeaders)
+                        .send(rawBody)
+
+                    expect(res.statusCode).toBe(500)
+                }
             })
 
             it(`should only process a ${gateway} webhook once if event-id is duplicated`, async () => {

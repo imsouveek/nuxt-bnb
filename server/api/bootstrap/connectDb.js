@@ -24,9 +24,7 @@ export default async function ({ dbUrl, dbName }) {
         return conn
     } catch (err) {
         console.error(`Failed to connect to MongoDB: ${cacheKey}`, err)
-        if (typeof conn.destroy === 'function') {
-            await conn.destroy()
-        }
+        await conn.destroy()
         clientMap.delete(cacheKey)
         throw err
     }

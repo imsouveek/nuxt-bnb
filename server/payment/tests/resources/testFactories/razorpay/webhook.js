@@ -8,7 +8,7 @@ export default () => {
             order?.gateway?.razorpay?.razorpayOrderId ||
             orderId ||
             faker.string.uuid()
-
+        const gatewayId = order?.gateway?.razorpay?.gatewayId || ''
         const paymentId = faker.string.alpha(10)
 
         const body = {
@@ -47,6 +47,7 @@ export default () => {
             },
             extracted: {
                 eventId,
+                gatewayId,
                 orderId: resolvedOrderId,
                 paymentId
             }
