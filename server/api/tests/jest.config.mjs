@@ -4,7 +4,8 @@ export default {
     setupFilesAfterEnv: ['<rootDir>/tests/jest/setupTestEnv.js'],
     testMatch: [
         '<rootDir>/tests/resources/**/*.test.js',
-        '<rootDir>/tests/bootstrap/**/*.test.js'
+        '<rootDir>/tests/bootstrap/**/*.test.js',
+        '<rootDir>/tests/services/**/*.test.js',
     ],
     testTimeout: 30000,
     transform: {},

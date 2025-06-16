@@ -3,9 +3,9 @@ import request from 'supertest'
 import { createUser } from '../users/users.factory.js'
 import { createHome } from '../homes/homes.factory.js'
 import { createBooking } from './bookings.factory.js'
-import { loginUser } from '../../utils/loginUser.js'
+import { getCsrfToken, loginUser } from '../../utils/headerHelpers.js'
 
-let Booking
+let Booking, csrfValues
 
 describe('Booking API', () => {
     let authUser, authHeader, otherUser, otherHeader, home, booking
@@ -33,6 +33,8 @@ describe('Booking API', () => {
             startEpoch: booking.startEpoch + 10,
             endEpoch: booking.endEpoch + 10
         })
+
+        csrfValues = await getCsrfToken(global.__TEST_STATE__.app)
     })
 
     describe('GET /api/bookings', () => {
@@ -189,6 +191,8 @@ describe('Booking API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/bookings')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send(payload)
 
@@ -213,6 +217,8 @@ describe('Booking API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/bookings')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send(payload)
 
             expect(res.status).toBe(401)
@@ -227,6 +233,8 @@ describe('Booking API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/bookings')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send(payload)
 
@@ -238,6 +246,8 @@ describe('Booking API', () => {
         it('updates a booking if user is authenticated and owns it', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch(`/api/bookings/${booking._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ status: 'cancelled', paymentId: 'asdfg' })
 
@@ -254,6 +264,8 @@ describe('Booking API', () => {
         it('returns 500 if update is for any field except status', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch(`/api/bookings/${booking._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ startEpoch: booking.startEpoch - 3 })
 
@@ -263,6 +275,8 @@ describe('Booking API', () => {
         it('returns 401 if not authenticated', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch(`/api/bookings/${booking._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ status: 'cancelled' })
 
             expect(res.status).toBe(401)
@@ -271,6 +285,8 @@ describe('Booking API', () => {
         it('returns 404 or error if user does not own booking', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch(`/api/bookings/${booking._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(otherHeader)
                 .send({ status: 'cancelled' })
 

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { getCookie, extractCsrfToken, ensureCsrfReady } from '../utils/csrfHelper.js'
 
 export default function ({ $config, store }, inject) {
 
@@ -7,8 +8,24 @@ export default function ({ $config, store }, inject) {
         https: true
     })
 
-    instance.interceptors.request.use((config) => {
-        console.log(`Making request to ${config.url}`)
+    instance.interceptors.request.use(async (config) => {
+        console.log(`Making ${config.method} request to ${config.url}`)
+
+        const { csrf_cookie, csrf_header } = $config.auth
+        const method = config.method?.toLowerCase()
+        const isUnsafe = !['get', 'head', 'options'].includes(method)
+
+        if (isUnsafe && config.url !== '/csrf-token') {
+            await ensureCsrfReady(instance, csrf_cookie)
+
+            const raw = getCookie(csrf_cookie)
+            const token = raw ? extractCsrfToken(raw) : null
+
+            if (token) {
+                config.headers[csrf_header] = token
+            }
+        }
+
         return config
     })
 
@@ -68,6 +85,7 @@ export default function ({ $config, store }, inject) {
         $get: (...args) => instance.get(...args).then(r => r.data),
         $post: (...args) => instance.post(...args).then(r => r.data),
         $put: (...args) => instance.put(...args).then(r => r.data),
+        $patch: (...args) => instance.patch(...args).then(r => r.data),
         $delete: (...args) => instance.delete(...args).then(r => r.data),
         $request: (...args) => instance.request(...args).then(r => r.data),
         raw: instance, // expose raw Axios instance if needed

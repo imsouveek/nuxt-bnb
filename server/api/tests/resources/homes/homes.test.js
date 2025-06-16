@@ -1,10 +1,10 @@
 import mongoose from 'mongoose'
 import request from 'supertest'
 import { createUser } from '../users/users.factory.js'
-import { loginUser } from '../../utils/loginUser.js'
+import { getCsrfToken, loginUser } from '../../utils/headerHelpers.js'
 import { createHome } from './homes.factory.js'
 
-let Home
+let Home, csrfValues
 
 describe('Homes API', () => {
     let authUser, authHeader, otherUser, otherHeader, home
@@ -24,6 +24,7 @@ describe('Homes API', () => {
         otherHeader = login2.authHeader()
 
         home = await createHome({ owner: authUser._id })
+        csrfValues = await getCsrfToken(global.__TEST_STATE__.app)
     })
 
     describe('POST /api/homes', () => {
@@ -49,6 +50,8 @@ describe('Homes API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/homes')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send(payload)
 
@@ -86,6 +89,8 @@ describe('Homes API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/homes')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send(payload)
 
@@ -105,6 +110,8 @@ describe('Homes API', () => {
         it('rejects unauthenticated create', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/homes')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ title: 'Fail Home' })
 
             expect(res.statusCode).toBe(401)
@@ -113,6 +120,8 @@ describe('Homes API', () => {
         it('fails if request is invalid', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/homes')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ title: 'Fail Home' })
 
@@ -169,6 +178,8 @@ describe('Homes API', () => {
         it('updates a home and reflects in DB', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch(`/api/homes/${home._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ title: 'Updated Title' })
 
@@ -182,6 +193,8 @@ describe('Homes API', () => {
         it('rejects update by non-owner', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch(`/api/homes/${home._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(otherHeader)
                 .send({ title: 'Malicious Update' })
 
@@ -194,6 +207,8 @@ describe('Homes API', () => {
         it('rejects unauthenticated update', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch(`/api/homes/${home._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ title: 'No Auth Update' })
 
             expect(res.statusCode).toBe(401)
@@ -202,6 +217,8 @@ describe('Homes API', () => {
         it('rejects updating blocked fields like _id or owner', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch(`/api/homes/${home._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ _id: new mongoose.Types.ObjectId(), owner: otherUser._id })
 
@@ -214,6 +231,8 @@ describe('Homes API', () => {
         it('deletes a home by owner and confirms DB removal', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/homes/${home._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
 
             expect(res.statusCode).toBe(200)
@@ -225,6 +244,8 @@ describe('Homes API', () => {
         it('rejects delete by non-owner', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/homes/${home._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(otherHeader)
 
             expect(res.statusCode).toBe(500)
@@ -236,6 +257,8 @@ describe('Homes API', () => {
         it('rejects unauthenticated delete', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/homes/${home._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
 
             expect(res.statusCode).toBe(401)
         })

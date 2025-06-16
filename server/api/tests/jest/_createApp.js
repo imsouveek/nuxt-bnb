@@ -6,7 +6,9 @@ export default async function createApp({ mongoUri, smtpHost = 'localhost', smtp
     const options = {
         publicRuntimeConfig: {
             auth: {
-                clientId: 'test-google-client-id'
+                clientId: 'test-google-client-id',
+                csrf_cookie: 'X-CSRF-TOKEN',
+                csrf_header: 'x-csrf-header'
             },
             url: {
                 app: 'http://localhost:3000',
@@ -23,6 +25,8 @@ export default async function createApp({ mongoUri, smtpHost = 'localhost', smtp
                 refresh_secret: 'test-refresh-secret',
                 refresh_cookie: 'test-refresh-cookie',
                 refresh_life: '7d',
+                csrf_secret: 'test-csrf-secret',
+                csrf_life: '30m'
             },
             smtp: {
                 host: smtpHost,

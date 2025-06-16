@@ -4,8 +4,8 @@ export default function (controllers) {
     const router = express.Router()
 
     router.get('/', controllers.middleware.auth, controllers.user.get)
-    router.get('/logout', controllers.middleware.auth, controllers.user.logout)
-    router.get('/logoutAll', controllers.middleware.auth, controllers.user.logoutAll)
+    router.post('/logout', controllers.middleware.auth, controllers.user.logout)
+    router.post('/logoutAll', controllers.middleware.auth, controllers.user.logoutAll)
 
     router.post('/', controllers.user.create)
     router.post('/token', controllers.middleware.auth, controllers.user.getToken)

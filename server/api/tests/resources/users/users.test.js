@@ -3,9 +3,9 @@ import request from 'supertest'
 import bcrypt from 'bcryptjs'
 import { createUser } from './users.factory.js'
 import { createImage } from '../images/images.factory.js'
-import { loginUser, extractCookieValue } from '../../utils/loginUser.js'
+import { getCsrfToken, loginUser, extractCookieValue } from '../../utils/headerHelpers.js'
 
-let User, Token, Image, seededUser, refreshCookie, authHeader
+let User, Token, Image, seededUser, refreshCookie, authHeader, csrfValues
 
 describe('User API', () => {
     beforeAll(() => {
@@ -24,6 +24,8 @@ describe('User API', () => {
         const login = await loginUser(global.__TEST_STATE__.app, seededUser.email, 'testpass123')
         refreshCookie = login.refreshCookie
         authHeader = login.authHeader
+
+        csrfValues = await getCsrfToken(global.__TEST_STATE__.app)
     })
 
     describe('GET /api/users', () => {
@@ -43,9 +45,14 @@ describe('User API', () => {
         })
     })
 
-    describe('GET /api/users/logout', () => {
+    describe('POST /api/users/logout', () => {
         it('fails without auth', async () => {
-            const res = await request(global.__TEST_STATE__.app).get('/api/users/logout')
+            const res = await request(global.__TEST_STATE__.app)
+                .post('/api/users/logout')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
+                .send()
+
             expect(res.statusCode).toBe(401)
         })
 
@@ -55,8 +62,9 @@ describe('User API', () => {
             const authHeader2 = login2.authHeader
 
             const res = await request(global.__TEST_STATE__.app)
-                .get('/api/users/logout')
-                .set('Cookie', login2.refreshCookie)
+                .post('/api/users/logout')
+                .set('Cookie', `${login2.refreshCookie}; ${csrfValues.csrfCookie}`)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader2())
 
             expect(res.statusCode).toBe(200)
@@ -69,9 +77,12 @@ describe('User API', () => {
         })
     })
 
-    describe('GET /api/users/logoutAll', () => {
+    describe('POST /api/users/logoutAll', () => {
         it('fails without auth', async () => {
-            const res = await request(global.__TEST_STATE__.app).get('/api/users/logoutAll')
+            const res = await request(global.__TEST_STATE__.app)
+                .post('/api/users/logoutAll')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
             expect(res.statusCode).toBe(401)
         })
 
@@ -80,7 +91,9 @@ describe('User API', () => {
             await seededUser.save()
 
             const res = await request(global.__TEST_STATE__.app)
-                .get('/api/users/logoutAll')
+                .post('/api/users/logoutAll')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader())
 
             expect(res.statusCode).toBe(200)
@@ -94,6 +107,8 @@ describe('User API', () => {
         it('creates a new user', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     email: 'new@example.com',
                     password: 'newpass123',
@@ -116,6 +131,8 @@ describe('User API', () => {
         it('fails to create user without proper email', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     email: 'test-string',
                     password: 'newpass123'
@@ -127,6 +144,8 @@ describe('User API', () => {
         it('fails to create duplicate user', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     email: seededUser.email,
                     password: 'newpass123',
@@ -139,6 +158,8 @@ describe('User API', () => {
         it('fails to create user without required fields', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     email: 'new@example.com',
                     password: 'newpass123'
@@ -150,6 +171,8 @@ describe('User API', () => {
         it('fails to create user with password = password', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     email: 'test-string',
                     password: 'password'
@@ -164,12 +187,16 @@ describe('User API', () => {
         it('fails without auth', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
             expect(res.statusCode).toBe(401)
         })
 
         it('fails with invalid type', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ type: 'upload' })
                 .set(authHeader())
 
@@ -179,6 +206,8 @@ describe('User API', () => {
         it('gets current token', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ type: 'image' })
                 .set(authHeader())
 
@@ -197,6 +226,8 @@ describe('User API', () => {
         it('fails without auth', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ name: 'Updated Name' })
             expect(res.statusCode).toBe(401)
         })
@@ -204,6 +235,8 @@ describe('User API', () => {
         it('updates current user', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader())
                 .send({ name: 'Updated Name' })
 
@@ -217,6 +250,8 @@ describe('User API', () => {
         it('rejects updating disallowed fields on user', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch(`/api/users`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader())
                 .send({ _id: new mongoose.Types.ObjectId(), tokens: [] })
 
@@ -227,6 +262,8 @@ describe('User API', () => {
         it('encrypts password when user updates it', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .patch('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader())
                 .send({ password: 'newpatchpass' })
 
@@ -244,6 +281,8 @@ describe('User API', () => {
             const newImage = await createImage()
             const res = await request(global.__TEST_STATE__.app)
                 .patch('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader())
                 .send({ image: newImage._id })
 
@@ -261,12 +300,16 @@ describe('User API', () => {
         it('fails without auth', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .delete('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
             expect(res.statusCode).toBe(401)
         })
 
         it('deletes current user', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .delete('/api/users')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader())
 
             expect(res.statusCode).toBe(200)

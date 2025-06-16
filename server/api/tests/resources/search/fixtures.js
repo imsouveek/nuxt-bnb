@@ -3,7 +3,7 @@ import { createHome } from '../homes/homes.factory.js'
 import { createAvailability } from '../homes/availabilities/availabilities.factory.js'
 import { createReview } from '../homes/reviews/reviews.factory.js'
 import { createBooking } from '../bookings/bookings.factory.js'
-import { loginUser } from '../../utils/loginUser.js'
+import { loginUser } from '../../utils/headerHelpers.js'
 
 export const setupSearchFixtures = async () => {
     const user = await createUser({ email: 'search@example.com', password: 'pass123' })

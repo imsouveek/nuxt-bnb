@@ -71,7 +71,9 @@ export default {
     },
     publicRuntimeConfig: {
         auth: {
-            clientId: process.env.GOOGLE_AUTH_CLIENT_ID
+            clientId: process.env.GOOGLE_AUTH_CLIENT_ID,
+            csrf_cookie: process.env.CSRF_COOKIE,
+            csrf_header: process.env.CSRF_HEADER
         },
         map: {
             key: process.env.GOOGLE_MAPS_API_KEY
@@ -80,9 +82,9 @@ export default {
             key_id: process.env.RAZORPAY_KEY_ID
         },
         url: {
-            app: `https://${process.env.HOST}:${process.env.NUXT_PORT}/`,
-            api: `https://${process.env.HOST}:${process.env.NUXT_PORT}/api/`,
-            payment: `https://${process.env.HOST}:${process.env.NUXT_PORT}/payment/`
+            app: `https://${process.env.HOST}:${process.env.NUXT_PORT}`,
+            api: `https://${process.env.HOST}:${process.env.NUXT_PORT}/api`,
+            payment: `https://${process.env.HOST}:${process.env.NUXT_PORT}/payment`
         }
     },
     privateRuntimeConfig: {
@@ -96,6 +98,8 @@ export default {
             refresh_secret: process.env.REFRESH_SECRET,
             refresh_cookie: process.env.REFRESH_COOKIE,
             refresh_life: process.env.REFRESH_LIFE,
+            csrf_secret: process.env.CSRF_SECRET,
+            csrf_life: process.env.CSRF_LIFE
         },
         paymentAuth: {
             auth_header: process.env.PAYMENT_AUTH_HEADER,

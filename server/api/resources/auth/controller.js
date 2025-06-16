@@ -1,5 +1,6 @@
 import cookie from 'cookie'
 import jwt from 'jsonwebtoken'
+import ms from 'ms'
 import { OAuth2Client } from 'google-auth-library'
 import { sendJSON } from '../../utils/response.js'
 
@@ -46,11 +47,9 @@ export default (services, auth) => {
         }
     }
 
-    async function sendLoginResponse(user, res) {
-        const tokens = await services.user.getNewToken(user)
-
-        const expires = new Date()
-        expires.setDate(expires.getDate() + 7)
+    async function sendLoginResponse(user, res, token = null) {
+        const tokens = await services.user.getNewToken(user, token)
+        const expires = new Date(Date.now() + ms(auth.refresh_life))
 
         const refresh_cookie = cookie.serialize(refreshCookieName, tokens.refresh_token, {
             path: '/',
@@ -92,15 +91,14 @@ export default (services, auth) => {
 
     async function refreshAccessToken(req, res) {
         try {
-            const cookies = cookie.parse(req.headers.cookie || '')
+            const cookies = cookie.parse(req.headers.cookie)
             const token = cookies[refreshCookieName]
             if (!token) throw new Error()
 
             const decoded = jwt.verify(token, refreshSecret)
             const user = await services.user.validateToken(decoded._id, token)
 
-            const tokens = await services.user.getNewToken(user, token)
-            sendJSON(res, tokens)
+            await sendLoginResponse(user, res, token)
         } catch {
             sendJSON(res, { error: 'Please Authenticate' }, 401)
         }

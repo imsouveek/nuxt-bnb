@@ -1,9 +1,9 @@
 import request from 'supertest'
 import { createUser } from '../users/users.factory.js'
-import { loginUser } from '../../utils/loginUser.js'
+import { getCsrfToken, loginUser } from '../../utils/headerHelpers.js'
 import { createImage, generateFakeImageUrl, generateBase64Jpeg } from './images.factory.js'
 
-let Image
+let Image, csrfValues
 
 describe('Image API', () => {
     let authUser, authHeader, otherUser, otherHeader, image
@@ -23,6 +23,7 @@ describe('Image API', () => {
         otherHeader = login2.authHeader()
 
         image = await createImage()
+        csrfValues = await getCsrfToken(global.__TEST_STATE__.app)
     })
 
     describe('POST /api/images', () => {
@@ -37,6 +38,8 @@ describe('Image API', () => {
         it('uploads a base64 image and returns its ID', async () => {
             const token = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ type: 'image' })
 
@@ -44,6 +47,8 @@ describe('Image API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/images')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .set('upload-token', uploadToken)
                 .send(payload)
@@ -60,6 +65,8 @@ describe('Image API', () => {
         it('uploads a url image and returns its ID', async () => {
             const token = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ type: 'image' })
 
@@ -67,6 +74,8 @@ describe('Image API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/images')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .set('upload-token', uploadToken)
                 .send({
@@ -85,6 +94,8 @@ describe('Image API', () => {
         it('fails to uplaod anything except images and urls', async () => {
             const token = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ type: 'image' })
 
@@ -92,6 +103,8 @@ describe('Image API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/images')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .set('upload-token', uploadToken)
                 .send({
@@ -104,12 +117,16 @@ describe('Image API', () => {
         it('fails image upload without auth', async () => {
             const token = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ type: 'image' })
             const uploadToken = token.body.token.token
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/images')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set('upload-token', uploadToken)
                 .send(payload)
 
@@ -119,6 +136,8 @@ describe('Image API', () => {
         it('fails without upload token', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/images')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .set('upload-token', 'uploadToken')
                 .send(payload)
@@ -129,6 +148,8 @@ describe('Image API', () => {
         it('fails with upload token not existing in backend', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/images')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send(payload)
 
@@ -138,12 +159,16 @@ describe('Image API', () => {
         it('fails with mismatched token and user', async () => {
             const token = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(otherHeader)
                 .send({ type: 'image' })
             const wrongToken = token.body.token.token
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/images')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .set('upload-token', wrongToken)
                 .send(payload)
@@ -195,6 +220,8 @@ describe('Image API', () => {
         it('can download url images', async () => {
             const token1 = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ type: 'image' })
 
@@ -202,6 +229,8 @@ describe('Image API', () => {
 
             const res1 = await request(global.__TEST_STATE__.app)
                 .post('/api/images')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .set('upload-token', uploadToken1)
                 .send({
@@ -219,12 +248,16 @@ describe('Image API', () => {
         it('deletes an image with valid token', async () => {
             const token = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ type: 'image' })
             const uploadToken = token.body.token.token
 
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/images/${image._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .set('upload-token', uploadToken)
 
@@ -237,12 +270,16 @@ describe('Image API', () => {
         it('fails to delete invalid image', async () => {
             const token = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ type: 'image' })
             const uploadToken = token.body.token.token
 
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/images/asdf`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .set('upload-token', uploadToken)
 
@@ -252,12 +289,16 @@ describe('Image API', () => {
         it('fails to delete without auth', async () => {
             const token = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({ type: 'image' })
             const uploadToken = token.body.token.token
 
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/images/${image._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set('upload-token', uploadToken)
 
             expect(res.statusCode).toBe(401)
@@ -266,6 +307,8 @@ describe('Image API', () => {
         it('fails to delete without token', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/images/${image._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
 
             expect(res.statusCode).toBe(400)
@@ -274,12 +317,16 @@ describe('Image API', () => {
         it('fails to delete with mismatched user token', async () => {
             const token = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(otherHeader)
                 .send({ type: 'image' })
             const wrongToken = token.body.token.token
 
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/images/${image._id}`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .set('upload-token', wrongToken)
 

@@ -154,6 +154,7 @@ This roadmap tracks functional and architectural development. Infra/config-level
 - [ ] Build booking summary / confirmation page  
 - [x] Add test coverage for booking and payment
 - [x] Deploy to GitHub
+- [x] Add CSRF, CORS and other security validations
 - [ ] Add support for DevContainers for GitHub Codespaces
 - [ ] Build test-env and prod-env scripts to provision UX, API and Payment separately
 - [ ] Deploy to K3s cluster

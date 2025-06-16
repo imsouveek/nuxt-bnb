@@ -2,9 +2,9 @@ import request from 'supertest'
 import { createUser } from '../../users/users.factory.js'
 import { createHome } from '../homes.factory.js'
 import { createAvailability } from './availabilities.factory.js'
-import { loginUser } from '../../../utils/loginUser.js'
+import { getCsrfToken, loginUser } from '../../../utils/headerHelpers.js'
 
-let Availability
+let Availability, csrfValues
 
 describe('Availability API', () => {
     let authUser, authHeader, otherUser, otherHeader, home, availability
@@ -25,6 +25,9 @@ describe('Availability API', () => {
 
         home = await createHome({ owner: authUser._id })
         availability = await createAvailability({ homeId: home._id })
+
+        csrfValues = await getCsrfToken(global.__TEST_STATE__.app)
+
     })
 
     describe('POST /api/homes/:homeId/availabilities', () => {
@@ -35,6 +38,8 @@ describe('Availability API', () => {
         it('creates new availabilities and persists it in DB', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post(`/api/homes/${home._id}/availabilities`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send(payload)
 
@@ -49,6 +54,8 @@ describe('Availability API', () => {
             const availabilityEpochs = availability.map(a => a.epochDate)
             const res = await request(global.__TEST_STATE__.app)
                 .post(`/api/homes/${home._id}/availabilities`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send({
                     availabilities: availabilityEpochs
@@ -63,6 +70,8 @@ describe('Availability API', () => {
         it('fails to create availability for non-existent home', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/homes/123456789012345678901234/availabilities')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send(payload)
 
@@ -72,6 +81,8 @@ describe('Availability API', () => {
         it('fails to create availability without auth', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post(`/api/homes/${home._id}/availabilities`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send(payload)
 
             expect(res.statusCode).toBe(401)
@@ -80,6 +91,8 @@ describe('Availability API', () => {
         it('fails to create availability for another user\'s home', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post(`/api/homes/${home._id}/availabilities`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(otherHeader)
                 .send(payload)
 
@@ -89,6 +102,8 @@ describe('Availability API', () => {
         it('throws error if availability is not sent', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post(`/api/homes/${home._id}/availabilities`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(otherHeader)
                 .send({})
 
@@ -167,6 +182,8 @@ describe('Availability API', () => {
             }
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/homes/${home._id}/availabilities`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send(payload)
             expect(res.statusCode).toBe(200)
@@ -182,6 +199,8 @@ describe('Availability API', () => {
             }
             const res = await request(global.__TEST_STATE__.app)
                 .delete('/api/homes/123456789012345678901234/availabilities')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(authHeader)
                 .send(payload)
 
@@ -195,6 +214,8 @@ describe('Availability API', () => {
             }
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/homes/${home._id}/availabilities`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send(payload)
 
             expect(res.statusCode).toBe(401)
@@ -210,6 +231,8 @@ describe('Availability API', () => {
             }
             const res = await request(global.__TEST_STATE__.app)
                 .delete(`/api/homes/${home._id}/availabilities`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .set(otherHeader)
                 .send(payload)
 

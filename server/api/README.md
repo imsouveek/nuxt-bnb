@@ -71,6 +71,7 @@ export async function bootstrapServer(config)
 ---
 
 ## Routes
+>Note: All POST, PATCH, and DELETE routes are protected by a double-submit CSRF strategy. Clients must first call /csrf-token to receive a signed CSRF cookie, and then include the extracted token in a request header.
 
 ### Authenticated
 
@@ -106,25 +107,25 @@ export async function bootstrapServer(config)
 
 ### Public Search (no auth)
 
-| Method | Path                                     | Description                   |
-|--------|------------------------------------------|-------------------------------|
-| GET    | `/search/homes`                          | Search homes by location      |
-| GET    | `/search/homes/:id`                      | Get public home details       |
-| GET    | `/search/homes/:id/owner`                | Get home owner info           |
-| GET    | `/search/homes/:id/reviews`              | Get reviews                   |
-| GET    | `/search/homes/:id/availabilities`       | Get availability dates        |
-| GET    | `/images/:id`                            | Retrieve image (JPEG)         |
+| Method | Path                                     | Description                                                                   |
+|--------|------------------------------------------|-------------------------------------------------------------------------------|
+| GET    | `/search/homes`                          | Search homes by location                                                      |
+| GET    | `/search/homes/:id`                      | Get public home details                                                       |
+| GET    | `/search/homes/:id/owner`                | Get home owner info                                                           |
+| GET    | `/search/homes/:id/reviews`              | Get reviews                                                                   |
+| GET    | `/search/homes/:id/availabilities`       | Get availability dates                                                        |
+| GET    | `/images/:id`                            | Retrieve image (JPEG)                                                         |
+| POST   | `/csrf-token`                            | Set signed CSRF cookie. Required before any POST, PATCH, or DELETE requests   |
 
 ---
 
 ## Middleware
 
-Located in `server/middleware/`:
-
-| File            | Purpose                                             |
-|-----------------|-----------------------------------------------------|
-| `auth.js`       | JWT authentication middleware                       |
-| `queryparams.js`| Parses `limit`, `sort`, etc. into `req.queryparams` |
+| File            | Location                    | Purpose                                             |
+|-----------------|-----------------------------|-----------------------------------------------------|
+| `auth.js`       | `server/api/middleware/`    | JWT authentication middleware                       |
+| `queryparams.js`| `server/api/middleware/`    | Parses `limit`, `sort`, etc. into `req.queryparams` |
+| `csrf.js`       | `server/api/services/`      | Verifies CSRF token on unsafe requests              |
 
 ---
 
@@ -152,10 +153,10 @@ This backend is fully tested using **Jest** and **supertest**, with isolated tes
 Additional notes:
 - `server/tests/` contains the full test suite
 - Coverage report
-  - Statements: 98.58 %
-  - Branches: 97.53 %
-  - Functions: 97.98 % 
-  - Lines: 98.52 %
+  - Statements: 98.67 %
+  - Branches: 98.15 %
+  - Functions: 98.07 % 
+  - Lines: 98.61 %
 
 To run tests with coverage, use the following command from project root:
 ```bash
@@ -184,6 +185,10 @@ Below are the required `.env` variables for the API service:
 | `REFRESH_SECRET`               | Secret used to sign refresh tokens                                          |
 | `REFRESH_COOKIE`               | Name of the HTTP-only cookie used for storing the refresh token             |
 | `REFRESH_LIFE`                 | Refresh token expiry duration (e.g., `1w`, `7d`)                            |
+| `CSRF_SECRET`                  | Secret used to sign csrf cookies                                            |
+| `CSRF_COOKIE`                  | Name of the cookie used for CSRF                                            |
+| `CSRF_LIFE`                    | CSRF token expiry duration (e.g., `1w`, `7d`)                               |
+| `CSRF_HEADER`                  | Name of CSRF Header                                                         |
 | `GOOGLE_AUTH_CLIENT_ID`        | Client ID for Google OAuth login                                            |
 
 

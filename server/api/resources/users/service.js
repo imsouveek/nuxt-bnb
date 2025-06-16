@@ -72,12 +72,7 @@ export default (models, auth) => {
     }
 
     async function getNewToken(user, refresh_token) {
-        let response = { user }
-        if (!refresh_token) {
-            response.refresh_token = await user.getAuthToken(auth.refresh_secret, auth.refresh_life, true)
-        }
-        response.access_token = await user.getAuthToken(auth.access_secret, auth.access_life, false)
-        return response
+        return await user.getAuthToken(auth, refresh_token)
     }
 
     return {

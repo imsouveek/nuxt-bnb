@@ -1,8 +1,10 @@
 import request from 'supertest'
 import bcrypt from 'bcryptjs'
+import cookie from 'cookie'
+import { getCsrfToken } from '../../utils/headerHelpers.js'
 import { createUser } from '../users/users.factory.js'
 
-let User, Token
+let User, Token, csrfValues
 
 describe('Auth API', () => {
     let seededUser
@@ -18,12 +20,16 @@ describe('Auth API', () => {
             email: 'test@example.com',
             password: 'password123'
         })
+
+        csrfValues = await getCsrfToken(global.__TEST_STATE__.app)
     })
 
     describe('Login', () => {
         it('fails to login unknown user', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/login')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     email: 'asdfg@test.com',
                     password: 'password123'
@@ -35,6 +41,8 @@ describe('Auth API', () => {
         it('fails to login with wrong password', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/login')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     email: seededUser.email,
                     password: 'wrongpassword'
@@ -49,6 +57,8 @@ describe('Auth API', () => {
         it('logs in and receives refresh + access tokens', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/login')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     email: seededUser.email,
                     password: 'password123'
@@ -69,10 +79,14 @@ describe('Auth API', () => {
         it('does\'t allow google users to login with password', async () => {
             const res1 = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/google-auth')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ token: 'fake-google-id-token' })
 
             const res2 = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/login')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     email: res1.body.user.email,
                     password: 'password123'
@@ -86,39 +100,50 @@ describe('Auth API', () => {
         it('refreshes access token using refresh cookie', async () => {
             const login = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/login')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ email: seededUser.email, password: 'password123' })
 
-            const cookie = login.headers['set-cookie']
+            const cookieHeader = login.headers['set-cookie']
+            const refresh_token = (cookie.parse(cookieHeader[0]))[global.__TEST_STATE__.config.auth.refresh_cookie]
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/refresh')
-                .set('Cookie', cookie)
+                .set(csrfValues.csrfHeader())
+                .set('Cookie', `${cookieHeader}; ${csrfValues.csrfCookie}`)
 
             expect(res.statusCode).toBe(200)
             expect(res.body).toHaveProperty('access_token')
 
             const loggedIn = await User.findOne({ email: seededUser.email })
             expect(loggedIn.tokens.length).toBe(1)
+            expect(loggedIn.tokens[0].token).not.toBe(refresh_token)
         })
 
         it('fails to refresh token with invalid cookie', async () => {
             await request(global.__TEST_STATE__.app)
                 .post('/api/auth/login')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ email: seededUser.email, password: 'password123' })
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/refresh')
-                .set('Cookie', '1234')
-
+                .set('Cookie', `${csrfValues.csrfCookie}; 1234`)
+                .set(csrfValues.csrfHeader())
             expect(res.statusCode).toBe(401)
         })
 
         it('fails to refresh token without cookie', async () => {
             await request(global.__TEST_STATE__.app)
                 .post('/api/auth/login')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ email: seededUser.email, password: 'password123' })
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/refresh')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
 
             expect(res.statusCode).toBe(401)
         })
@@ -128,6 +153,8 @@ describe('Auth API', () => {
         it('sends reset email ', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/forgot')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ email: seededUser.email })
 
             expect(res.statusCode).toBe(200)
@@ -155,6 +182,8 @@ describe('Auth API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/forgot')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ email: seededUser.email })
 
             expect(res.statusCode).toBe(200)
@@ -177,6 +206,8 @@ describe('Auth API', () => {
         it('fails to send reset email for invalid email id', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/forgot')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ email: 'test' })
 
             expect(res.statusCode).toBe(500)
@@ -187,6 +218,8 @@ describe('Auth API', () => {
         it('fails to reset password with wrong token', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/reset')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ token: 'fake-token', password: 'newpass' })
 
             expect(res.statusCode).toBe(401)
@@ -204,6 +237,8 @@ describe('Auth API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/reset')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ token: tokenRecord.token, password: 'newpass' })
 
             expect(res.statusCode).toBe(500)
@@ -217,6 +252,8 @@ describe('Auth API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post(`/api/auth/reset`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     token: tokenRecord.token,
                     password: 'newpassword456'
@@ -239,6 +276,8 @@ describe('Auth API', () => {
 
             const res = await request(global.__TEST_STATE__.app)
                 .post(`/api/auth/reset`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({
                     token: tokenRecord.token,
                     password: 'newpassword456'
@@ -252,6 +291,8 @@ describe('Auth API', () => {
         it('logs in or creates user using valid Google token', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/google-auth')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ token: 'fake-google-id-token' })
 
             expect(res.statusCode).toBe(200)
@@ -268,6 +309,8 @@ describe('Auth API', () => {
         it('logs in or creates user using valid Google token', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/google-auth')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
                 .send({ token: 'fail-token' })
 
             expect(res.statusCode).toBe(401)

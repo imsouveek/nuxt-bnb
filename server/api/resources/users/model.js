@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import validator from 'validator'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import { randomUUID } from 'crypto'
 import { getOrCreateModel } from '../../utils/getModel.js'
 
 export default (dbClient) => {
@@ -86,15 +87,21 @@ export default (dbClient) => {
         return user;
     }
 
-    userSchema.methods.getAuthToken = async function (secret, duration, saveToken = false) {
+    userSchema.methods.getAuthToken = async function (auth, token) {
         const user = this
-        const token = jwt.sign({ _id: user._id.toString() }, secret, { expiresIn: duration })
+        const refresh_token = jwt.sign({ _id: user._id.toString(), jti: randomUUID() }, auth.refresh_secret, { expiresIn: auth.refresh_life })
+        const access_token = jwt.sign({ _id: user._id.toString(), jti: randomUUID() }, auth.access_secret, { expiresIn: auth.access_life })
 
-        if (saveToken) {
-            user.tokens = user.tokens.concat({ token: token })
-            await user.save()
+        if (token) {
+            user.tokens = user.tokens.filter(t => t.token !== token)
         }
-        return token
+
+        user.tokens = user.tokens.concat({ token: refresh_token })
+        await user.save()
+        return {
+            refresh_token,
+            access_token
+        }
     }
 
     userSchema.statics.getCredentials = async (email, password, strategy) => {

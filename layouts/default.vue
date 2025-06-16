@@ -125,7 +125,7 @@ export default {
             })
         },
         async logoutHandler() {
-            await this.$api.$get('/users/logout')
+            await this.$api.$post('/users/logout')
         }
     }
 }
