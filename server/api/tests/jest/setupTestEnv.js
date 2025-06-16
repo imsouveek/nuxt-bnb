@@ -15,6 +15,7 @@ beforeAll(async () => {
         // error: jest.fn(),
     }
 
+    global.__MOCK_CONFIG__ = {}
     const mongoUri = await startTestDb()
     const { smtpHost, smtpPort, smtpApiPort } = await startMailpit()
 

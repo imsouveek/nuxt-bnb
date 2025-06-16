@@ -18,6 +18,33 @@ jest.unstable_mockModule('google-auth-library', () => ({
     }))
 }))
 
+jest.unstable_mockModule('axios', () => {
+    return {
+        default: {
+            post: jest.fn(async () => {
+                const paymentMock = global.__MOCK_CONFIG__?.payments
+
+                if (paymentMock?.createOrderShouldThrowException) {
+                    throw new Error("Mock Exception")
+                }
+
+                if (paymentMock?.createOrderShouldFail) {
+                    return { status: 400 }
+                }
+
+                return {
+                    status: 201,
+                    data: {
+                        id: "TEST_PAYMENT_ID",
+                        status: "Pending"
+                    }
+                }
+            })
+        },
+        __esModule: true
+    }
+})
+
 // Import and expose createApp only after mocking is in place
 const mod = await import('./_createApp.js')
 export default mod.default

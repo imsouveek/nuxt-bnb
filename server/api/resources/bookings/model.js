@@ -27,8 +27,8 @@ export default (dbClient) => {
         },
         status: {
             type: String,
-            enum: ['pending', 'confirmed', 'cancelled'],
-            default: 'pending'
+            enum: ['New', 'Pending', 'Success', 'Failed'],
+            default: 'New'
         },
         totalAmount: {
             type: Number,

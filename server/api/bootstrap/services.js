@@ -23,7 +23,7 @@ export default (config, dbClient) => {
         review: reviewService(models),
         search: searchService(models),
         availability: availabilityService(models),
-        booking: bookingService(models),
+        booking: bookingService(models, config.url.payment, config.paymentAuth),
         email: emailService(config.smtp, config.url.app)
     }
 }

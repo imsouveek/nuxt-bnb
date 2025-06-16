@@ -12,7 +12,7 @@ export const createBooking = async (overrides = {}) => {
         endEpoch: startEpoch + days,
         guestCount: 2,
         totalAmount: 960,
-        status: 'confirmed',
+        status: 'Success',
         ...overrides
     }
     const booking = new Booking(defaultBooking)

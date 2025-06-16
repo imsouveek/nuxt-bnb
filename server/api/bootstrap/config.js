@@ -7,6 +7,7 @@ export default function bootstrapConfig(options) {
         ...options.publicRuntimeConfig.auth
     }
     config.url = options.publicRuntimeConfig.url
+    config.paymentAuth = options.privateRuntimeConfig.paymentAuth
 
     return config
 }

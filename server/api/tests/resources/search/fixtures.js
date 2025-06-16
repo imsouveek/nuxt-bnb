@@ -26,7 +26,7 @@ export const setupSearchFixtures = async () => {
         userId: user._id,
         startEpoch: 20000,
         endEpoch: 20003,
-        status: 'pending'
+        status: 'Pending'
     })
 
     const cancelledBooking = await createBooking({
@@ -34,7 +34,7 @@ export const setupSearchFixtures = async () => {
         userId: user._id,
         startEpoch: 20000,
         endEpoch: 20003,
-        status: 'cancelled'
+        status: 'Failed'
     })
 
     return {

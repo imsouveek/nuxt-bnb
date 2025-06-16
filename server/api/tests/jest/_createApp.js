@@ -30,6 +30,10 @@ export default async function createApp({ mongoUri, smtpHost = 'localhost', smtp
                 password_token_expiry: '10m',
                 image_token_expiry: 'never'
             },
+            paymentAuth: {
+                auth_header: 'payment_auth_header',
+                auth_key: 'payment_auth_key'
+            },
             smtp: {
                 host: smtpHost,
                 port: smtpPort

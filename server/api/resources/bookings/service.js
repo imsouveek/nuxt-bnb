@@ -1,25 +1,50 @@
-export default (models) => {
+import axios from 'axios'
 
-    const create = async (userId, data) => {
-        const { homeId, startEpoch, endEpoch } = data
-        const home = await models.home.findOne({ _id: homeId })
+export default (models, paymentUrl, paymentConfig) => {
 
+    const create = async (userId, home, data) => {
+        const { startEpoch, endEpoch } = data
         const totalAmount = home.pricePerNight * (endEpoch - startEpoch)
 
-        return models.booking.create({
+        let booking = await models.booking.create({
             ...data,
             totalAmount,
             userId
         })
+
+        let payment
+        try {
+            const { auth_header: pay_header, auth_key: pay_key } = paymentConfig
+            payment = await axios.post(paymentUrl, {
+                bookingId: booking._id,
+                amount: totalAmount,
+                type: data.gateway
+            }, {
+                headers: {
+                    [pay_header]: pay_key
+                }
+            })
+            if (payment.status !== 201) {
+                throw new Error("Could not contact payment gateway")
+            }
+        } catch (err) {
+            throw new Error("Payment failed")
+        }
+
+        booking.paymentId = payment?.data?.id
+        booking.status = payment?.data?.status
+        await booking.save()
+        return booking
     }
 
-    async function get(searchParams, queryparams) {
-        const { bookingId, homeId } = searchParams
-        const { fieldList, options, ...filters } = queryparams
+    async function get(searchParams, queryparams = {}) {
+        const { bookingId, homeId, userId } = searchParams
+        const { fieldList, options = {}, ...filters } = queryparams
 
         const query = { ...filters }
         if (bookingId) query._id = bookingId
         if (homeId) query.homeId = homeId
+        if (userId) query.userId = userId
 
         const {
             startEpochAfter,
@@ -45,18 +70,11 @@ export default (models) => {
         const results = await models.booking.find(query, fieldList, restOptions)
             .populate('homeId')
             .populate('userId')
-            .lean()
 
-        return bookingId ? results[0] || {} : results
+        return bookingId ? results[0] || null : results
     }
 
-    const update = async (userId, bookingId, updateData) => {
-        const booking = await models.booking.findOne({ _id: bookingId, userId })
-
-        if (!booking) {
-            throw new Error('Booking not found or access denied')
-        }
-
+    const update = async (booking, updateData) => {
         const updates = Object.keys(updateData);
         const allowedUpdates = ['status', 'paymentId'];
         const isValid = updates.every((update) => allowedUpdates.includes(update));

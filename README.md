@@ -150,7 +150,8 @@ This roadmap tracks functional and architectural development. Infra/config-level
 - [x] Update Admin Home editor to use Vuex and other Vue patterns     
 - [x] Implement Availability save
 - [x] Implement Razorpay payments  
-- [x] Handle Razorpay webhook with idempotency logic  
+- [x] Handle Razorpay webhook with idempotency logic 
+- [x] Integrate booking service to payment service
 - [ ] Build booking summary / confirmation page  
 - [x] Add test coverage for booking and payment
 - [x] Deploy to GitHub
@@ -209,6 +210,7 @@ This roadmap tracks functional and architectural development. Infra/config-level
 
 ## Async Jobs and Messaging
 - [ ] Add BullMQ + Redis for async job support  
+- [ ] Add account lockout for brute force login attempts
 - [ ] Move image resizing and email sending to background jobs  
 - [ ] Create queue-based booking confirmation handler
 - [ ] Add Pulumi provisioning

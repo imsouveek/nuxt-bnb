@@ -9,9 +9,9 @@ export default (models) => {
         return newHome
     }
 
-    async function get(searchParams, queryparams) {
+    async function get(searchParams, queryparams = {}) {
         const { homeId, userId, user } = searchParams
-        const { fieldList, options } = queryparams
+        const { fieldList, options = {} } = queryparams
 
         const query = {}
         if (homeId) query._id = homeId

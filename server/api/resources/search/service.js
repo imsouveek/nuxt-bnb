@@ -33,7 +33,6 @@ export default (models) => {
 
     async function filterAvailableHomes(homes, { options }) {
         const { startEpoch, endEpoch } = options
-
         if (!startEpoch || !endEpoch) return homes
 
         if (startEpoch > endEpoch) {
@@ -53,14 +52,12 @@ export default (models) => {
 
     async function filterBookedHomes(homes, { excludeBooked, options }) {
         const { startEpoch, endEpoch } = options
-
         if (excludeBooked !== 'true' || !startEpoch || !endEpoch) return homes
 
         const homeIds = homes.map(h => h._id)
-
         const bookings = await models.booking.find({
             homeId: { $in: homeIds },
-            status: { $in: ['pending', 'confirmed'] },
+            status: { $in: ['Pending', 'Success'] },
             startEpoch: { $lt: endEpoch },
             endEpoch: { $gt: startEpoch }
         })
@@ -86,6 +83,9 @@ export default (models) => {
 
     return {
         findHomes,
+        getHomesByLocation,
+        filterAvailableHomes,
+        filterBookedHomes,
         getById,
         populate
     }

@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 
 export const createAvailability = async (overrides = {}) => {
     const Availability = global.__TEST_STATE__.dbClient.model('Availability')
-    const num_days = faker.number.int({ min: 2, max: 10 })
+    const num_days = overrides?.num_days ?? faker.number.int({ min: 2, max: 10 })
     const startDate = faker.date.soon()
     const startDateEpoch = Math.round(startDate.getTime() / (86400 * 1000))
     const returnValue = []

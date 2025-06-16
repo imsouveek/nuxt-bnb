@@ -2,8 +2,10 @@ import mongoose from 'mongoose'
 import request from 'supertest'
 import { createUser } from '../users/users.factory.js'
 import { createHome } from '../homes/homes.factory.js'
+import { createAvailability } from '../homes/availabilities/availabilities.factory.js'
 import { createBooking } from './bookings.factory.js'
 import { getCsrfToken, loginUser } from '../../utils/headerHelpers.js'
+import { faker } from '@faker-js/faker'
 
 let Booking, csrfValues
 
@@ -25,16 +27,22 @@ describe('Booking API', () => {
         otherHeader = login2.authHeader()
 
         home = await createHome({ owner: authUser._id })
-        booking = await createBooking({ homeId: home._id, userId: authUser._id, status: 'pending' }) // assign one for use
+        booking = await createBooking({ homeId: home._id, userId: authUser._id, status: 'Pending' }) // assign one for use
         await createBooking({
             homeId: home._id,
             userId: authUser._id,
-            status: 'confirmed',
+            status: 'Success',
             startEpoch: booking.startEpoch + 10,
             endEpoch: booking.endEpoch + 10
         })
 
         csrfValues = await getCsrfToken(global.__TEST_STATE__.app)
+        global.__MOCK_CONFIG__ = {
+            payments: {
+                createOrderShouldThrowException: false,
+                createOrderShouldFail: false
+            }
+        }
     })
 
     describe('GET /api/bookings', () => {
@@ -87,17 +95,17 @@ describe('Booking API', () => {
 
         it('filters bookings by status', async () => {
             const res = await request(global.__TEST_STATE__.app)
-                .get('/api/bookings?status=pending')
+                .get('/api/bookings?status=Pending')
                 .set(authHeader)
 
             expect(res.status).toBe(200)
             expect(res.body.length).toBe(1)
-            res.body.forEach(b => expect(b.status).toBe('pending'))
+            res.body.forEach(b => expect(b.status).toBe('Pending'))
         })
 
         it('returns empty array if no bookings match status', async () => {
             const res = await request(global.__TEST_STATE__.app)
-                .get('/api/bookings?status=cancelled')
+                .get('/api/bookings?status=Failed')
                 .set(authHeader)
 
             expect(res.status).toBe(200)
@@ -175,7 +183,7 @@ describe('Booking API', () => {
                 .set(authHeader)
 
             expect(res.status).toBe(200)
-            expect(res.body).toEqual({})
+            expect(res.body).toBeNull()
         })
     })
 
@@ -186,7 +194,7 @@ describe('Booking API', () => {
                 startEpoch: 20000,
                 endEpoch: 20002,
                 guestCount: 2,
-                paymentId: 'TEST_PAYMENT_ID'
+                gateway: "Razorpay"
             }
 
             const res = await request(global.__TEST_STATE__.app)
@@ -198,13 +206,132 @@ describe('Booking API', () => {
 
             expect(res.status).toBe(201)
             expect(res.body._id).toBeDefined()
-            expect(res.body.status).toBe('pending')
+            expect(res.body.status).toBe('Pending')
 
             const dbBooking = await Booking.findById(res.body._id)
             expect(dbBooking).not.toBeNull()
 
             expect(dbBooking.totalAmount).toBe(home.pricePerNight * 2)
             expect(dbBooking.paymentId).toBe('TEST_PAYMENT_ID')
+        })
+
+        it('creates a new booking and persists it in DB even if payment throws exception', async () => {
+            global.__MOCK_CONFIG__.payments.createOrderShouldThrowException = true
+            const payload = {
+                homeId: home._id,
+                startEpoch: 20000,
+                endEpoch: 20002,
+                guestCount: 2,
+                gateway: "Razorpay"
+            }
+
+            const res = await request(global.__TEST_STATE__.app)
+                .post('/api/bookings')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
+                .set(authHeader)
+                .send(payload)
+
+            expect(res.status).toBe(500)
+
+            const dbBooking = await Booking.find({
+                homeId: home._id,
+                userId: authUser._id
+            })
+            expect(dbBooking.length).toBe(3)
+        })
+
+        it('creates a new booking and persists it in DB even if payment fails', async () => {
+            global.__MOCK_CONFIG__.payments.createOrderShouldFail = true
+            const payload = {
+                homeId: home._id,
+                startEpoch: 20000,
+                endEpoch: 20002,
+                guestCount: 2,
+                gateway: "Razorpay"
+            }
+
+            const res = await request(global.__TEST_STATE__.app)
+                .post('/api/bookings')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
+                .set(authHeader)
+                .send(payload)
+
+            expect(res.status).toBe(500)
+
+            const dbBooking = await Booking.find({
+                homeId: home._id,
+                userId: authUser._id
+            })
+            expect(dbBooking.length).toBe(3)
+        })
+
+        it('fails booking without proper home', async () => {
+            const payload = {
+                homeId: faker.database.mongodbObjectId(),
+                startEpoch: 20000,
+                endEpoch: 20002,
+                guestCount: 2,
+                gateway: "Razorpay"
+            }
+
+            const res = await request(global.__TEST_STATE__.app)
+                .post('/api/bookings')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
+                .set(authHeader)
+                .send(payload)
+
+            expect(res.status).toBe(500)
+        })
+
+        it('fails booking without availability', async () => {
+            await createAvailability({ homeId: home._id, num_days: 1, epochDate: 20000 })
+            const payload = {
+                homeId: home._id,
+                startEpoch: 20000,
+                endEpoch: 20002,
+                guestCount: 2,
+                paymentId: 'TEST_PAYMENT_ID',
+                gateway: "Razorpay"
+            }
+
+            const res = await request(global.__TEST_STATE__.app)
+                .post('/api/bookings')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
+                .set(authHeader)
+                .send(payload)
+
+            expect(res.status).toBe(500)
+        })
+
+        it('fails booking if hotel is already booked', async () => {
+            await createBooking({
+                homeId: home._id,
+                userId: otherUser._id,
+                status: 'Success',
+                startEpoch: 20001,
+                endEpoch: 20002,
+            })
+
+            const payload = {
+                homeId: home._id,
+                startEpoch: 20000,
+                endEpoch: 20002,
+                guestCount: 2,
+                gateway: "Razorpay"
+            }
+
+            const res = await request(global.__TEST_STATE__.app)
+                .post('/api/bookings')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
+                .set(authHeader)
+                .send(payload)
+
+            expect(res.status).toBe(500)
         })
 
         it('rejects booking creation if user is not authenticated', async () => {
@@ -249,14 +376,14 @@ describe('Booking API', () => {
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
                 .set(authHeader)
-                .send({ status: 'cancelled', paymentId: 'asdfg' })
+                .send({ status: 'Failed', paymentId: 'asdfg' })
 
             expect(res.status).toBe(200)
-            expect(res.body.status).toBe('cancelled')
+            expect(res.body.status).toBe('Failed')
             expect(res.body.paymentId).toBe('asdfg')
 
             const dbBooking = await Booking.findById(booking._id)
-            expect(dbBooking.status).toBe('cancelled')
+            expect(dbBooking.status).toBe('Failed')
             expect(dbBooking.paymentId).toBe('asdfg')
 
         })
@@ -277,7 +404,7 @@ describe('Booking API', () => {
                 .patch(`/api/bookings/${booking._id}`)
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
-                .send({ status: 'cancelled' })
+                .send({ status: 'Failed' })
 
             expect(res.status).toBe(401)
         })
@@ -288,7 +415,7 @@ describe('Booking API', () => {
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
                 .set(otherHeader)
-                .send({ status: 'cancelled' })
+                .send({ status: 'Failed' })
 
             expect(res.status).toBe(500)
         })

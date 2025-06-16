@@ -153,10 +153,10 @@ This backend is fully tested using **Jest** and **supertest**, with isolated tes
 Additional notes:
 - `server/tests/` contains the full test suite
 - Coverage report
-  - Statements: 98.69 %
-  - Branches: 98.2 %
+  - Statements: 98.72 %
+  - Branches: 98.29 %
   - Functions: 98.07 % 
-  - Lines: 98.63 %
+  - Lines: 98.67 %
 
 To run tests with coverage, use the following command from project root:
 ```bash
@@ -192,7 +192,8 @@ Below are the required `.env` variables for the API service:
 | `PASSWORD_TOKEN_EXPIRY`        | Define duration after which password tokens expire                          |
 | `IMAGE_TOKEN_EXPIRY`           | Define duration after which image upload tokens expire                      |
 | `GOOGLE_AUTH_CLIENT_ID`        | Client ID for Google OAuth login                                            |
-
+| `PAYMENT_AUTH_HEADER`          | Auth header for payment order creation                                      |
+| `PAYMENT_AUTH_KEY`             | Auth key to set for passing payment authentication                          |
 
 ---
 
