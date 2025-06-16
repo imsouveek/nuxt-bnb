@@ -99,7 +99,9 @@ export default {
             refresh_cookie: process.env.REFRESH_COOKIE,
             refresh_life: process.env.REFRESH_LIFE,
             csrf_secret: process.env.CSRF_SECRET,
-            csrf_life: process.env.CSRF_LIFE
+            csrf_life: process.env.CSRF_LIFE,
+            password_token_expiry: process.env.PASSWORD_TOKEN_EXPIRY,
+            image_token_expiry: process.env.IMAGE_TOKEN_EXPIRY
         },
         paymentAuth: {
             auth_header: process.env.PAYMENT_AUTH_HEADER,

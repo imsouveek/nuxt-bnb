@@ -1,7 +1,10 @@
+import ms from 'ms'
+
 export default (models) => {
-    async function getNewToken(email, type) {
-        if (type !== 'password' && type !== 'image') {
-            throw new Error('Invalid token type')
+    async function getNewToken(email, type, token_life) {
+        let expiresAt = null
+        if (token_life !== 'never') {
+            expiresAt = new Date(Date.now() + ms(token_life))
         }
 
         let token
@@ -14,6 +17,7 @@ export default (models) => {
             token = new models.token({ email, type })
         }
 
+        token.expiresAt = expiresAt
         await token.save()
 
         return token
@@ -29,6 +33,10 @@ export default (models) => {
         }
 
         await models.token.findOneAndDelete({ _id: tokenObj._id })
+
+        if (tokenObj.expiresAt && new Date(tokenObj.expiresAt) < new Date()) {
+            throw new Error('Token has expired')
+        }
 
         if (tokenObj.type !== type) {
             throw new Error(`Invalid token type`)

@@ -19,7 +19,7 @@ export default (services, auth) => {
             const user = await services.user.get(req.user._id, req.queryparams?.fieldList)
             sendJSON(res, user)
         } catch (e) {
-          next(e)
+            next(e)
         }
     }
 
@@ -28,7 +28,7 @@ export default (services, auth) => {
             const updatedUser = await services.user.patch(req.user, req.body)
             sendJSON(res, updatedUser)
         } catch (e) {
-          next(e)
+            next(e)
         }
     }
 
@@ -37,7 +37,7 @@ export default (services, auth) => {
             const deletedUser = await services.user.remove(req.user)
             sendJSON(res, deletedUser)
         } catch (e) {
-          next(e)
+            next(e)
         }
     }
 
@@ -46,7 +46,7 @@ export default (services, auth) => {
             await services.user.removeToken(req.user, req.token)
             logOutCookie(res)
         } catch (e) {
-          next(e)
+            next(e)
         }
     }
 
@@ -81,7 +81,22 @@ export default (services, auth) => {
 
     async function getToken(req, res, next) {
         try {
-            const token = await services.token.getNewToken(req.user.email, req.body.type)
+            if (!req.body.type) {
+                throw new Error('Token type is required')
+            }
+
+            const { image_token_expiry } = auth
+            let token_life
+
+            switch (req.body.type) {
+                case 'image':
+                    token_life = image_token_expiry
+                    break;
+                default:
+                    throw new Error('Unsupported token type')
+            }
+
+            const token = await services.token.getNewToken(req.user.email, req.body.type, token_life)
             sendJSON(res, { token })
         } catch (e) {
             next(e)

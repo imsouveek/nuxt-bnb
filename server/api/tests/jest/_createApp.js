@@ -26,7 +26,9 @@ export default async function createApp({ mongoUri, smtpHost = 'localhost', smtp
                 refresh_cookie: 'test-refresh-cookie',
                 refresh_life: '7d',
                 csrf_secret: 'test-csrf-secret',
-                csrf_life: '30m'
+                csrf_life: '30m',
+                password_token_expiry: '10m',
+                image_token_expiry: 'never'
             },
             smtp: {
                 host: smtpHost,

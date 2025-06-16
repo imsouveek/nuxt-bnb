@@ -28,6 +28,10 @@ export default (dbClient) => {
         token: {
             type: String,
             unique: true
+        },
+        expiresAt: {
+            type: Date,
+            default: null
         }
     }, {
         timestamps: true

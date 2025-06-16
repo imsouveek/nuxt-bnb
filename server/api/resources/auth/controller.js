@@ -8,6 +8,7 @@ export default (services, auth) => {
     const refreshCookieName = auth.refresh_cookie
     const refreshSecret = auth.refresh_secret
     const googleClientId = auth.clientId
+    const passwordTokenExpiry = auth.password_token_expiry
 
     async function login(req, res) {
         try {
@@ -68,7 +69,7 @@ export default (services, auth) => {
 
     async function forgotPassword(req, res) {
         try {
-            const token = await services.token.getNewToken(req.body.email, 'password')
+            const token = await services.token.getNewToken(req.body.email, 'password', passwordTokenExpiry)
             await services.email.sendForgottenPasswordEmail(token)
             sendJSON(res, { message: 'Please check your email' })
         } catch (e) {

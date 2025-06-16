@@ -153,10 +153,10 @@ This backend is fully tested using **Jest** and **supertest**, with isolated tes
 Additional notes:
 - `server/tests/` contains the full test suite
 - Coverage report
-  - Statements: 98.67 %
-  - Branches: 98.15 %
+  - Statements: 98.69 %
+  - Branches: 98.2 %
   - Functions: 98.07 % 
-  - Lines: 98.61 %
+  - Lines: 98.63 %
 
 To run tests with coverage, use the following command from project root:
 ```bash
@@ -189,6 +189,8 @@ Below are the required `.env` variables for the API service:
 | `CSRF_COOKIE`                  | Name of the cookie used for CSRF                                            |
 | `CSRF_LIFE`                    | CSRF token expiry duration (e.g., `1w`, `7d`)                               |
 | `CSRF_HEADER`                  | Name of CSRF Header                                                         |
+| `PASSWORD_TOKEN_EXPIRY`        | Define duration after which password tokens expire                          |
+| `IMAGE_TOKEN_EXPIRY`           | Define duration after which image upload tokens expire                      |
 | `GOOGLE_AUTH_CLIENT_ID`        | Client ID for Google OAuth login                                            |
 
 

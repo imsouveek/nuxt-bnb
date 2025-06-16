@@ -192,6 +192,17 @@ describe('User API', () => {
             expect(res.statusCode).toBe(401)
         })
 
+        it('fails with missing type', async () => {
+            const res = await request(global.__TEST_STATE__.app)
+                .post('/api/users/token')
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
+                .send({ asdfg: '1234' })
+                .set(authHeader())
+
+            expect(res.statusCode).toBe(500)
+        })
+
         it('fails with invalid type', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/users/token')

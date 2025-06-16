@@ -3,13 +3,14 @@ import { createUser } from '../users/users.factory.js'
 import { getCsrfToken, loginUser } from '../../utils/headerHelpers.js'
 import { createImage, generateFakeImageUrl, generateBase64Jpeg } from './images.factory.js'
 
-let Image, csrfValues
+let Image, Token, csrfValues
 
 describe('Image API', () => {
     let authUser, authHeader, otherUser, otherHeader, image
 
     beforeAll(() => {
         Image = global.__TEST_STATE__.dbClient.model('Image')
+        Token = global.__TEST_STATE__.dbClient.model('Token')
     })
 
     beforeEach(async () => {
@@ -44,6 +45,8 @@ describe('Image API', () => {
                 .send({ type: 'image' })
 
             const uploadToken = token.body.token.token
+            const tokenInDb = await Token.findById(token.body.token._id)
+            expect(tokenInDb.expiresAt).toBeNull()
 
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/images')

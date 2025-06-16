@@ -174,10 +174,11 @@ describe('Auth API', () => {
             expect(linkResponse.Links[0].URL).toBe(`${global.__TEST_STATE__.config.url.app}/auth/reset/${tokenRecord.token}`)
         })
 
-        it('maintains only one password reset token', async () => {
+        it('maintains only one password reset token and resets token expiry', async () => {
             await Token.create({
                 email: seededUser.email,
-                type: 'password'
+                type: 'password',
+                expiresAt: new Date(Date.now() - 86400000)
             })
 
             const res = await request(global.__TEST_STATE__.app)
@@ -191,6 +192,7 @@ describe('Auth API', () => {
             const tokenRecord = await Token.findOne({ type: 'password' })
             expect(tokenRecord).toBeTruthy()
             expect(tokenRecord.email).toBe(seededUser.email)
+            expect(tokenRecord.expiresAt.getTime()).toBeGreaterThan((new Date(Date.now())).getTime())
 
             const apiResponse = await fetch(`${global.__TEST_STATE__.smtpUrl}/api/v1/messages`).then(res => res.json()).catch(err => console.error(err))
             expect(apiResponse.messages[0].To[0].Address).toEqual(seededUser.email)
@@ -272,6 +274,25 @@ describe('Auth API', () => {
             const tokenRecord = await Token.create({
                 email: seededUser.email,
                 type: 'image'
+            })
+
+            const res = await request(global.__TEST_STATE__.app)
+                .post(`/api/auth/reset`)
+                .set('Cookie', csrfValues.csrfCookie)
+                .set(csrfValues.csrfHeader())
+                .send({
+                    token: tokenRecord.token,
+                    password: 'newpassword456'
+                })
+
+            expect(res.statusCode).toBe(401)
+        })
+
+        it('fails to reset password using expired token', async () => {
+            const tokenRecord = await Token.create({
+                email: seededUser.email,
+                type: 'password',
+                expiresAt: new Date(Date.now() - 86400000)
             })
 
             const res = await request(global.__TEST_STATE__.app)
