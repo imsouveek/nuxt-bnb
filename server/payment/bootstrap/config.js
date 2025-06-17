@@ -6,6 +6,7 @@ export default function bootstrapConfig(options) {
         ...options.publicRuntimeConfig.razorpay
     }
     config.auth = options.privateRuntimeConfig.paymentAuth
+    config.url = options.publicRuntimeConfig.url
 
     return config
 }

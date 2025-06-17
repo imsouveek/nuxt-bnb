@@ -385,7 +385,22 @@ describe('Booking API', () => {
             const dbBooking = await Booking.findById(booking._id)
             expect(dbBooking.status).toBe('Failed')
             expect(dbBooking.paymentId).toBe('asdfg')
+        })
 
+        it('updates a booking from webhook with payment headers instead of CSRF / user auth', async () => {
+            const { auth_header: pay_header, auth_key: pay_key } = global.__TEST_STATE__.config.paymentAuth
+            const res = await request(global.__TEST_STATE__.app)
+                .patch(`/api/bookings/${booking._id}`)
+                .set(pay_header, pay_key)
+                .send({ status: 'Success', paymentId: 'asdfg' })
+
+            expect(res.status).toBe(200)
+            expect(res.body.status).toBe('Success')
+            expect(res.body.paymentId).toBe('asdfg')
+
+            const dbBooking = await Booking.findById(booking._id)
+            expect(dbBooking.status).toBe('Success')
+            expect(dbBooking.paymentId).toBe('asdfg')
         })
 
         it('returns 500 if update is for any field except status', async () => {

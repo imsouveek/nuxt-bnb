@@ -1,4 +1,10 @@
-export default (strategies, dbClient) => {
+import axios from 'axios'
+
+export default (strategies, dbClient, config) => {
+
+    const authHeader = config.auth.auth_header.toLowerCase()
+    const authKey = config.auth.auth_key
+    const apiUrl = config.url.api
 
     const process = async (req, gateway) => {
         const strategy = strategies[gateway]
@@ -26,13 +32,13 @@ export default (strategies, dbClient) => {
         if (!result) throw new Error('Invalid signature')
 
         // Update payment and save webhook event
-        const gatewayId = await updateOrder(gateway, result)
+        const gatewayRecord = await updateOrder(gateway, result)
 
         await dbClient.webhookEvent.create({
             data: {
                 eventId,
                 gateway: strategy.name,
-                gatewayId,
+                gatewayId: gatewayRecord.gatewayId,
                 status: result.status,
                 rawBody: req.rawBody
             }
@@ -63,7 +69,7 @@ export default (strategies, dbClient) => {
         }
 
         // Step 2: Update Order using gatewayId (which is unique and indexed)
-        await dbClient.order.update({
+        const orderRecord = await dbClient.order.update({
             where: { gatewayId: gatewayRecord.gatewayId },
             data: {
                 status: orderStatus,
@@ -75,8 +81,18 @@ export default (strategies, dbClient) => {
             }
         })
 
-        return gatewayRecord.gatewayId
+        axios.patch(`${apiUrl}/bookings/${orderRecord.bookingId}`, {
+            status: orderRecord.status,
+            paymentId: orderRecord.id
+        }, {
+            headers: {
+                [authHeader]: authKey
+            }
+        }).catch((err) => {
+            console.log(`Unexpected exception when dispatching booking update: ${err}`)
+        })
 
+        return gatewayRecord
     }
 
     return {

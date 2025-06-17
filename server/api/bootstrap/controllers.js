@@ -25,7 +25,7 @@ export default (config, dbClient) => {
         search: searchController(services),
         availability: availabilityController(services),
         booking: bookingController(services),
-        middleware: getMiddleware(services, config.auth),
+        middleware: getMiddleware(services, config.auth, config.paymentAuth),
         config
     }
 }

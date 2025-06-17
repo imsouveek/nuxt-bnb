@@ -57,6 +57,8 @@ export default ({ csrf_secret, csrf_cookie, csrf_header, csrf_life }) => {
     }
 
     const csrfMiddleware = (req, res, next) => {
+        if (req.internalAuth) return next()
+
         if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next()
 
         const cookies = cookie.parse(req.headers.cookie || '')

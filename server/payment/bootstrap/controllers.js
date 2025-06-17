@@ -7,7 +7,7 @@ import webhookController from '../resources/webhooks/controller.js'
 
 export default (config, dbClient) => {
     const strategies = getStrategies(config)
-    const services = getServices(strategies, dbClient)
+    const services = getServices(strategies, dbClient, config)
 
     return {
         order: orderController(services),

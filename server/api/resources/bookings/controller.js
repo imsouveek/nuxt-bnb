@@ -49,10 +49,18 @@ export default (services) => {
 
     async function update(req, res, next) {
         try {
-            const booking = await services.booking.get({ bookingId: req.params.id, userId: req.user._id })
+            let booking
+
+            if (req.internalAuth) {
+                booking = await services.booking.get({ bookingId: req.params.id })
+            } else {
+                booking = await services.booking.get({ bookingId: req.params.id, userId: req.user._id })
+            }
+
             if (!booking) {
                 throw new Error("Booking not found")
             }
+
             const result = await services.booking.update(booking, req.body)
             sendJSON(res, result)
         } catch (e) {

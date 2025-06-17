@@ -7,6 +7,7 @@ export default function (services, auth) {
     const refreshCookieName = auth.refresh_cookie
 
     return async function (req, res, next) {
+        if (req.internalAuth) return next()
         try {
             const access_token = req.headers.authorization?.replace('Bearer ', '')
             if (!access_token) throw new Error()

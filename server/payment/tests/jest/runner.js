@@ -36,5 +36,20 @@ jest.unstable_mockModule('razorpay', () => ({
     }))
 }))
 
+
+jest.unstable_mockModule('axios', () => {
+    return {
+        default: {
+            patch: jest.fn(async () => {
+                if (global.__MOCK_CONFIG__?.bookingApi.updateShouldThrowError) {
+                    throw new Error("Mock Booking API Error")
+                }
+                return
+            })
+        },
+        __esModule: true
+    }
+})
+
 const mod = await import('./_createApp.js')
 export default mod.default

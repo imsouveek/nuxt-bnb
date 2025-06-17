@@ -7,6 +7,9 @@ export default async function createApp(paymentDb) {
         publicRuntimeConfig: {
             razorpay: {
                 key_id: 'razorpay_key'
+            },
+            url: {
+                api: 'https://localhost:3000'
             }
         },
         privateRuntimeConfig: {
@@ -18,7 +21,7 @@ export default async function createApp(paymentDb) {
             paymentAuth: {
                 auth_header: 'payment_auth_header',
                 auth_key: 'payment_auth_key'
-            },
+            }
         }
     }
 

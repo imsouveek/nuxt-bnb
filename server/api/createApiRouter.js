@@ -15,7 +15,7 @@ export default function createApiRouter(controllers) {
 
     router.use(cors({
         origin: (origin, callback) => {
-            if (!origin || origin === controllers.config.url.app) {
+            if (!origin || origin === controllers.config.url.app || origin === controllers.config.url.payment) {
                 return callback(null, true)
             }
             return callback(new Error(`Not allowed by CORS: ${origin}, ${controllers.config.url.app}`))
@@ -26,8 +26,9 @@ export default function createApiRouter(controllers) {
 
     const { csrfRouter, csrfMiddleware } = csrf(controllers.config.auth)
     router.use('/csrf-token', csrfRouter())
-    router.use(csrfMiddleware)
 
+    router.use(controllers.middleware.internalAuth)
+    router.use(csrfMiddleware)
     router.use(controllers.middleware.queryparams)
 
     router.use('/auth', authRouter(controllers))

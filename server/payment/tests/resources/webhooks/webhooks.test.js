@@ -2,6 +2,7 @@ import request from 'supertest'
 import webhooksFactory from './webhooks.factory.js'
 import dbModule from '../../../strategies/db.js'
 import create from '../orders/orders.factory.js'
+import axios from 'axios'
 
 const { createOrder } = create()
 
@@ -57,6 +58,10 @@ describe('Webhooks API', () => {
         beforeEach(async () => {
             createdOrder = await createOrder(gatewayName)
             global.__MOCK_CONFIG__[gatewayName] = { fetchPaymentStatusShouldFail: false }
+            global.__MOCK_CONFIG__.bookingApi = {
+                updateShouldThrowError: false
+            }
+            axios.patch.mockClear()
         })
 
         describe(`/payment/webhooks/${gateway}`, () => {
@@ -89,9 +94,48 @@ describe('Webhooks API', () => {
                     }
                 })
                 expect(webhookInDb.gatewayId).toBe(extracted.gatewayId)
+                expect(axios.patch).toHaveBeenCalledTimes(1)
+                expect(axios.patch).toHaveBeenCalledWith(
+                    expect.stringContaining(`/bookings/${updatedOrder.bookingId}`),
+                    expect.objectContaining({
+                        paymentId: updatedOrder.id,
+                        status: 'Success'
+                    }),
+                    expect.any(Object)
+                )
             })
 
-            // Add test for payment.failed
+            it(`should successfully process a valid ${gateway} payment.captured webhook even if booking sync fails`, async () => {
+                global.__MOCK_CONFIG__.bookingApi.updateShouldThrowError = true
+                const { rawBody, headers, extracted } = gatewayFactory.createWebhook(webhook_secret, {
+                    order: createdOrder
+                })
+
+                const res = await request(app)
+                    .post(`/payment/webhooks/${gateway}`)
+                    .set(headers)
+                    .send(rawBody)
+
+                expect(res.statusCode).toBe(200)
+
+                const updatedOrder = await getOrderInDb(createdOrder, gatewayDbModel)
+
+                expect(updatedOrder).toBeDefined()
+                expect(updatedOrder.status).toBe('Success');
+                gatewayFactory.verifyWebhookResult({
+                    rawBody,
+                    headers,
+                    orderInDb: updatedOrder
+                })
+                const webhookInDb = await db.webhookEvent.findUnique({
+                    where: {
+                        eventId: extracted.eventId
+                    }
+                })
+                expect(webhookInDb.gatewayId).toBe(extracted.gatewayId)
+                expect(axios.patch).toHaveBeenCalledTimes(1)
+            })
+
             it(`should correctly process a ${gateway} payment.failed webhook`, async () => {
                 const { rawBody, headers, extracted } = gatewayFactory.createWebhook(webhook_secret, {
                     order: createdOrder,
