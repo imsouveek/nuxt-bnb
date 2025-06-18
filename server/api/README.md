@@ -153,10 +153,10 @@ This backend is fully tested using **Jest** and **supertest**, with isolated tes
 Additional notes:
 - `server/tests/` contains the full test suite
 - Coverage report
-  - Statements: 98.72 %
-  - Branches: 98.29 %
-  - Functions: 98.07 % 
-  - Lines: 98.67 %
+  - Statements: 98.75 %
+  - Branches: 98.36 %
+  - Functions: 98.1 % 
+  - Lines: 98.69 %
 
 To run tests with coverage, use the following command from project root:
 ```bash

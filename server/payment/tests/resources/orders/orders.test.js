@@ -91,7 +91,6 @@ describe('Orders API', () => {
 
     describe('GET /orders/:id', () => {
         for (const type of gatewayTypes) {
-            const gatewayKey = type.toLowerCase()
 
             it(`fetches ${type} order by ID`, async () => {
                 const created = await createOrder(type)
@@ -107,8 +106,8 @@ describe('Orders API', () => {
                     status: created.status
                 })
 
-                expect(res.body.gateway).not.toBeNull()
-                expect(res.body.gateway[gatewayKey]).not.toBeNull()
+                expect(res.body.gatewayType).toBe(type)
+                expect(res.body.gatewayRefs.gatewayRefOrderId).not.toBeNull()
             })
         }
 
@@ -122,10 +121,11 @@ describe('Orders API', () => {
             expect(res.body).toMatchObject({
                 id: testOrder.id,
                 bookingId: testOrder.bookingId,
-                status: testOrder.status
+                status: testOrder.status,
+                gatewayType: ''
             })
 
-            expect(res.body.gateway).toBeNull()
+            expect(res.body.gatewayRefs).toBeUndefined()
         })
 
         it('returns 404 for non-existent order', async () => {

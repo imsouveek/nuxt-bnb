@@ -36,7 +36,10 @@ jest.unstable_mockModule('axios', () => {
                     status: 201,
                     data: {
                         id: "TEST_PAYMENT_ID",
-                        status: "Pending"
+                        status: "Pending",
+                        gatewayRefs: {
+                            gatewayRefOrderId: "order_123"
+                        }
                     }
                 }
             })

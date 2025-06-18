@@ -14,8 +14,8 @@ export default (services) => {
                 }, 400)
             }
             const newOrder = await services.order.create(type, data)
-
-            sendJSON(res, newOrder, 201)
+            const response = services.order.processResponse(newOrder)
+            sendJSON(res, response, 201)
         } catch (e) {
             next(e)
         }
@@ -25,8 +25,8 @@ export default (services) => {
         try {
             const orderId = req.params.id
             const result = await services.order.get(orderId)
-
-            sendJSON(res, result || {}, result ? 200 : 404);
+            const response = services.order.processResponse(result)
+            sendJSON(res, response, result ? 200 : 404);
         } catch (e) {
             next(e)
         }

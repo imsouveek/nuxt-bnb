@@ -34,7 +34,10 @@ export default (models, paymentUrl, paymentConfig) => {
         booking.paymentId = payment?.data?.id
         booking.status = payment?.data?.status
         await booking.save()
-        return booking
+        return {
+            booking,
+            gatewayRefs: payment?.data?.gatewayRefs
+        }
     }
 
     async function get(searchParams, queryparams = {}) {

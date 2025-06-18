@@ -72,8 +72,26 @@ export default (strategies, dbClient) => {
         }
     }
 
+    const processResponse = (order) => {
+        if (!order) return null
+
+        const response = JSON.parse(JSON.stringify(order))
+        delete response.gatewayId
+        delete response.gateway
+
+        response.gatewayType = order.gateway?.type ?? ''
+        if (!!response.gatewayType) {
+            const strategyKey = response.gatewayType.toLowerCase()
+            const strategy = strategies[strategyKey]
+
+            response.gatewayRefs = strategy.order.getGatewayRefs(order)
+        }
+        return response
+    }
+
     return {
         create,
-        get
+        get,
+        processResponse
     }
 }

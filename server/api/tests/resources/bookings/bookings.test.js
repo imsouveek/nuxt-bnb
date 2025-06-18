@@ -204,11 +204,12 @@ describe('Booking API', () => {
                 .set(authHeader)
                 .send(payload)
 
+            console.log(res.body)
             expect(res.status).toBe(201)
-            expect(res.body._id).toBeDefined()
-            expect(res.body.status).toBe('Pending')
+            expect(res.body.booking._id).toBeDefined()
+            expect(res.body.booking.status).toBe('Pending')
 
-            const dbBooking = await Booking.findById(res.body._id)
+            const dbBooking = await Booking.findById(res.body.booking._id)
             expect(dbBooking).not.toBeNull()
 
             expect(dbBooking.totalAmount).toBe(home.pricePerNight * 2)

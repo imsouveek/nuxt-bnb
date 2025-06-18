@@ -16,8 +16,15 @@ export default (razorpay) => {
         return payment.status === 'captured'
     }
 
+    const getGatewayRefs = (order) => {
+        return {
+            gatewayRefOrderId: order.gateway?.razorpay?.razorpayOrderId
+        }
+    }
+
     return {
         create,
-        verifyPayment
+        verifyPayment,
+        getGatewayRefs
     }
 }
