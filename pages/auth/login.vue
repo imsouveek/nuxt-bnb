@@ -28,6 +28,7 @@ v-model="password" outlined dense clearable type="password" label="Password"
 </template>
 
 <script>
+import redirectAfterLogin from '../../utils/redirectAfterLogin.js'
 export default {
     name: 'UserLogin',
     data: () =>({
@@ -35,9 +36,6 @@ export default {
         password: '',
         message: ''
     }),
-    mounted() {
-        this.$auth.enableAuth(this.$refs.googleButton)
-    },
     methods: {
         googleLogin () {
             this.$refs.googleButton.querySelector("div[role=button]").click()
@@ -51,7 +49,8 @@ export default {
                 if (!resp) {
                     throw new Error("")
                 }
-                this.$nuxt.context.redirect('/')
+
+                redirectAfterLogin(this.$store, this.$router)
             } catch (error) {
                 this.message = 'Invalid email or password'
             }

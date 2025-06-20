@@ -80,7 +80,7 @@ export default (strategies, dbClient) => {
         delete response.gateway
 
         response.gatewayType = order.gateway?.type ?? ''
-        if (!!response.gatewayType) {
+        if (response.gatewayType) {
             const strategyKey = response.gatewayType.toLowerCase()
             const strategy = strategies[strategyKey]
 

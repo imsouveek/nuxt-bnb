@@ -1,11 +1,13 @@
 import axios from 'axios'
-import { getCookie, extractCsrfToken, ensureCsrfReady } from '../utils/csrfHelper.js'
+import csrfHelper from '../utils/csrfHelper.js'
+const { getCookie, extractCsrfToken, ensureCsrfReady } = csrfHelper
 
 export default function ({ $config, store }, inject) {
 
     const instance = axios.create({
         baseURL: $config.url.api,
-        https: true
+        https: true,
+        withCredentials: true
     })
 
     instance.interceptors.request.use(async (config) => {
@@ -16,14 +18,16 @@ export default function ({ $config, store }, inject) {
         const isUnsafe = !['get', 'head', 'options'].includes(method)
 
         if (isUnsafe && config.url !== '/csrf-token') {
-            await ensureCsrfReady(instance, csrf_cookie)
+            const res = await ensureCsrfReady(instance, csrf_cookie)
 
-            const raw = getCookie(csrf_cookie)
+            const cookieHeader = res?.headers?.['set-cookie']
+            const raw = getCookie(csrf_cookie, cookieHeader)
             const token = raw ? extractCsrfToken(raw) : null
 
             if (token) {
                 config.headers[csrf_header] = token
             }
+
         }
 
         return config
@@ -50,12 +54,16 @@ export default function ({ $config, store }, inject) {
         async (error) => {
             const originalRequest = error.config
 
+            if (typeof document === 'undefined') {
+                return Promise.reject(error)
+            }
+
             if (error.response?.status === 401 && !originalRequest._retry) {
                 const shouldAttemptRefresh = !['/auth/login', '/auth/google-auth', '/auth/refresh'].includes(originalRequest.url)
                 if (shouldAttemptRefresh) {
                     originalRequest._retry = true
                     try {
-                        const res = await instance.post('/auth/refresh', {}, { withCredentials: true })
+                        const res = await instance.post('/auth/refresh', {})
                         if (res.status !== 200 || !res.data?.access_token) {
                             return handleAuthError(error)
                         }

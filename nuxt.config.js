@@ -17,7 +17,8 @@ export default {
         }]
     },
     router: {
-        prefetchLinks: false
+        prefetchLinks: false,
+        middleware: 'auth'
     },
     server: {
         https: {
@@ -33,7 +34,8 @@ export default {
     ],
     modules: [
         '~/modules/api',
-        '~/modules/payment'
+        '~/modules/payment',
+        '~/modules/noSSR'
     ],
     css: ['~/assets/sass/global.scss'],
     buildModules: [

@@ -11,6 +11,7 @@
 <script>
 export default {
     name: "HomePage",
+
     async asyncData({ $api }) {
         try {
             return {
@@ -21,6 +22,7 @@ export default {
         }
 
     },
+
     head() {
         return {
             title: 'Homepage',

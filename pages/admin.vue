@@ -45,8 +45,10 @@
 export default {
     name: 'AdminHomePage',
     layout: 'blank',
-    async asyncData( {$auth, store, error} ) {
-        await $auth.parseUser()
+    meta: {
+        authRequired: true
+    },
+    async asyncData( {store, error} ) {
         if (!store.state.auth.isLoggedIn) {
                 error( {statusCode: 401, message: "No Access!! Please log in!"})
         }

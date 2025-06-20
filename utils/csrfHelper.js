@@ -1,13 +1,30 @@
 let csrfInitPromise = null
 
-export function getCookie(name) {
-    return document.cookie
-        .split('; ')
-        .find(c => c.startsWith(name + '='))
-        ?.split('=')[1]
+function getCookie(name, cookieSource) {
+    if (!cookieSource) {
+        if (typeof document === 'undefined') return null
+        cookieSource = document.cookie
+    }
+
+    let cookies = []
+
+    if (Array.isArray(cookieSource)) {
+        cookies = cookieSource
+    } else if (typeof cookieSource === 'string') {
+        cookies = cookieSource.split('; ')
+    } else {
+        return null
+    }
+
+    const match = cookies.find(c => c.startsWith(name + '='))
+
+    if (!match) return null
+
+    const value = match.split('=')[1]
+    return value
 }
 
-export function extractCsrfToken(raw) {
+function extractCsrfToken(raw) {
     try {
         const dot = raw.lastIndexOf('.')
         const payload = decodeURIComponent(raw.slice(0, dot))
@@ -19,7 +36,7 @@ export function extractCsrfToken(raw) {
     }
 }
 
-export async function ensureCsrfReady(instance, cookieName) {
+async function ensureCsrfReady(instance, cookieName) {
     if (getCookie(cookieName)) return
     if (!csrfInitPromise) {
         csrfInitPromise = instance.post('/csrf-token')
@@ -28,5 +45,11 @@ export async function ensureCsrfReady(instance, cookieName) {
                 throw e
             })
     }
-    await csrfInitPromise
+    return await csrfInitPromise
+}
+
+export default {
+    getCookie,
+    extractCsrfToken,
+    ensureCsrfReady
 }

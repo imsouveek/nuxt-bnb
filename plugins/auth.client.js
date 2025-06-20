@@ -1,4 +1,5 @@
-export default function({$config, $api, redirect, error}, inject) {
+import redirectAfterLogin from "../utils/redirectAfterLogin.js"
+export default function ({ app, $config, $api, store, error }, inject) {
     let isLoaded = false
     let waiting = []
 
@@ -25,9 +26,9 @@ export default function({$config, $api, redirect, error}, inject) {
             waiting = []
         })
     }
-    
+
     function enableAuth(canvas) {
-        if (!isLoaded){
+        if (!isLoaded) {
             waiting.push({
                 fn: enableAuth,
                 arguments
@@ -44,17 +45,15 @@ export default function({$config, $api, redirect, error}, inject) {
         });
 
         window.google.accounts.id.renderButton(
-            canvas,{
-                type: "standard",
-                shape: "rectangular",
-                theme: "outline",
-                size: "large",
-                text: "signin",
-                width: 100
-            }  
+            canvas, {
+            type: "standard",
+            shape: "rectangular",
+            theme: "outline",
+            size: "large",
+            text: "signin",
+            width: 100
+        }
         );
-
-        parseUser()
     }
 
     async function parseUser(userDetails) {
@@ -79,8 +78,8 @@ export default function({$config, $api, redirect, error}, inject) {
                 })
                 if (!response) {
                     error({ statusCode: 401, message: 'Google Sign-on Failed' })
-                } 
-                redirect('/')
+                }
+                redirectAfterLogin(store, app.router)
             }
 
         } catch (error) {

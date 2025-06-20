@@ -3,13 +3,6 @@ import { bootstrapServer } from '../../server/api/bootstrap'
 import createApiRouter from '../../server/api/createApiRouter'
 
 export default function () {
-    this.nuxt.hook('render:setupMiddleware', (app) => {
-        app.use('/admin', (req, res, next) => {
-            res.spa = true
-            next()
-        })
-    })
-
     this.nuxt.hook('render:setupMiddleware', async (app) => {
         const { controllers } = await bootstrapServer(this.options)
 
