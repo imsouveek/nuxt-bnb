@@ -103,7 +103,7 @@ export default {
         }
     },
     async mounted() {
-        await this.$auth.parseUser()
+        await this.$initSession()
         this.$maps.makeAutoComplete(document.getElementById("citySearch"))
     },
     methods: {

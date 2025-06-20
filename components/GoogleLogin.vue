@@ -19,7 +19,7 @@ export default {
         }
     },
     mounted() {
-        this.$auth.enableAuth(this.$refs.googleButton)
+        this.$googleAuth.enableAuth(this.$refs.googleButton)
     },
     methods: {
         googleLogin() {

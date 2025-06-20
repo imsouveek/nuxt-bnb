@@ -1,4 +1,4 @@
-import redirectAfterLogin from "../utils/redirectAfterLogin.js"
+import redirectAfterLogin from "../../utils/redirectAfterLogin.js"
 export default function ({ app, $config, $api, store, error }, inject) {
     let isLoaded = false
     let waiting = []
@@ -6,7 +6,7 @@ export default function ({ app, $config, $api, store, error }, inject) {
     window.handleCredentialResponse = parseUser
 
     addScript()
-    inject('auth', {
+    inject('googleAuth', {
         enableAuth,
         parseUser
     })
@@ -65,23 +65,14 @@ export default function ({ app, $config, $api, store, error }, inject) {
             return
         }
         try {
-            let user
-            if (!userDetails) {
-                user = await $api.$get('/users')
-                if (!user) {
-                    return
-                }
-            } else {
-                const idToken = userDetails.credential
-                const response = await $api.$post('/auth/google-auth', {
-                    token: idToken
-                })
-                if (!response) {
-                    error({ statusCode: 401, message: 'Google Sign-on Failed' })
-                }
-                redirectAfterLogin(store, app.router)
+            const idToken = userDetails.credential
+            const response = await $api.$post('/auth/google-auth', {
+                token: idToken
+            })
+            if (!response) {
+                error({ statusCode: 401, message: 'Google Sign-on Failed' })
             }
-
+            redirectAfterLogin(store, app.router)
         } catch (error) {
             console.log(error)
 

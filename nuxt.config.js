@@ -27,10 +27,11 @@ export default {
         }
     },
     plugins: [
+        '~/plugins/auth/google.client',
         '~/plugins/axios.api',
         '~/plugins/maps.client',
-        '~/plugins/auth.client',
-        '~/plugins/imageHandler'
+        '~/plugins/imageHandler',
+        '~/plugins/initSession.client'
     ],
     modules: [
         '~/modules/api',
