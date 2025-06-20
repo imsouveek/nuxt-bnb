@@ -29,10 +29,22 @@ horizontal show-extra-details :home="home"
 </template>
 
 <script>
+function getSearchApiUrl(queryParams) {
+    const params = {
+        ...queryParams,
+        excludeBooked: queryParams.excludeBooked ?? 'true',
+        radius: queryParams.radius ?? 10000,
+    }
+    delete params.label
+
+    const search = new URLSearchParams(params)
+    return `/search/homes?${search.toString()}`
+}
+
 export default {
     name: "SearchPage",
     async beforeRouteUpdate(to, from, next) {
-        const data = await this.$api.$get(`/search/homes?lat=${to.query.lat}&lng=${to.query.lng}&radius=10000`)
+        const data = await this.$api.$get(getSearchApiUrl(to.query))
         this.homes = data
         this.label = to.query.label
         this.lat = to.query.lat
@@ -41,7 +53,7 @@ export default {
         next()
     },
     async asyncData({query, $api}) {
-        const data = await $api.$get(`/search/homes?lat=${query.lat}&lng=${query.lng}&radius=10000`)
+        const data = await $api.$get(getSearchApiUrl(query))
         return {
             homes: data,
             label: query.label,

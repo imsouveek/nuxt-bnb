@@ -12,10 +12,10 @@
                         <app-bar-input v-model="inputText" input-id="citySearch" @changed="locationChanged" />
                     </v-col>
                     <v-col cols="3">
-                        <date-range-picker v-model="dates" @change="dateChanged" />
+                        <date-range-picker v-model="dates"/>
                     </v-col>
                     <v-col cols="1">
-                        <v-btn color="primary" depressed>
+                        <v-btn color="primary" depressed @click="submitSearch">
                             <v-icon>mdi-magnify</v-icon>
                         </v-btn>
                     </v-col>
@@ -85,13 +85,14 @@ color="primary" class="d-flex justify-end" block text
 </template>
 
 <script>
-import { ISODate, addDays } from '~/utils/dateUtils';
+import { ISODate, addDays, toEpochDate } from '~/utils/dateUtils';
 
 export default {
     name: 'DefaultLayout',
     data: () => ({
         dates: [ISODate(addDays(Date.now(), 7)), ISODate(addDays(Date.now(), 9))],
-        inputText: ''
+        inputText: '',
+        place: null
     }),
     computed: {
         user() {
@@ -106,21 +107,19 @@ export default {
         this.$maps.makeAutoComplete(document.getElementById("citySearch"))
     },
     methods: {
-        dateChanged() {
-            if (this.dates[1]) {
-                console.log(this.dates)
-            }
-        },
         locationChanged(event) {
-            const place = event.detail
-            if (!place.geometry) return
-
+            this.place = event.detail
+        },
+        submitSearch() {
+            if (!this.place || !this.dates[1]) return
             this.$router.push({
                 name: "search",
                 query: {
-                    lat: place.geometry.location.lat(),
-                    lng: place.geometry.location.lng(),
-                    label: document.getElementById("citySearch").value
+                    lat: this.place.geometry.location.lat(),
+                    lng: this.place.geometry.location.lng(),
+                    label: this.place.formatted_address || this.place.name,
+                    startEpoch: toEpochDate(this.dates[0]),
+                    endEpoch: toEpochDate(this.dates[1])
                 }
             })
         },
