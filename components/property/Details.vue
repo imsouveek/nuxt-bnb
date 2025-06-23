@@ -1,5 +1,13 @@
 <template>
     <div>
+        <v-snackbar v-model="snackbar" :timeout="2000" color="primary">
+            {{ snackText }}
+            <template #action="{ attrs }">
+                <v-btn color="primary--text" text v-bind="attrs" @click="snackbar = false">
+                    Close
+                </v-btn>
+            </template>
+        </v-snackbar>
         <v-card class="px-2" flat>
             <v-container>
                 <v-row>
@@ -40,7 +48,7 @@
                                 <span class="text-h4 text--secondary"> / night </span>
                             </div>
                             <date-range-picker v-model="bookingDates" />
-                            <v-btn color="primary" class="my-8 text-h5 font-weight-medium" large block depressed>
+                            <v-btn color="primary" class="my-8 text-h5 font-weight-medium" large block depressed @click="submitBooking">
                                 Book Now !
                             </v-btn>
                         </div>
@@ -53,7 +61,7 @@
 
 <script>
 import pluralize from '~/utils/pluralize';
-import { ISODate, addDays } from '~/utils/dateUtils';
+import { ISODate, addDays, toEpochDate } from '~/utils/dateUtils';
 
 export default {
     name: 'PropertyDetails',
@@ -64,10 +72,30 @@ export default {
         }
     },
     data: () => ({
-        bookingDates: [ISODate(addDays(Date.now(), 7)), ISODate(addDays(Date.now(), 9))]
+        bookingDates: [ISODate(addDays(Date.now(), 7)), ISODate(addDays(Date.now(), 9))],
+        snackbar: false,
+        snackText: ''
     }), 
     methods: {
-        pluralize
+        pluralize,
+        showSnack(msg) {
+            this.snackText = msg,
+            this.snackbar = true
+        },
+        submitBooking() {
+            if (!this.bookingDates[1]) {
+                this.showSnack("Please select both check-in and check-out dates")
+                return
+            }
+            this.$router.push({
+                name: "booking",
+                query: {
+                    homeId: this.home._id,
+                    startEpoch: toEpochDate(this.bookingDates[0]),
+                    endEpoch: toEpochDate(this.bookingDates[1])
+                }
+            })
+        }
     }
 }
 </script>

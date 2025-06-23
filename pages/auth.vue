@@ -20,14 +20,16 @@ export default {
     name: 'AuthPage',
     layout: 'blank',
 
-    head() {
-        return {
-            title: 'Auth'
+    async asyncData( {from, store} ) {
+        if(! store.state.auth.redirectUrl) {
+            store.commit('auth/setRedirectUrl', from?.fullPath)
         }
     },
 
-    async asyncData( {from, store} ) {
-       store.commit('auth/setRedirectUrl', from?.fullPath)
+     head() {
+        return {
+            title: 'Auth'
+        }
     },
 
     beforeDestroy() {

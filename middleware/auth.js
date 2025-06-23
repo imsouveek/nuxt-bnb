@@ -10,6 +10,7 @@ export default async function ({ $api, store, route, redirect }) {
         try {
             user = await $api.$get('/users')
         } catch (err) {
+            store.commit('auth/setRedirectUrl', route?.fullPath)
             return redirect('/auth/login')
         }
     }

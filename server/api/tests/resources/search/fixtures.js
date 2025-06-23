@@ -22,16 +22,16 @@ export const setupSearchFixtures = async () => {
     const reviews = await createReview({ homeId: homes[1]._id })
 
     const booking = await createBooking({
-        homeId: homes[3]._id,
-        userId: user._id,
+        home: homes[3]._id,
+        user: user._id,
         startEpoch: 20000,
         endEpoch: 20003,
         status: 'Pending'
     })
 
     const cancelledBooking = await createBooking({
-        homeId: homes[4]._id,
-        userId: user._id,
+        home: homes[4]._id,
+        user: user._id,
         startEpoch: 20000,
         endEpoch: 20003,
         status: 'Failed'

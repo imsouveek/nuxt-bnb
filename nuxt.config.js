@@ -27,8 +27,9 @@ export default {
         }
     },
     plugins: [
-        '~/plugins/auth/google.client',
         '~/plugins/axios.api',
+        '~/plugins/auth/google.client',
+        '~/plugins/paymentGateway/razorpay.client',
         '~/plugins/maps.client',
         '~/plugins/imageHandler',
         '~/plugins/initSession.client'
@@ -47,13 +48,15 @@ export default {
                         primary: '#a15a20',
                         secondary: '#faefe3',
                         accent: '#3b210c',
-                        error: '#b71c1c'
+                        error: '#b71c1c',
+                        success: '#228b22'
                     },
                     dark: {
                         primary: '#a15a20',
                         secondary: '#faefe3',
                         accent: '#3b210c',
                         error: '#b71c1c',
+                        success: '#228b22',
                         background: '#3b210c'
                     }
                 },

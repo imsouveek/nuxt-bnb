@@ -3,12 +3,12 @@ import { getOrCreateModel } from '../../utils/getModel.js'
 
 export default (dbClient) => {
     const bookingSchema = new mongoose.Schema({
-        homeId: {
+        home: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Home',
             required: true
         },
-        userId: {
+        user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true

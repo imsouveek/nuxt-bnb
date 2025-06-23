@@ -5,7 +5,7 @@ export function shortDate(dateStr) {
         year: 'numeric',
         day: 'numeric'
     })
-}     
+}
 
 export function ISODate(date) {
     return date.toLocaleDateString('fr-CA', {
@@ -13,7 +13,7 @@ export function ISODate(date) {
         month: '2-digit',
         day: '2-digit'
     })
-}     
+}
 
 export function addDays(date, n) {
     return new Date(date + n * 24 * 60 * 60 * 1000)

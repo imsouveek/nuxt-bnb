@@ -56,13 +56,13 @@ export default (models) => {
 
         const homeIds = homes.map(h => h._id)
         const bookings = await models.booking.find({
-            homeId: { $in: homeIds },
+            home: { $in: homeIds },
             status: { $in: ['Pending', 'Success'] },
             startEpoch: { $lt: endEpoch },
             endEpoch: { $gt: startEpoch }
         })
 
-        const bookedHomeIds = new Set(bookings.map(b => String(b.homeId)))
+        const bookedHomeIds = new Set(bookings.map(b => String(b.home)))
         return homes.filter(home => !bookedHomeIds.has(String(home._id)))
     }
 

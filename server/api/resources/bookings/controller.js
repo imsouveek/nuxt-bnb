@@ -3,7 +3,8 @@ import { sendJSON } from '../../utils/response.js'
 export default (services) => {
     async function create(req, res, next) {
         try {
-            const home = await services.home.get({ homeId: req.body.homeId, user: req.user })
+
+            const home = await services.home.get({ homeId: req.body.homeId })
             if (!home) {
                 throw new Error("Home not found")
             }
@@ -34,9 +35,13 @@ export default (services) => {
     async function get(req, res, next) {
         try {
             const bookingId = req.params.id
-            const searchParams = {
-                bookingId,
-                homeId: req.query.homeId,
+            const homeId = req.queryparams.homeId
+            const searchParams = {}
+
+            if (bookingId) searchParams.bookingId = bookingId
+            if (homeId) {
+                searchParams.homeId = homeId
+                delete req.queryparams.homeId
             }
 
             const result = await services.booking.get(searchParams, req.queryparams)

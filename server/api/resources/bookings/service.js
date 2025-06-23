@@ -2,20 +2,21 @@ import axios from 'axios'
 
 export default (models, paymentUrl, paymentConfig) => {
 
-    const create = async (userId, home, data) => {
+    const create = async (user, home, data) => {
         const { startEpoch, endEpoch } = data
         const totalAmount = home.pricePerNight * (endEpoch - startEpoch)
 
         let booking = await models.booking.create({
             ...data,
+            home: home._id,
             totalAmount,
-            userId
+            user
         })
 
         let payment
         try {
             const { auth_header: pay_header, auth_key: pay_key } = paymentConfig
-            payment = await axios.post(paymentUrl, {
+            payment = await axios.post(`${paymentUrl}/orders`, {
                 bookingId: booking._id,
                 amount: totalAmount,
                 type: data.gateway
@@ -28,7 +29,7 @@ export default (models, paymentUrl, paymentConfig) => {
                 throw new Error("Could not contact payment gateway")
             }
         } catch (err) {
-            throw new Error("Payment failed")
+            throw new Error(`Payment failed with ${err}`)
         }
 
         booking.paymentId = payment?.data?.id
@@ -46,8 +47,8 @@ export default (models, paymentUrl, paymentConfig) => {
 
         const query = { ...filters }
         if (bookingId) query._id = bookingId
-        if (homeId) query.homeId = homeId
-        if (userId) query.userId = userId
+        if (homeId) query.home = homeId
+        if (userId) query.user = userId
 
         const {
             startEpochAfter,
@@ -71,8 +72,8 @@ export default (models, paymentUrl, paymentConfig) => {
         }
 
         const results = await models.booking.find(query, fieldList, restOptions)
-            .populate('homeId')
-            .populate('userId')
+            .populate('home')
+            .populate('user')
 
         return bookingId ? results[0] || null : results
     }

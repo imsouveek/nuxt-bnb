@@ -27,10 +27,10 @@ describe('Booking API', () => {
         otherHeader = login2.authHeader()
 
         home = await createHome({ owner: authUser._id })
-        booking = await createBooking({ homeId: home._id, userId: authUser._id, status: 'Pending' }) // assign one for use
+        booking = await createBooking({ home: home._id, user: authUser._id, status: 'Pending' }) // assign one for use
         await createBooking({
-            homeId: home._id,
-            userId: authUser._id,
+            home: home._id,
+            user: authUser._id,
             status: 'Success',
             startEpoch: booking.startEpoch + 10,
             endEpoch: booking.endEpoch + 10
@@ -201,10 +201,9 @@ describe('Booking API', () => {
                 .post('/api/bookings')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
-                .set(authHeader)
+                .set(otherHeader)
                 .send(payload)
 
-            console.log(res.body)
             expect(res.status).toBe(201)
             expect(res.body.booking._id).toBeDefined()
             expect(res.body.booking.status).toBe('Pending')
@@ -230,16 +229,16 @@ describe('Booking API', () => {
                 .post('/api/bookings')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
-                .set(authHeader)
+                .set(otherHeader)
                 .send(payload)
 
             expect(res.status).toBe(500)
 
             const dbBooking = await Booking.find({
-                homeId: home._id,
-                userId: authUser._id
+                home: home._id,
+                user: otherUser._id
             })
-            expect(dbBooking.length).toBe(3)
+            expect(dbBooking.length).toBe(1)
         })
 
         it('creates a new booking and persists it in DB even if payment fails', async () => {
@@ -256,16 +255,16 @@ describe('Booking API', () => {
                 .post('/api/bookings')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
-                .set(authHeader)
+                .set(otherHeader)
                 .send(payload)
 
             expect(res.status).toBe(500)
 
             const dbBooking = await Booking.find({
-                homeId: home._id,
-                userId: authUser._id
+                home: home._id,
+                user: otherUser._id
             })
-            expect(dbBooking.length).toBe(3)
+            expect(dbBooking.length).toBe(1)
         })
 
         it('fails booking without proper home', async () => {
@@ -281,7 +280,7 @@ describe('Booking API', () => {
                 .post('/api/bookings')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
-                .set(authHeader)
+                .set(otherHeader)
                 .send(payload)
 
             expect(res.status).toBe(500)
@@ -302,7 +301,7 @@ describe('Booking API', () => {
                 .post('/api/bookings')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
-                .set(authHeader)
+                .set(otherHeader)
                 .send(payload)
 
             expect(res.status).toBe(500)
@@ -310,8 +309,8 @@ describe('Booking API', () => {
 
         it('fails booking if hotel is already booked', async () => {
             await createBooking({
-                homeId: home._id,
-                userId: otherUser._id,
+                home: home._id,
+                user: otherUser._id,
                 status: 'Success',
                 startEpoch: 20001,
                 endEpoch: 20002,
@@ -329,7 +328,7 @@ describe('Booking API', () => {
                 .post('/api/bookings')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
-                .set(authHeader)
+                .set(otherHeader)
                 .send(payload)
 
             expect(res.status).toBe(500)
@@ -363,7 +362,7 @@ describe('Booking API', () => {
                 .post('/api/bookings')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
-                .set(authHeader)
+                .set(otherHeader)
                 .send(payload)
 
             expect(res.status).toBe(500)
