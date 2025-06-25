@@ -8,7 +8,7 @@ export default (models) => {
         return unbookedHomes
     }
 
-    async function getHomesByLocation({ lat, lng, radius = 10000, fieldList, options }) {
+    async function getHomesByLocation({ homeIds, lat, lng, radius = 10000, fieldList, options }) {
         if (lat && lng) {
             const latNum = parseFloat(lat)
             const lngNum = parseFloat(lng)
@@ -27,8 +27,14 @@ export default (models) => {
             return await models.home.find(geoFilter, fieldList, options)
         }
 
+        const query = homeIds ? {
+            _id: {
+                $in: homeIds.split(',')
+            }
+        } : {}
+
         // No location filter — return all homes with pagination
-        return await models.home.find({}, fieldList, options)
+        return await models.home.find(query, fieldList, options)
     }
 
     async function filterAvailableHomes(homes, { options }) {

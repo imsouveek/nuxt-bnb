@@ -20,6 +20,7 @@ export function addDays(date, n) {
 }
 
 export function toEpochDate(date) {
+    if (!date) return
     const time = new Date(date).getTime();
     if (isNaN(time)) throw new Error('Invalid date');
     return time / (86400 * 1000);

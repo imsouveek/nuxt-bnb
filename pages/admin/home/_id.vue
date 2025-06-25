@@ -1,6 +1,6 @@
 <script>
 import { mapState } from 'vuex' 
-import { VTabs, VTab, VTabsItems, VTabItem } from 'vuetify/lib'
+import { VCard, VTabs, VTab, VTabsItems, VTabItem } from 'vuetify/lib'
 
 export default {
     async beforeRouteUpdate(to, from, next) {
@@ -95,6 +95,19 @@ export default {
                 })
             ])
         )
+        
+        const tabItemsWrappedInCard = h(VCard, {
+            props: { flat: true, outlined: true },
+            class: 'mt-n2'
+        }, tabItems)
+
+        const tabsItemsBlock = h(VTabsItems, {
+            props: {
+                value: this.tabModel,
+                class: 'pt-4',
+                light: true
+            }
+        }, [tabItemsWrappedInCard])
 
         // 3️. Wrap everything in your AdminForm layout
         return h('admin-form', {
@@ -123,13 +136,7 @@ export default {
             }, tabs),
 
             // 5️. Add v-tabs-items (tab panels)
-            h(VTabsItems, {
-                props: {
-                    light: true,
-                    class: 'pt-4',
-                    value: this.tabModel
-                },
-            }, tabItems)
+           tabsItemsBlock
         ])
     }
 

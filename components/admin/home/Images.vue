@@ -22,7 +22,6 @@ export default {
             this.childInterface = childInterface
         },
         async save() {
-            console.log('Uploading images')
             await this.childInterface?.save?.()
         }
     }

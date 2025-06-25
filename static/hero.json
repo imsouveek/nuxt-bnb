@@ -1,0 +1,61 @@
+{
+  "title": "Book Unique Stays",
+  "subtitle": "Find your perfect getaway across the globe",
+  "banner": {
+    "image": "/images/banner.png"
+  },
+  "topDestinations": [
+    {
+      "name": "Goa",
+      "image": "/images/dest/goa.jpg",
+      "lat": 15.5013509,
+      "lng": 73.9134937,
+      "label": "Old Goa, Goa, India"
+    },
+    {
+      "name": "Manali",
+      "image": "/images/dest/manali.jpg",
+      "lat": 32.2431872,
+      "lng": 77.1891761,
+      "label": "Manali, Himachal Pradesh, India"
+    },
+    {
+      "name": "Jaipur",
+      "image": "/images/dest/jaipur.jpg",
+      "lat": 26.9124336,
+      "lng": 75.7872709,
+      "label": "Jaipur, Rajasthan, India"
+    },
+    {
+      "name": "Kerala",
+      "image": "/images/dest/alappuzha.jpg",
+      "lat": 9.4980667,
+      "lng": 76.3388484,
+      "label": "Alappuzha, Kerala, India"
+    }
+  ],
+  "recommendations": {
+    "Popular": [
+      "677b52f6b486aae727250a77",
+      "677b5338b486aae727250a82",
+      "677b536db486aae727250a8d",
+      "677b5599b486aae727250ac6",
+      "677b55cab486aae727250ad1"
+    ],
+    "Beachfront": [
+      "677b52f6b486aae727250a77",
+      "677b5338b486aae727250a82",
+      "677b5a69b486aae727250b2e"
+    ],
+    "Family": [
+      "677b5338b486aae727250a82",
+      "677b536db486aae727250a8d",
+      "677b5599b486aae727250ac6",
+      "677b55cab486aae727250ad1"
+    ],
+    "Luxury": [
+      "677b5338b486aae727250a82",
+      "677b536db486aae727250a8d"
+    ]
+  }
+}

@@ -152,10 +152,11 @@ This roadmap tracks functional and architectural development. Infra/config-level
 - [x] Implement Razorpay payments  
 - [x] Handle Razorpay webhook with idempotency logic 
 - [x] Integrate booking service to payment service
-- [ ] Build booking summary / confirmation page  
+- [x] Build booking summary / confirmation page  
 - [x] Add test coverage for booking and payment
 - [x] Deploy to GitHub
 - [x] Add CSRF, CORS and other security validations
+- [x] Add a landing page
 - [ ] Add support for DevContainers for GitHub Codespaces
 - [ ] Build test-env and prod-env scripts to provision UX, API and Payment separately
 - [ ] Deploy to K3s cluster

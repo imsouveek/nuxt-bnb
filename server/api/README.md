@@ -154,7 +154,7 @@ Additional notes:
 - `server/tests/` contains the full test suite
 - Coverage report
   - Statements: 98.76 %
-  - Branches: 98.39 %
+  - Branches: 98.4 %
   - Functions: 98.1 % 
   - Lines: 98.7 %
 

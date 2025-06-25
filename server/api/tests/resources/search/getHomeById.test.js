@@ -20,6 +20,16 @@ describe('GET /api/search/homes/:id and related paths', () => {
         expect(res.body._geoloc).toHaveProperty('lng')
     })
 
+    it('returns multiple homes by IDs', async () => {
+        const res = await request(global.__TEST_STATE__.app)
+            .get(`/api/search/homes?homeIds=${homes[0]._id},${homes[1]._id}`)
+
+        expect(res.statusCode).toBe(200)
+        expect(res.body.length).toBe(2)
+        expect(res.body[0]._id.toString()).toBe(homes[0]._id.toString())
+        expect(res.body[1]._id.toString()).toBe(homes[1]._id.toString())
+    })
+
     it('returns 404 for non-existent home', async () => {
         const res = await request(global.__TEST_STATE__.app)
             .get('/api/search/homes/123456789012345678901234')
