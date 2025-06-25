@@ -8,7 +8,7 @@
     "features": {
         "ghcr.io/devcontainers/features/github-cli:1": {}
     },
-    "initializeCommand": "./scripts/envtool dev --split-sample && ./scripts/dev-env start services -d",
+    "initializeCommand": "./scripts/envtool dev --split-sample",
     "postCreateCommand": "./scripts/dev-env start app --watch",
     "forwardPorts": [1025, 3000, 4040, 5432, 8025, 8080, 8081, 27017],
     "customizations": {
