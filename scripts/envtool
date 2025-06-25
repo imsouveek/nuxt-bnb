@@ -10,10 +10,11 @@ SAMPLE_FILE_EXTENSION="sample"
 # === functions ===
 usage() {
     echo "Usage:"
-    echo "  $0 [env] --merge      Merge env files into .env.${ENV_NAME}.${MERGED_FILE_EXTENSION}"
-    echo "  $0 [env] --split      Split .env.${ENV_NAME}.${MERGED_FILE_EXTENSION} into env files"
-    echo "  $0 [env] --sample     Create *.sample files with masked secrets"
-    echo "  $0 [env] --clean       Remove all merged/sample files"
+    echo "  $0 [env] --merge          Merge env files into .env.${ENV_NAME}.${MERGED_FILE_EXTENSION}"
+    echo "  $0 [env] --split          Split .env.${ENV_NAME}.${MERGED_FILE_EXTENSION} into env files"
+    echo "  $0 [env] --sample         Create *.sample files with masked secrets"
+    echo "  $0 [env] --split-sample   Generate .env from sample merged file with no masked keys"
+    echo "  $0 [env] --clean          Remove all merged/sample files"
     exit 1
 }
 
@@ -178,6 +179,48 @@ clean_env_files() {
     fi
 }
 
+split_sample_file() {
+    sample_file="${ENV_PATH}/.env.${ENV_NAME}.${MERGED_FILE_EXTENSION}.${SAMPLE_FILE_EXTENSION}"
+    if [[ ! -f "$sample_file" ]]; then
+        echo "Error: Sample merged file not found: $sample_file"
+        exit 1
+    fi
+
+    echo "Splitting $sample_file into per-service .env files, skipping masked secrets..."
+
+    # Load masking keys using Python
+    readarray -t MASK_KEYS < <(
+        python3 - "$CONFIG_FILE" <<EOF
+import sys, json
+cfg = json.load(open(sys.argv[1]))
+for k in cfg.get("mask_keys", []):
+    print(k)
+EOF
+    )
+    declare -A MASK_LOOKUP
+    for key in "${MASK_KEYS[@]}"; do MASK_LOOKUP["$key"]=1; done
+
+    current_file=""
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ "$line" =~ ^#\ From\ (.*) ]]; then
+            rel_path="${BASH_REMATCH[1]}"
+            current_file="$ENV_PATH/$rel_path"
+            : > "$current_file"
+            echo "  → Writing to $current_file"
+        elif [[ -n "$current_file" && "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+            key="${line%%=*}"
+            if [[ -n "${MASK_LOOKUP[$key]:-}" ]]; then
+                continue
+            fi
+            echo "$line" >> "$current_file"
+        elif [[ -n "$current_file" ]]; then
+            echo "$line" >> "$current_file"
+        fi
+    done < "$sample_file"
+
+    echo "Split-sample complete."
+}
+
 # === command parsing ===
 ENV_NAME="${1:-}"
 ACTION="${2:-}"
@@ -211,6 +254,9 @@ case "$ACTION" in
         ;;
     --clean)
         clean_env_files
+        ;;
+    --split-sample)
+        split_sample_file
         ;;
     *)
         usage

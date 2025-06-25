@@ -1,0 +1,23 @@
+{
+    "name": "NuxtBnb Workspace",
+    "dockerComposeFile": [
+        "../docker-compose.yml"
+    ],
+    "service": "app",
+    "workspaceFolder": "/app",
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    "initializeCommand": "./scripts/envtool dev --splitsample && ./scripts/dev-env start services -d",
+    "postCreateCommand": "./scripts/dev-env start app --watch",
+    "forwardPorts": [1025, 3000, 4040, 5432, 8025, 8080, 8081, 27017],
+    "customizations": {
+        "vscode": {
+        "extensions": [
+            "dbaeumer.vscode-eslint",
+            "esbenp.prettier-vscode",
+            "ms-azuretools.vscode-docker"
+        ]
+        }
+    }
+}
