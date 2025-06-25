@@ -1,8 +1,5 @@
 {
-    "app": {
-        "commands": ["start", "stop", "connect"],
-        "requires_base": true
-    },
+    "app":  ["start", "stop", "connect"],
     "mongodb": ["start", "stop", "connect"],
     "mongo-express": ["start", "stop", "connect"],
     "postgresdb": ["start", "stop", "connect"],
@@ -11,8 +8,7 @@
     "ngrok": ["start", "stop", "connect"],
     "utils": {
         "commands": ["run"],
-        "containers": ["app-utils"],
-        "requires_base": true
+        "containers": ["app-utils"]
     },
     "shell": ["run"],
     "mongo": {
@@ -30,13 +26,11 @@
     "api": {
         "commands": ["test"],
         "containers": ["unit-test"],
-        "requires_base": true,
         "jest_config": "server/api/tests/jest.config.mjs"
     },
     "payment": {
         "commands": ["test"],
         "containers": ["unit-test"],
-        "requires_base": true,
         "jest_config": "server/payment/tests/jest.config.mjs"
     }
 }

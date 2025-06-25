@@ -1,5 +1,5 @@
 # Use base image which contains installed node_modules
-FROM nuxt-bnb-base:dev
+FROM base_image
 
 # Set working directory
 WORKDIR /app

@@ -5,6 +5,8 @@ services:
       dockerfile: tooling/dev/app/Dockerfile.app
       args:
         PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
+      additional_contexts:
+        base_image: "service:base"
     ports:
       - "${NUXT_LOCAL_PORT}:${NUXT_PORT}"
     develop:
@@ -35,6 +37,8 @@ services:
       args:
         DATABASE_URL: "${PAYMENT_DB_URL}${PAYMENT_DB_NAME}"
         PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
+      additional_contexts:
+        base_image: "service:base"
     volumes:
       - ../../../:/app
       - /app/node_modules

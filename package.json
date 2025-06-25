@@ -1,6 +1,6 @@
 {
     "name": "nuxt-bnb",
-    "author": "Souveek Kumar Bose",
+    "author": "Souveek Bose",
     "type": "module",
     "scripts": {
         "dev": "nodemon",

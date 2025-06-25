@@ -1,7 +1,7 @@
 {
     "name": "NuxtBnb Workspace",
     "dockerComposeFile": [
-        "../docker-compose.yml"
+        "../tooling/dev/docker-compose.yaml"
     ],
     "service": "app",
     "workspaceFolder": "/workspaces/nuxt-bnb",

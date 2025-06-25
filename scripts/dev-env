@@ -7,12 +7,10 @@ COMPOSE_FILE="${ROOT_DIR}/tooling/dev/compose.yaml"
 TARGETS_FILE="${ROOT_DIR}/tooling/dev/targets.json"
 
 # Argument buckets
-BASE_ARGS=()
 JEST_ARGS=()
 EXTRA_ARGS=()
 PASSTHROUGH_CMD=()
 FILTERED_ARGS=()
-BASE_MODE=false
 JEST_MODE=false
 PASSTHROUGH_MODE=false
 
@@ -48,7 +46,7 @@ detect_platform_args
 # -------------------------
 # Load targets and schemas
 # -------------------------
-declare -A COMMANDS CONTAINERS BASE_REQUIRED JEST_CONFIG
+declare -A COMMANDS CONTAINERS JEST_CONFIG
 
 if [[ ! -f "$TARGETS_FILE" ]]; then
     echo "Error: Target list file not found: $TARGETS_FILE"
@@ -58,7 +56,6 @@ fi
 # key           = target name
 # commands      = supported commands (start|stop|...)
 # containers    = container names (separated by |)
-# base_flag     = "yes" if base image is needed
 # rest          = optional Jest config path
 # Load JSON using Python 3
 eval "$(
@@ -74,8 +71,6 @@ for name, conf in targets.items():
     elif isinstance(conf, dict):
         print(f'COMMANDS[{name}]="{"|".join(conf.get("commands", []))}"')
         print(f'CONTAINERS[{name}]="{" ".join(conf.get("containers", [name]))}"')
-        if conf.get("requires_base"):
-            print(f'BASE_REQUIRED[{name}]=1')
         if "jest_config" in conf:
             print(f'JEST_CONFIG[{name}]="{conf["jest_config"]}"')
 EOF
@@ -127,50 +122,6 @@ print_help() {
 }
 
 # --------------------------------------------------
-# Function to build base image
-# --------------------------------------------------
-build_base_image_if_needed() {
-    echo "Building shared base image for $NODE_ARCH/$NODE_PLATFORM ($NODE_LIBC)..."
-
-    local build_args=(
-        --build-arg NODE_ARCH="$NODE_ARCH"
-        --build-arg NODE_PLATFORM="$NODE_PLATFORM"
-        --build-arg NODE_LIBC="$NODE_LIBC"
-        -t nuxt-bnb-base:dev
-        -f "$ROOT_DIR/tooling/dev/base/Dockerfile.base"
-        "$ROOT_DIR"
-    )   
-
-    if [[ ${#BASE_ARGS[@]} -gt 0 ]]; then
-        build_args+=("${BASE_ARGS[@]}")
-    fi
-
-    docker build "${build_args[@]}"
-}
-
-handle_base_build_logic() {
-    local command="$1"
-    local target="$2"
-
-    case "$command" in
-        start|run|test) ;;
-        *)
-            if [[ ${#BASE_ARGS[@]} -gt 0 ]]; then
-                echo "Error: --base is only allowed with 'start', 'run', or 'test' commands"
-                exit 1
-            fi
-            return 0
-            ;;
-    esac
-
-    if [[ ${BASE_REQUIRED["$target"]+_} ]]; then
-        build_base_image_if_needed
-    elif [[ ${#BASE_ARGS[@]} -gt 0 ]]; then
-        echo "Error: --base provided but target '$target' does not use base image"
-        exit 1
-    fi
-}
-# --------------------------------------------------
 # Helpers to show validate command and target
 # --------------------------------------------------
 is_valid_target() {
@@ -194,29 +145,19 @@ has_test_config() {
 parse_extra_args() {
     for arg in "$@"; do
         case "$arg" in
-            --base)
-                BASE_MODE=true
-                JEST_MODE=false
-                PASSTHROUGH_MODE=false
-                continue
-                ;;
             --jest)
                 JEST_MODE=true
-                BASE_MODE=false
                 PASSTHROUGH_MODE=false
                 continue
                 ;;
             -- ) 
                 PASSTHROUGH_MODE=true
                 JEST_MODE=false
-                BASE_MODE=false
                 continue
                 ;;
         esac
 
-        if $BASE_MODE; then
-            BASE_ARGS+=("$arg")
-        elif $JEST_MODE; then
+        if $JEST_MODE; then
             JEST_ARGS+=("$arg")
         elif $PASSTHROUGH_MODE; then
             PASSTHROUGH_CMD+=("$arg")
@@ -244,8 +185,6 @@ if [[ "$COMMAND" != "run" && ${#PASSTHROUGH_CMD[@]} -gt 0 ]]; then
     echo "Error: -- can only be used with the 'run' command"
     exit 1
 fi
-
-handle_base_build_logic "$COMMAND" "$TARGET"
 
 case "$COMMAND" in
     start)

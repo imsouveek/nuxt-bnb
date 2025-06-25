@@ -15,6 +15,7 @@
 name: nuxt-bnb 
 
 include:
+  - ./base/compose.yaml
   - ./mailpit/compose.yaml
   - ./mongo/compose.yaml
   - ./postgres/compose.yaml

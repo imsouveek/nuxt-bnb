@@ -18,15 +18,11 @@ Run './scripts/dev-env help <command>' for detailed help.
 start - Start a container or group. Pass docker compose flags after target name
 
 Usage:
-  ./scripts/dev-env start <target> [docker compose up options] [--base <build options>]
+  ./scripts/dev-env start <target> [docker compose up options]
 
 Examples:
   ./scripts/dev-env start app --watch
   ./scripts/dev-env start services -d
-  ./scripts/dev-env start app --watch --base --no-cache -q
-
-- Use [--base <build options>] to pass options to the base image build.
-Note: Any options to the base image build must come after --base. Compose flags go directly after the target.
 ## stop
 stop - Stop a container or group. Pass docker compose flags after target name
 
@@ -40,31 +36,25 @@ Examples:
 test - Run tests in an isolated container. The container is deleted after test completes. Coverage is on by default unless test args are passed.
 
 Usage:
-  ./scripts/dev-env test <target> [docker compose run options] [--jest <jest options>] [--base <build options>]
+  ./scripts/dev-env test <target> [docker compose run options] [--jest <jest options>] 
 
 Examples:
   ./scripts/dev-env test api
   ./scripts/dev-env test api -q --jest --runInBand --testNamePattern='auth'
-  ./scripts/dev-env test api --jest --runInBand --testNamePattern='auth' --base --no-cache -q
   ./scripts/dev-env test api --jest /app/server/api/tests/bootstrap/connectDb.test.js
 
-- Use [--base <build options>] to pass options to the base image build.
 - Use [--jest <jest options>] to customize Jest behavior.
-Note: Any options to the base image build must come after --base. Compose flags go directly after the target.
 ## run
 run - Run arbitrary commands in a utility container. These containers are deleted when done. Not specifying a command starts a shell.
 
 Usage:
-  ./scripts/dev-env run utils <command> [--base <build options>]
+  ./scripts/dev-env run utils <command>
   ./scripts/dev-env run shell <command>
 
 Examples:
-  ./scripts/dev-env run utils npx eslint --ext .vue,.js .
-  ./scripts/dev-env run utils npx prisma migrate dev
-  ./scripts/dev-env run utils npx eslint . --base --no-cache 
+  ./scripts/dev-env run utils -- npx eslint --ext .vue,.js .
+  ./scripts/dev-env run utils -- npx prisma migrate dev 
 
-- Use [--base <build options>] to pass options to the base image build.
-Note: Any options to the base image build must come after --base. Compose flags go directly after the target.
 ## connect
 connect - Open a shell in a running container
 
@@ -82,7 +72,6 @@ The `targets.json` file defines reusable container groups and command mappings.
 "api": {        <-- Target Name
     "commands": ["test"],       <-- Supported commands
     "containers": ["unit-test"],        <-- Containers to use. If multiple, omit 'connect' command
-    "requires_base": true,          <-- Whether this target needs the base image (default: false)
     "jest_config": "server/api/tests/jest.config.mjs"       <-- Mandatory and supported for test targets only
 }
 

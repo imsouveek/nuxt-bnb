@@ -5,6 +5,8 @@ services:
       dockerfile: tooling/dev/unit_test/Dockerfile.test
       args:
         PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
+      additional_contexts:
+        base_image: "service:base"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
