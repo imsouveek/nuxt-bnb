@@ -32,11 +32,11 @@ export default (dbClient) => {
         },
         totalAmount: {
             type: Number,
-            required: true,
+            required: true
         },
         paymentId: {
             type: String,
-            required: false, // initially null until payment is created
+            required: false // initially null until payment is created
         }
     }, {
         timestamps: true

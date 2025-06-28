@@ -18,7 +18,7 @@
                             </div>
                         </div>
                         <div class="py-4">
-                            <short-text :text="review.comment" :target="150"></short-text> <br />
+                            <short-text :text="review.comment" :target="150" /><br />
                         </div>
                     </v-col>
                 </v-row>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { shortDate } from '~/utils/dateUtils';
+import { shortDate } from '~/utils/dateUtils'
 
 export default {
     name: 'PropertyReviews',

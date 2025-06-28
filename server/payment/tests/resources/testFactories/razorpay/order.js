@@ -31,7 +31,6 @@ export default () => {
         expect(orderInDb.gateway?.type).toBe('Razorpay')
         expect(orderInDb.gateway?.razorpay?.razorpayOrderId).toEqual(responseBody.gatewayRefs.gatewayRefOrderId)
 
-
         expect(responseBody).toMatchObject({
             bookingId: payload.bookingId,
             amount: payload.amount,

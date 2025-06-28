@@ -14,8 +14,8 @@ export const startTestDb = async (inPort = 5432) => {
     pgContainer = await new GenericContainer('postgres')
         .withExposedPorts(inPort)
         .withEnvironment({
-            POSTGRES_USER: "test",
-            POSTGRES_PASSWORD: "secret",
+            POSTGRES_USER: 'test',
+            POSTGRES_PASSWORD: 'secret',
             POSTGRES_DB: dbName
         })
         .start()
@@ -32,9 +32,9 @@ export const startTestDb = async (inPort = 5432) => {
     execSync(`npx prisma db push --schema=${schemaPath}`, {
         env: {
             ...process.env,
-            DATABASE_URL: `${dbUrl}${dbName}`,
+            DATABASE_URL: `${dbUrl}${dbName}`
         },
-        stdio: 'inherit',
+        stdio: 'inherit'
     })
 
     return { dbUrl, dbName }

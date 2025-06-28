@@ -3,7 +3,9 @@
         <v-card flat>
             <v-img src="https://tinyurl.com/2s3rz735" />
         </v-card>
-        <div class="text-h4 error--text pt-8">Umm! That's a booboo!!</div>
+        <div class="text-h4 error--text pt-8">
+            Umm! That's a booboo!!
+        </div>
         {{ error.message }} ( {{ error.statusCode }} )
         <v-card-actions>
             <nuxt-link to="/" prefetch>
@@ -19,14 +21,14 @@
 export default {
     name: 'ErrorPage',
     layout: 'blank',
-    async asyncData({ query}) { 
-        return { 
+    asyncData ({ query }) {
+        return {
             error: {
             ...query
-            } 
+            }
         }
     },
-    head() {
+    head () {
         return {
             title: `${this.error.statusCode} Error`
         }

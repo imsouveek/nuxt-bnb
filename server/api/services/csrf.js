@@ -1,18 +1,20 @@
-import express from 'express'
 import crypto from 'crypto'
+import express from 'express'
 import ms from 'ms'
 import cookie from 'cookie'
 import { sendJSON } from '../utils/response.js'
 
-export function signCSRF(value, secret) {
+export function signCSRF (value, secret) {
     const hmac = crypto.createHmac('sha256', secret)
     hmac.update(value)
     return `${value}.${hmac.digest('hex')}`
 }
 
-function verifyCSRF(signedValue, secret) {
+function verifyCSRF (signedValue, secret) {
     const i = signedValue.lastIndexOf('.')
-    if (i === -1) return null
+    if (i === -1) {
+ return null
+}
 
     const value = signedValue.slice(0, i)
     const sig = signedValue.slice(i + 1)
@@ -29,7 +31,6 @@ function verifyCSRF(signedValue, secret) {
 }
 
 export default ({ csrf_secret, csrf_cookie, csrf_header, csrf_life }) => {
-
     const csrfRouter = () => {
         const router = express.Router()
 
@@ -49,7 +50,7 @@ export default ({ csrf_secret, csrf_cookie, csrf_header, csrf_life }) => {
 
             res.setHeader('Set-Cookie', cookieStr)
             sendJSON(res, {
-                message: "Generated Token Successfully"
+                message: 'Generated Token Successfully'
             }, 201)
         })
 
@@ -57,9 +58,13 @@ export default ({ csrf_secret, csrf_cookie, csrf_header, csrf_life }) => {
     }
 
     const csrfMiddleware = (req, res, next) => {
-        if (req.internalAuth) return next()
+        if (req.internalAuth) {
+            return next()
+        }
 
-        if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next()
+        if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+            return next()
+        }
 
         const cookies = cookie.parse(req.headers.cookie || '')
         const raw = cookies[csrf_cookie]

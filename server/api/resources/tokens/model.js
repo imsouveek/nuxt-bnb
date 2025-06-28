@@ -1,6 +1,6 @@
+import { randomUUID } from 'crypto'
 import mongoose from 'mongoose'
 import validator from 'validator'
-import { randomUUID } from 'crypto'
 import { getOrCreateModel } from '../../utils/getModel.js'
 
 export default (dbClient) => {
@@ -37,7 +37,7 @@ export default (dbClient) => {
         timestamps: true
     })
 
-    tokenSchema.pre('save', async function (next) {
+    tokenSchema.pre('save', function (next) {
         const token = this
 
         token.token = randomUUID()

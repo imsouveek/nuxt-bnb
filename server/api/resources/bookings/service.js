@@ -1,12 +1,11 @@
 import axios from 'axios'
 
 export default (models, paymentUrl, paymentConfig) => {
-
     const create = async (user, home, data) => {
         const { startEpoch, endEpoch } = data
         const totalAmount = home.pricePerNight * (endEpoch - startEpoch)
 
-        let booking = await models.booking.create({
+        const booking = await models.booking.create({
             ...data,
             home: home._id,
             totalAmount,
@@ -26,7 +25,7 @@ export default (models, paymentUrl, paymentConfig) => {
                 }
             })
             if (payment.status !== 201) {
-                throw new Error("Could not contact payment gateway")
+                throw new Error('Could not contact payment gateway')
             }
         } catch (err) {
             throw new Error(`Payment failed with ${err}`)
@@ -41,14 +40,20 @@ export default (models, paymentUrl, paymentConfig) => {
         }
     }
 
-    async function get(searchParams, queryparams = {}) {
+    async function get (searchParams, queryparams = {}) {
         const { bookingId, homeId, userId } = searchParams
         const { fieldList, options = {}, ...filters } = queryparams
 
         const query = { ...filters }
-        if (bookingId) query._id = bookingId
-        if (homeId) query.home = homeId
-        if (userId) query.user = userId
+        if (bookingId) {
+            query._id = bookingId
+        }
+        if (homeId) {
+            query.home = homeId
+        }
+        if (userId) {
+            query.user = userId
+        }
 
         const {
             startEpochAfter,
@@ -61,12 +66,15 @@ export default (models, paymentUrl, paymentConfig) => {
         if (startEpochAfter !== undefined) {
             query.startEpoch = { $gte: startEpochAfter }
         }
+
         if (startEpochBefore !== undefined) {
             query.startEpoch = { ...(query.startEpoch || {}), $lte: startEpochBefore }
         }
+
         if (endEpochAfter !== undefined) {
             query.endEpoch = { $gte: endEpochAfter }
         }
+
         if (endEpochBefore !== undefined) {
             query.endEpoch = { ...(query.endEpoch || {}), $lte: endEpochBefore }
         }
@@ -79,14 +87,16 @@ export default (models, paymentUrl, paymentConfig) => {
     }
 
     const update = async (booking, updateData) => {
-        const updates = Object.keys(updateData);
-        const allowedUpdates = ['status', 'paymentId'];
-        const isValid = updates.every((update) => allowedUpdates.includes(update));
+        const updates = Object.keys(updateData)
+        const allowedUpdates = ['status', 'paymentId']
+        const isValid = updates.every(update => allowedUpdates.includes(update))
         if (!isValid) {
             throw new Error('Invalid Request')
         }
 
-        updates.forEach((update) => booking[update] = updateData[update])
+        updates.forEach((update) => {
+            booking[update] = updateData[update]
+        })
 
         await booking.save()
         return booking

@@ -1,7 +1,7 @@
 import { PrismaClient } from './prisma/generated/prisma-client'
 
 const clientMap = new Map()
-export const __test__clientMap = clientMap;
+export const __test__clientMap = clientMap
 
 export default async ({ dbUrl, dbName }) => {
     if (!dbUrl || !dbName) {

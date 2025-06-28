@@ -1,7 +1,7 @@
 import { sendJSON, sendJPEG } from '../../utils/response.js'
 
 export default (services) => {
-    async function create(req, res, next) {
+    async function create (req, res, next) {
         try {
             const token = req.headers['upload-token']?.trim()
             if (!token) {
@@ -23,7 +23,7 @@ export default (services) => {
         }
     }
 
-    async function get(req, res, next) {
+    async function get (req, res, next) {
         try {
             const result = await services.image.getImage(req.params.id, req.queryparams)
             sendJPEG(res, result)
@@ -32,7 +32,7 @@ export default (services) => {
         }
     }
 
-    async function remove(req, res, next) {
+    async function remove (req, res, next) {
         try {
             const token = req.headers['upload-token']?.trim()
             if (!token) {

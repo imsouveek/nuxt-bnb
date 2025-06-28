@@ -1,10 +1,11 @@
 <template>
     <v-menu
-ref="menu" v-model="menu" :close-on-content-click="close_on_content_click" :close-on-click="close_on_click"
-        transition="scale-transition" offset-y min-width="50" bottom right :disabled="disabled">
+        ref="menu" v-model="menu" :close-on-content-click="close_on_content_click" :close-on-click="close_on_click"
+        transition="scale-transition" offset-y min-width="50" bottom right :disabled="disabled"
+    >
         <template #activator="{ on, attrs }">
             <div :class="`dateRangeSelector ${menu ? 'active-open' : ''}`">
-                <v-input v-for="(field, index) in fields" v-bind="attrs" :key="index" hide-details dense v-on="on"  >
+                <v-input v-for="(field, index) in fields" v-bind="attrs" :key="index" hide-details dense v-on="on">
                     <template #prepend>
                         <div :class="`py-1 my-1 pl-2 ${field.styleclasses}`">
                             <v-icon @click="clickHandler">
@@ -16,14 +17,18 @@ ref="menu" v-model="menu" :close-on-content-click="close_on_content_click" :clos
                         <label for="dateInput">
                             {{ labels[index] }}
                         </label>
-                        <input id="dateInput" type="text" :value="value[index]" class="pt-3" autocomplete="off" @click.stop.prevent="clickHandler"/>
+                        <input
+                            id="dateInput" type="text" :value="value[index]" class="pt-3" autocomplete="off"
+                            @click.stop.prevent="clickHandler"
+                        />
                     </div>
                 </v-input>
             </div>
         </template>
         <v-date-picker
-ref="calendar" :value="value" no-title scrollable range :allowed-dates="allowedDates"
-            class="dateRangeSelector" @click:date="clickHandler" @mouseenter:date="hoverHandler" />
+            ref="calendar" :value="value" no-title scrollable range :allowed-dates="allowedDates"
+            class="dateRangeSelector" @click:date="clickHandler" @mouseenter:date="hoverHandler"
+        />
     </v-menu>
 </template>
 
@@ -59,25 +64,25 @@ export default {
             styleclasses: 'end-date'
         }]
     }),
-    watch:{
-        menu(){
-            if (this.clickCount == 1){
+    watch: {
+        menu () {
+            if (this.clickCount === 1) {
                 this.menu = true
             }
         }
     },
-    mounted() {
+    mounted () {
         this.dateRange = [this.value[0], this.value[1]]
     },
     methods: {
-        clickHandler(clickedDate) {
+        clickHandler (clickedDate) {
             if (typeof clickedDate === 'object') {
                 if (!this.menu) {
                     this.menu = true
                     this.close_on_click = true
                     return
                 } else {
-                    if (this.clickCount == 1) {
+                    if (this.clickCount === 1) {
                         this.close_on_click = false
                         return
                     }
@@ -88,9 +93,9 @@ export default {
             }
 
             this.$set(this.dateRange, this.clickCount, clickedDate)
-            ++ this.clickCount
+            ++this.clickCount
 
-            if (this.clickCount == 2) {
+            if (this.clickCount === 2) {
                 this.menu = false
                 this.clickCount = 0
             } else {
@@ -98,32 +103,31 @@ export default {
             }
             this.$emit('change', this.dateRange)
         },
-        hoverHandler(date) {
-            if (this.clickCount != 1) {
+        hoverHandler (date) {
+            if (this.clickCount !== 1) {
                 return
             }
-            var startDate = new Date(this.dateRange[0])
-            var mouseDate = new Date(date)
-            var mouse_yyyymm = date.slice(0, 8)
-            this.$refs.calendar.$el.querySelectorAll("tbody td button").forEach((node) => {
-                var nodeDate = new Date(`${mouse_yyyymm}${node.children[0].textContent.padStart(2, '0')}`)
+            const startDate = new Date(this.dateRange[0])
+            const mouseDate = new Date(date)
+            const mouse_yyyymm = date.slice(0, 8)
+            this.$refs.calendar.$el.querySelectorAll('tbody td button').forEach((node) => {
+                const nodeDate = new Date(`${mouse_yyyymm}${node.children[0].textContent.padStart(2, '0')}`)
                 if (nodeDate > startDate && nodeDate < mouseDate) {
-                    node.classList.add("v-btn--active")
+                    node.classList.add('v-btn--active')
                 } else {
-                    node.classList.remove("v-btn--active")
+                    node.classList.remove('v-btn--active')
                 }
 
                 if (nodeDate.toString() === mouseDate.toString()) {
-                    node.classList.add("v-date-picker--last-in-range")
+                    node.classList.add('v-date-picker--last-in-range')
                 } else {
-                    node.classList.remove("v-date-picker--last-in-range")
+                    node.classList.remove('v-date-picker--last-in-range')
                 }
             })
-
         },
-        allowedDates(val) {
-            if (this.clickCount == 0) {
-                return new Date(val) >= new Date(Date.now() - 24*60*60*1000)
+        allowedDates (val) {
+            if (this.clickCount === 0) {
+                return new Date(val) >= new Date(Date.now() - 24 * 60 * 60 * 1000)
             } else {
                 return new Date(val) >= new Date(this.dateRange[0])
             }

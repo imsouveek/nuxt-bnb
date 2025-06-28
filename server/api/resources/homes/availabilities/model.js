@@ -2,7 +2,6 @@ import mongoose from 'mongoose'
 import { getOrCreateModel } from '../../../utils/getModel'
 
 export default (dbClient) => {
-
     const availabilitySchema = new mongoose.Schema({
         epochDate: {
             type: Number,
@@ -22,7 +21,7 @@ export default (dbClient) => {
         epochDate: 1
     }, {
         unique: true
-    });
+    })
 
     const Availability = getOrCreateModel(dbClient, 'Availability', availabilitySchema)
     return Availability

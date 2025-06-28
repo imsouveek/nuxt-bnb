@@ -9,14 +9,19 @@
                     </div>
                     <v-form v-else ref="form" @submit.prevent="submitHandler">
                         <v-text-field
-v-model="email" outlined dense clearable label="Email Address"
-                            persistent-placeholder placeholder="email@domain.com" :rules="emailRules" required />
-                        <v-btn color="primary" depressed block type="submit">Send Reset Link</v-btn>
+                            v-model="email" outlined dense clearable label="Email Address"
+                            persistent-placeholder placeholder="email@domain.com" :rules="emailRules" required
+                        />
+                        <v-btn color="primary" depressed block type="submit">
+                            Send Reset Link
+                        </v-btn>
                     </v-form>
                 </v-card-text>
             </v-card>
         </div>
-        <nuxt-link to="/auth/login">Back to Login</nuxt-link>
+        <nuxt-link to="/auth/login">
+            Back to Login
+        </nuxt-link>
     </div>
 </template>
 
@@ -25,16 +30,16 @@ import validator from 'validator'
 
 export default {
     name: 'ForgotPassword',
-    data: () =>({
+    data: () => ({
         email: '',
         emailRules: [
             v => !!v || 'E-mail is required',
-            v => validator.isEmail(v) || 'E-mail must be valid',
+            v => validator.isEmail(v) || 'E-mail must be valid'
         ],
         message: ''
     }),
     methods: {
-        submitHandler: async function() {
+        submitHandler: async function () {
             if (!this.$refs.form.validate()) {
                 return
             }
@@ -43,11 +48,11 @@ export default {
                     email: this.email
                 })
                 if (!resp) {
-                    throw new Error("Please try again later")
+                    throw new Error('Please try again later')
                 }
                 this.message = resp.message
             } catch (error) {
-                this.$nuxt.context.error( {statusCode: 500, message: error.message})
+                this.$nuxt.context.error({ statusCode: 500, message: error.message })
             }
         }
     }

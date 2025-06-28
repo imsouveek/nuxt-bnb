@@ -4,21 +4,25 @@
             <v-row>
                 <v-col :cols="horizontal ? 6 : 12" class="pa-0">
                     <v-img
-:height="horizontal ? '100%' : '300'" :src="$imageHandler.get(home.images[0])" 
-                        :class="horizontal ? 'left-rounded' : 'top-rounded'" />
-                    <v-btn absolute top left fab dark small color="secondary" class="favicon" >
+                        :height="horizontal ? '100%' : '300'" :src="$imageHandler.get(home.images[0])"
+                        :class="horizontal ? 'left-rounded' : 'top-rounded'"
+                    />
+                    <v-btn absolute top left fab dark small color="secondary" class="favicon">
                         <v-icon color="primary">
                             mdi-heart-outline
                         </v-icon>
                     </v-btn>
                 </v-col>
                 <v-col :cols="horizontal ? 6 : 12" class="pa-0">
-                    <div class="text-h5 pa-4">{{ home.title }} </div>
+                    <div class="text-h5 pa-4">
+                        {{ home.title }}
+                    </div>
                     <v-card-text>
                         <v-row class="mx-0 d-flex">
                             <v-rating
-:value="home.reviewValue" color="primary" dense half-increments readonly size="14"
-                                class="align-self-center" />
+                                :value="home.reviewValue" color="primary" dense half-increments readonly size="14"
+                                class="align-self-center"
+                            />
                             <div class="ms-4 align-self-center text--secondary">
                                 {{ home.reviewValue }} ({{ home.reviewCount }})
                             </div>
@@ -27,7 +31,9 @@
                             {{ home.guests }} guests &middot; ${{ home.pricePerNight }} / night
                         </div>
                         <div>
-                            <v-icon color="primary">mdi-map-marker-outline</v-icon>
+                            <v-icon color="primary">
+                                mdi-map-marker-outline
+                            </v-icon>
                             <span class="primary--text text-decoration-underline">
                                 {{ home.location.address }}, {{ home.location.city }}, {{ home.location.state }}
                             </span>
@@ -71,13 +77,13 @@ export default {
         }
     },
     computed: {
-        getWidth() {
+        getWidth () {
             if (!this.horizontal) {
                 return '350'
             }
             return ''
         },
-        features() {
+        features () {
             return this.home.features.slice(0, 3).join(', ')
         }
     },
@@ -104,5 +110,4 @@ export default {
 ::v-deep.favicon {
     top: 15px !important;
 }
-
 </style>

@@ -4,10 +4,9 @@ import validator from 'validator'
 import { getOrCreateModel } from '../../utils/getModel'
 
 export default (dbClient) => {
-
     const imageSchema = new mongoose.Schema({
         imageData: {
-            type: String,
+            type: String
         },
         url: {
             type: String,
@@ -53,11 +52,11 @@ export default (dbClient) => {
 
     imageSchema.statics.downloadImage = async function (url) {
         const imageBlob = await (await fetch(url, {
-            headers: {},
+            headers: {}
         })).blob()
 
-        const imageArrayBuffer = await imageBlob.arrayBuffer();
-        const resultBuffer = Buffer.from(imageArrayBuffer);
+        const imageArrayBuffer = await imageBlob.arrayBuffer()
+        const resultBuffer = Buffer.from(imageArrayBuffer)
 
         const result = `data:${imageBlob.type};base64,$${resultBuffer.toString('base64')}`
         return result

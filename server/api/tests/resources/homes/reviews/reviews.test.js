@@ -1,8 +1,8 @@
 import request from 'supertest'
 import { createUser } from '../../users/users.factory.js'
 import { createHome } from '../homes.factory.js'
-import { createReview } from './reviews.factory.js'
 import { loginUser } from '../../../utils/headerHelpers.js'
+import { createReview } from './reviews.factory.js'
 
 describe('Review API', () => {
     let authUser, authHeader, otherUser, otherHeader, home, review
@@ -55,6 +55,5 @@ describe('Review API', () => {
 
             expect(res.statusCode).toBe(500)
         })
-
     })
 })

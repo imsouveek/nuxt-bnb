@@ -22,7 +22,7 @@ describe('GET /api/search/homes/:id and related paths', () => {
 
     it('returns multiple homes by IDs', async () => {
         const res = await request(global.__TEST_STATE__.app)
-            .get(`/api/search/homes?homeIds=${homes[0]._id},${homes[1]._id}`)
+            .get(`/api/search/homes?homeId=${homes[0]._id}&homeId=${homes[1]._id}`)
 
         expect(res.statusCode).toBe(200)
         expect(res.body.length).toBe(2)

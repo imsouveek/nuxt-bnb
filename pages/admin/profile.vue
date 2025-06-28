@@ -5,24 +5,30 @@
                 <v-col cols="6">
                     <div class="profileImage">
                         <image-uploader
-ref="imageUploader" v-model="profile.image" single
-                            :preview-height="210" :preview-width="210" @interface="getChildInterface" />
+                            ref="imageUploader" v-model="profile.image" single
+                            :preview-height="210" :preview-width="210" @interface="getChildInterface"
+                        />
                     </div>
                     <v-text-field
-v-model="profile.name" dense outlined persistent-placeholder placeholder="Name" type="text"
-                        label="Name" />
+                        v-model="profile.name" dense outlined persistent-placeholder placeholder="Name" type="text"
+                        label="Name"
+                    />
                     <v-text-field
-v-model="profile.email" dense outlined persistent-placeholder placeholder="Email" type="text"
-                        label="Email" />
+                        v-model="profile.email" dense outlined persistent-placeholder placeholder="Email" type="text"
+                        label="Email"
+                    />
                     <v-text-field
-v-model="password" outlined dense clearable type="password" label="Password"
-                        password persistent-placeholder placeholder="......" :rules="passwordRules" />
+                        v-model="password" outlined dense clearable type="password" label="Password"
+                        password persistent-placeholder placeholder="......" :rules="passwordRules"
+                    />
                     <v-text-field
-v-model="confirm" outlined dense clearable type="password" label="Re-enter Password"
-                        password persistent-placeholder placeholder="......" :rules="confirmRules" />
+                        v-model="confirm" outlined dense clearable type="password" label="Re-enter Password"
+                        password persistent-placeholder placeholder="......" :rules="confirmRules"
+                    />
                     <v-textarea
-v-model="profile.description" persistent-placeholder outlined label="Description"
-                        placeholder="Describe you" />
+                        v-model="profile.description" persistent-placeholder outlined label="Description"
+                        placeholder="Describe you"
+                    />
                     <div> You have {{ profile.reviewCount }} reviews </div>
                     <div> Joined: {{ Date(profile.createdAt) }} </div>
                     <div> Last modified: {{ Date(profile.updatedAt) }} </div>
@@ -38,10 +44,10 @@ export default {
     childInterface: {
         save: () => undefined
     },
-    async asyncData({ $api }) {
+    async asyncData ({ $api }) {
         let payload
         try {
-            payload = await $api.$get(`/users`)
+            payload = await $api.$get('/users')
         } catch (error) {
             // silently ignore errors here — handled later
         }
@@ -69,10 +75,10 @@ export default {
     data: () => ({
         isUploading: false,
         password: '',
-        confirm: '',
+        confirm: ''
     }),
     computed: {
-        passwordRules() {
+        passwordRules () {
             const rules = []
 
             const requiredCharactersRule =
@@ -81,7 +87,7 @@ export default {
 
             return rules
         },
-        confirmRules() {
+        confirmRules () {
             const rules = []
             if (this.password) {
                 const requiredRule = v => !!v || 'Password confirm is required'
@@ -96,35 +102,35 @@ export default {
         }
     },
     methods: {
-        async saveHandler() {
+        async saveHandler () {
             this.isUploading = true
             await this.$options.childInterface.save()
 
-            const {name, email, description, image} = this.profile
-            const updateObj = {name, email, description, image}
-            
+            const { name, email, description, image } = this.profile
+            const updateObj = { name, email, description, image }
+
             if (this.password) {
                 updateObj.password = this.password
-            } 
-            await this.$api.$patch(`/users`, {...updateObj})
+            }
+            await this.$api.$patch('/users', { ...updateObj })
 
             // Reset password fields
-            this.password=''
-            this.confirm=''
+            this.password = ''
+            this.confirm = ''
 
             // Have to update user details in store
             this.$store.commit('auth/user', this.profile)
 
             this.isUploading = false
         },
-        getChildInterface(childInterface) {
+        getChildInterface (childInterface) {
             this.$options.childInterface = childInterface
         }
     }
 }
 </script>
 
-<style lang="scss" scoped> 
+<style lang="scss" scoped>
 ::v-deep.profileImage {
     width: 300px;
     height: 300px;

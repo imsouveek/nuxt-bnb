@@ -154,9 +154,9 @@ Additional notes:
 - `server/tests/` contains the full test suite
 - Coverage report
   - Statements: 98.76 %
-  - Branches: 98.4 %
+  - Branches: 98.79 %
   - Functions: 98.1 % 
-  - Lines: 98.7 %
+  - Lines: 98.73 %
 
 To run tests with coverage, use the following command from project root:
 ```bash

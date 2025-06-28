@@ -1,7 +1,7 @@
 <template>
     <v-card flat>
         <v-card-text>
-            <image-uploader ref="uploader" v-model="images" @interface="getChildInterface"/>
+            <image-uploader ref="uploader" v-model="images" @interface="getChildInterface" />
         </v-card-text>
     </v-card>
 </template>
@@ -18,10 +18,10 @@ export default {
         ...mapWritableFields('admin/home', ['images'])
     },
     methods: {
-        getChildInterface(childInterface) {
+        getChildInterface (childInterface) {
             this.childInterface = childInterface
         },
-        async save() {
+        async save () {
             await this.childInterface?.save?.()
         }
     }

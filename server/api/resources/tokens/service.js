@@ -1,7 +1,7 @@
 import ms from 'ms'
 
 export default (models) => {
-    async function getNewToken(email, type, token_life) {
+    async function getNewToken (email, type, token_life) {
         let expiresAt = null
         if (token_life !== 'never') {
             expiresAt = new Date(Date.now() + ms(token_life))
@@ -23,7 +23,7 @@ export default (models) => {
         return token
     }
 
-    async function validateToken(token, type) {
+    async function validateToken (token, type) {
         const tokenObj = await models.token.findOne({
             token
         })
@@ -39,7 +39,7 @@ export default (models) => {
         }
 
         if (tokenObj.type !== type) {
-            throw new Error(`Invalid token type`)
+            throw new Error('Invalid token type')
         }
 
         const user = await models.user.findOne({

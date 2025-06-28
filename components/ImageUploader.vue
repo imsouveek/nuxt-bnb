@@ -1,12 +1,17 @@
 <template>
     <v-card class="pa-4 full-space" flat>
         <div
-class="full-space bordered py-4" @dragenter="isDragEnter=true" @dragleave="isDragEnter=false"
-            @dragend="isDragEnter=false" @drop="isDragEnter=false">
-            <input v-if="showUploadOption" ref="fileInput" class="display-none" type="file" accept="image/*" :multiple="!single" @change="addImages"/>
+            class="full-space bordered py-4" @dragenter="isDragEnter=true" @dragleave="isDragEnter=false"
+            @dragend="isDragEnter=false" @drop="isDragEnter=false"
+        >
             <input
-v-if="showUploadOption" class="hide-by-opacity full-space drop-area" type="file" accept="image/*" :multiple="!single"
-                @click.prevent @change="addImages"/>
+                v-if="showUploadOption" ref="fileInput" class="display-none" type="file" accept="image/*" :multiple="!single"
+                @change="addImages"
+            />
+            <input
+                v-if="showUploadOption" class="hide-by-opacity full-space drop-area" type="file" accept="image/*" :multiple="!single"
+                @click.prevent @change="addImages"
+            />
             <div v-if="images.length > 0">
                 <v-container>
                     <v-row no-gutters>
@@ -14,8 +19,9 @@ v-if="showUploadOption" class="hide-by-opacity full-space drop-area" type="file"
                             <v-card class="rounded-0 mx-auto" :max-height="previewHeight" :max-width="previewWidth">
                                 <v-img :src="image" :height="previewHeight" :width="previewWidth" />
                                 <v-btn
-absolute top right dark fab small color="secondary" class="fab"
-                                    @click="deleteImage(index)">
+                                    absolute top right dark fab small color="secondary" class="fab"
+                                    @click="deleteImage(index)"
+                                >
                                     <v-icon color="primary">
                                         mdi-close
                                     </v-icon>
@@ -29,10 +35,13 @@ absolute top right dark fab small color="secondary" class="fab"
                 <div class="text-h6 primary--text">
                     {{ isUploading ? 'Uploading...' : dropString }}
                 </div>
-                <div :class="isDragEnter || isUploading ? 'hide-by-layer' : ''"> Or</div>
+                <div :class="isDragEnter || isUploading ? 'hide-by-layer' : ''">
+                    Or
+                </div>
                 <v-btn
-color="primary" depressed :class="isDragEnter || isUploading ? 'hide-by-layer' : 'top-layer'"
-                    @click="$refs.fileInput.click()">
+                    color="primary" depressed :class="isDragEnter || isUploading ? 'hide-by-layer' : 'top-layer'"
+                    @click="$refs.fileInput.click()"
+                >
                     {{ images.length > 0 ? 'Upload More' : 'Browse' }}
                 </v-btn>
             </div>
@@ -75,25 +84,27 @@ export default {
         isDragEnter: false
     }),
     computed: {
-        dropString() {
+        dropString () {
             return this.single ? 'Drag and drop image here' : 'Drag and drop images here'
         },
-        imageSources() {
-            return this.images.map(str => {
+        imageSources () {
+            return this.images.map((str) => {
                 if (str.startsWith('data:image')) {
                     return str
-                } else return this.$imageHandler.get(str, {
-                    width: this.previewWidth,
-                    height: this.previewHeight,
-                    fit: 'cover'
-                })
+                } else {
+                    return this.$imageHandler.get(str, {
+                        width: this.previewWidth,
+                        height: this.previewHeight,
+                        fit: 'cover'
+                    })
+                }
             })
         },
-        showUploadOption() {
+        showUploadOption () {
             return this.images.length === 0 || !this.single
         }
     },
-    mounted() {
+    mounted () {
         this.emitInterface()
         if (this.single) {
             if (this.value) {
@@ -104,12 +115,14 @@ export default {
         }
     },
     methods: {
-        async addImages(event) {
+        async addImages (event) {
             this.isUploading = true
-            let temp = []
+            const temp = []
 
             for (const file of event.target.files) {
-                if (!file) continue
+                if (!file) {
+                continue
+            }
                 temp.push(this.$imageHandler.read(file))
             }
 
@@ -118,7 +131,7 @@ export default {
             this.isUploading = false
         },
 
-        async deleteImage(index) {
+        deleteImage (index) {
             this.isUploading = true
             const id = this.images[index]
             if (!id.startsWith('data:image')) {
@@ -128,28 +141,28 @@ export default {
             this.isUploading = false
         },
 
-        async save() {
+        async save () {
             this.isUploading = true
 
             // Delete the images that are removed
-            let deleteTasks = []
+            const deleteTasks = []
             for (const id of this.deletedImages) {
                 deleteTasks.push(this.$imageHandler.remove(id))
             }
-                
+
             this.deletedImages = []
             await Promise.all(deleteTasks)
-            
+
             // Save the images that have been added
-            let addTasks = []
+            const addTasks = []
             for (const str of this.images) {
                 if (str.startsWith('data:image')) {
                     addTasks.push(this.$imageHandler.put(str))
                 }
             }
-            
+
             const result = await Promise.all(addTasks)
-            this.images = this.images.map(str => {
+            this.images = this.images.map((str) => {
                 if (str.startsWith('data:image')) {
                     return result.shift().id
                 }
@@ -159,12 +172,12 @@ export default {
             this.isUploading = false
             if (this.single) {
                 this.$emit('change', this.images[0])
-            } else{
+            } else {
                 this.$emit('change', this.images)
             }
         },
 
-        emitInterface() {
+        emitInterface () {
             this.$emit('interface', {
                 save: () => this.save()
             })
@@ -181,7 +194,7 @@ export default {
     border-radius: $border-radius-root;
 }
 ::v-deep.hide-by-opacity {
-    opacity: 0; 
+    opacity: 0;
 }
 
 ::v-deep.hide-by-layer {
@@ -203,7 +216,7 @@ export default {
 }
 
 ::v-deep.top-layer {
-    position: relative; 
+    position: relative;
     z-index: 2;
 }
 

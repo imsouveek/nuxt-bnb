@@ -1,8 +1,8 @@
 import request from 'supertest'
 import { createUser } from '../../users/users.factory.js'
 import { createHome } from '../homes.factory.js'
-import { createAvailability } from './availabilities.factory.js'
 import { getCsrfToken, loginUser } from '../../../utils/headerHelpers.js'
+import { createAvailability } from './availabilities.factory.js'
 
 let Availability, csrfValues
 
@@ -27,7 +27,6 @@ describe('Availability API', () => {
         availability = await createAvailability({ homeId: home._id })
 
         csrfValues = await getCsrfToken(global.__TEST_STATE__.app)
-
     })
 
     describe('POST /api/homes/:homeId/availabilities', () => {

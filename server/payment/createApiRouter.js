@@ -3,14 +3,13 @@ import orderRouter from './resources/orders/route.js'
 import webhookRouter from './resources/webhooks/route.js'
 import { sendJSON } from './utils/response.js'
 
-export default function createApiRouter(controllers) {
+export default function createApiRouter (controllers) {
     const router = express.Router()
 
     router.use('/orders', orderRouter(controllers))
     router.use('/webhooks', webhookRouter(controllers))
 
     // Catch errors
-    // eslint-disable-next-line no-unused-vars
     router.use((err, req, res, next) => {
         const message = err?.message || 'Unexpected error'
         const status = err?.status || 500
@@ -19,4 +18,4 @@ export default function createApiRouter(controllers) {
     })
 
     return router
-} 
+}

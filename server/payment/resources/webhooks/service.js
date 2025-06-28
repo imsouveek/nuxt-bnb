@@ -1,7 +1,6 @@
 import axios from 'axios'
 
 export default (strategies, dbClient, config) => {
-
     const authHeader = config.auth.auth_header.toLowerCase()
     const authKey = config.auth.auth_key
     const apiUrl = config.url.api
@@ -20,16 +19,18 @@ export default (strategies, dbClient, config) => {
             }
         })
         if (alreadyProcessed) {
-            console.log("Duplicate event")
+            console.log('Duplicate event')
             return
         }
 
         // Signature verification
         const result = strategy.verify.webhook({
             rawBody: req.rawBody,
-            signature,
+            signature
         })
-        if (!result) throw new Error('Invalid signature')
+        if (!result) {
+            throw new Error('Invalid signature')
+        }
 
         // Update payment and save webhook event
         const gatewayRecord = await updateOrder(gateway, result)
@@ -48,7 +49,9 @@ export default (strategies, dbClient, config) => {
     const clientProcess = async (req, gateway) => {
         const strategy = strategies[gateway]
         const result = strategy.verify.client(req.body)
-        if (!result) throw new Error('Invalid client-side signature')
+        if (!result) {
+            throw new Error('Invalid client-side signature')
+        }
 
         return await updateOrder(gateway, result)
     }
@@ -59,13 +62,15 @@ export default (strategies, dbClient, config) => {
 
         const gatewayRecord = await strategy.db.find(dbClient, strategy.orderIdMatch(orderId))
         if (!gatewayRecord) {
-            console.log("No order found")
+            console.log('No order found')
             return ''
         }
 
         if (orderStatus === 'Success') {
             const isRealPayment = await strategy.order.verifyPayment(paymentId)
-            if (!isRealPayment) throw new Error(`Failed payment check at ${strategy.name}`)
+            if (!isRealPayment) {
+                throw new Error(`Failed payment check at ${strategy.name}`)
+            }
         }
 
         // Step 2: Update Order using gatewayId (which is unique and indexed)

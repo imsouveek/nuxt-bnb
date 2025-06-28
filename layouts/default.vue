@@ -4,7 +4,7 @@
             <v-container>
                 <v-row justify="center">
                     <v-col cols="12" md="9">
-                        <search-bar/>
+                        <search-bar />
                     </v-col>
                 </v-row>
             </v-container>

@@ -12,10 +12,11 @@
                 <label :for="inputId">
                     Address
                 </label>
-                <input 
-                    :id="inputId" type="text" :value="value"  class="pt-3 full-width"
+                <input
+                    :id="inputId" type="text" :value="value" class="pt-3 full-width"
                     autocomplete="off" @input="$emit('input', $event.target.value)"
-                    @changed="$emit('changed', $event)"/>
+                    @changed="$emit('changed', $event)"
+                />
             </div>
             <template #append>
                 <div v-if="value.length > 0" class="py-1 my-1 pr-2">
@@ -42,7 +43,7 @@ export default {
         }
     },
     methods: {
-        clearInput() {
+        clearInput () {
             this.$emit('input', '')
         }
     }
@@ -83,7 +84,6 @@ export default {
         transform: $text-field-dense-label-active-transform;
     }
 
-    
 }
 
 </style>

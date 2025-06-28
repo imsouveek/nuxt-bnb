@@ -5,11 +5,11 @@ export const state = () => ({
 })
 
 export const mutations = {
-    user(state, user) {
+    user (state, user) {
         state.isLoggedIn = !!user
         state.user = user || {}
     },
-    setRedirectUrl(state, fullPath) {
+    setRedirectUrl (state, fullPath) {
         state.redirectUrl = fullPath
     }
 }

@@ -1,8 +1,8 @@
+import { randomUUID } from 'crypto'
 import mongoose from 'mongoose'
 import validator from 'validator'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import { randomUUID } from 'crypto'
 import { getOrCreateModel } from '../../utils/getModel.js'
 
 export default (dbClient) => {
@@ -84,7 +84,7 @@ export default (dbClient) => {
         delete user.tokens
         delete user.authStrategy
 
-        return user;
+        return user
     }
 
     userSchema.methods.getAuthToken = async function (auth, token) {
@@ -108,18 +108,18 @@ export default (dbClient) => {
         const result = await User.findOne({ email })
 
         if (!result) {
-            throw new Error("Unable to login")
+            throw new Error('Unable to login')
         }
 
         if (result.authStrategy !== strategy) {
-            throw new Error("Unable to login")
+            throw new Error('Unable to login')
         }
 
         if (strategy === 'local') {
             const isMatch = await bcrypt.compare(password, result.password)
 
             if (!isMatch) {
-                throw new Error("Unable to login")
+                throw new Error('Unable to login')
             }
         }
         return result
@@ -129,7 +129,7 @@ export default (dbClient) => {
         const user = this
 
         if (user.isModified('password')) {
-            user.password = await bcrypt.hash(user.password, 8);
+            user.password = await bcrypt.hash(user.password, 8)
         }
 
         next()

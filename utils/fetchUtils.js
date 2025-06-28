@@ -1,4 +1,4 @@
-export async function unWrap(response) {
+export async function unWrap (response) {
     const json = await response.json()
     const { ok, status, statusText } = response
     return {
@@ -9,7 +9,7 @@ export async function unWrap(response) {
     }
 }
 
-export function getErrorResponse(error) {
+export function getErrorResponse (error) {
     return {
         ok: false,
         status: 500,
@@ -17,4 +17,3 @@ export function getErrorResponse(error) {
         json: {}
     }
 }
-

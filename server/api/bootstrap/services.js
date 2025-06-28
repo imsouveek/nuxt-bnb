@@ -1,4 +1,3 @@
-import getModels from './models.js'
 import emailService from '../services/emails.js'
 
 import userService from '../resources/users/service.js'
@@ -12,9 +11,10 @@ import searchService from '../resources/search/service.js'
 import imageService from '../resources/images/service.js'
 
 import bookingService from '../resources/bookings/service.js'
+import getModels from './models.js'
 
 export default (config, dbClient) => {
-    const models = getModels(dbClient);
+    const models = getModels(dbClient)
     return {
         user: userService(models, config.auth),
         home: homeService(models),

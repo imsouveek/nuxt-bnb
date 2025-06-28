@@ -1,14 +1,14 @@
 export default (models) => {
     const METERS_PER_DEGREE = 111111
 
-    async function findHomes(queryparams) {
+    async function findHomes (queryparams) {
         const homes = await getHomesByLocation(queryparams)
         const availableHomes = await filterAvailableHomes(homes, queryparams)
         const unbookedHomes = await filterBookedHomes(availableHomes, queryparams)
         return unbookedHomes
     }
 
-    async function getHomesByLocation({ homeIds, lat, lng, radius = 10000, fieldList, options }) {
+    async function getHomesByLocation ({ homeId, lat, lng, radius = 10000, fieldList, options }) {
         if (lat && lng) {
             const latNum = parseFloat(lat)
             const lngNum = parseFloat(lng)
@@ -27,19 +27,23 @@ export default (models) => {
             return await models.home.find(geoFilter, fieldList, options)
         }
 
-        const query = homeIds ? {
-            _id: {
-                $in: homeIds.split(',')
+        const query = homeId
+            ? {
+                _id: {
+                    $in: homeId
+                }
             }
-        } : {}
+            : {}
 
         // No location filter — return all homes with pagination
         return await models.home.find(query, fieldList, options)
     }
 
-    async function filterAvailableHomes(homes, { options }) {
+    async function filterAvailableHomes (homes, { options }) {
         const { startEpoch, endEpoch } = options
-        if (!startEpoch || !endEpoch) return homes
+        if (!startEpoch || !endEpoch) {
+            return homes
+        }
 
         if (startEpoch > endEpoch) {
             throw new Error('startEpoch must be before or equal to endEpoch')
@@ -56,9 +60,12 @@ export default (models) => {
         return homes.filter(home => !unavailableHomeIds.has(String(home._id)))
     }
 
-    async function filterBookedHomes(homes, { excludeBooked, options }) {
+    async function filterBookedHomes (homes, { excludeBooked, options }) {
         const { startEpoch, endEpoch } = options
-        if (excludeBooked !== 'true' || !startEpoch || !endEpoch) return homes
+
+        if (excludeBooked !== 'true' || !startEpoch || !endEpoch) {
+            return homes
+        }
 
         const homeIds = homes.map(h => h._id)
         const bookings = await models.booking.find({
@@ -72,13 +79,12 @@ export default (models) => {
         return homes.filter(home => !bookedHomeIds.has(String(home._id)))
     }
 
-
-    async function getById(homeId, queryparams) {
+    async function getById (homeId, queryparams) {
         const { fieldList, options } = queryparams
         return await models.home.findById(homeId, fieldList, options)
     }
 
-    async function populate(home, path, queryparams) {
+    async function populate (home, path, queryparams) {
         const { fieldList, options } = queryparams
         return await home.populate({
             path,

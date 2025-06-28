@@ -5,11 +5,13 @@
                 <template #activator="{ on, attrs }">
                     <v-avatar v-bind="attrs" v-on="on">
                         <v-img
-:src="$imageHandler.get(user.image, {
-                            width: 200,
-                            height: 200,
-                            fit: 'cover'
-                        })" class="avatar" />
+                            :src="$imageHandler.get(user.image, {
+                                width: 200,
+                                height: 200,
+                                fit: 'cover'
+                            })"
+                            class="avatar"
+                        />
                     </v-avatar>
                 </template>
                 <v-list width="250px">
@@ -18,16 +20,18 @@
                             <v-list-item-title class="text-h6 text-right">
                                 {{ user.name }}
                             </v-list-item-title>
-                            <v-list-item-subtitle class="text-right">{{ user.email
-                                }}</v-list-item-subtitle>
+                            <v-list-item-subtitle class="text-right">
+                                {{ user.email }}
+                            </v-list-item-subtitle>
                         </v-list-item-content>
                     </v-list-item>
                     <v-divider />
                     <v-list-item>
                         <v-list-item-title>
                             <v-btn
-color="primary" class="d-flex justify-end" block text nuxt
-                                to="/admin">
+                                color="primary" class="d-flex justify-end" block text nuxt
+                                to="/admin"
+                            >
                                 Admin Section
                             </v-btn>
                         </v-list-item-title>
@@ -35,8 +39,9 @@ color="primary" class="d-flex justify-end" block text nuxt
                     <v-list-item>
                         <v-list-item-title>
                             <v-btn
-color="primary" class="d-flex justify-end" block text
-                                @click="logoutHandler">
+                                color="primary" class="d-flex justify-end" block text
+                                @click="logoutHandler"
+                            >
                                 Sign Out
                             </v-btn>
                         </v-list-item-title>
@@ -54,23 +59,23 @@ color="primary" class="d-flex justify-end" block text
 
 <script>
 export default {
-    name: "SignOnButton",
+    name: 'SignOnButton',
     props: {
         absolute: Boolean
     },
     computed: {
-        user() {
+        user () {
             return this.$store.state.auth.user
         },
-        isLoggedIn() {
+        isLoggedIn () {
             return this.$store.state.auth.isLoggedIn
         }
     },
-    async mounted() {
+    async mounted () {
         await this.$initSession()
     },
     methods: {
-        async logoutHandler() {
+        async logoutHandler () {
             await this.$api.$post('/users/logout')
         }
     }

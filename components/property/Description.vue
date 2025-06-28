@@ -3,7 +3,9 @@
         <v-container>
             <v-row>
                 <v-col cols="7" class="pl-0 pr-14 py-8 align-self-center">
-                    <div class="text-h5 font-weight-medium pb-6"> Description </div>
+                    <div class="text-h5 font-weight-medium pb-6">
+                        Description
+                    </div>
                     <div> {{ home.description }} </div>
                 </v-col>
                 <v-divider vertical />
@@ -23,7 +25,7 @@
 export default {
     name: 'PropertyDescription',
     props: {
-        home:{
+        home: {
             type: Object,
             required: true
         }

@@ -2,7 +2,7 @@ import express from 'express'
 import { bootstrapServer } from '../../bootstrap'
 import createApiRouter from '../../createApiRouter'
 
-export default async function createApp(paymentDb) {
+export default async function createApp (paymentDb) {
     const options = {
         publicRuntimeConfig: {
             razorpay: {

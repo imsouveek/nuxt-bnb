@@ -32,7 +32,7 @@ describe('Image API', () => {
 
         beforeEach(async () => {
             payload = {
-                data: await generateBase64Jpeg(),
+                data: await generateBase64Jpeg()
             }
         })
 
@@ -181,7 +181,6 @@ describe('Image API', () => {
     })
 
     describe('GET /api/images/:id', () => {
-
         it('retrieves the image as JPEG binary', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .get(`/api/images/${image._id}`)
@@ -280,7 +279,7 @@ describe('Image API', () => {
             const uploadToken = token.body.token.token
 
             const res = await request(global.__TEST_STATE__.app)
-                .delete(`/api/images/asdf`)
+                .delete('/api/images/asdf')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
                 .set(authHeader)

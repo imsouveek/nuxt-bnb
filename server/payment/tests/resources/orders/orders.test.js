@@ -7,7 +7,7 @@ let app, auth
 
 const gatewayTypes = ['Razorpay']
 
-beforeAll(async () => {
+beforeAll(() => {
     app = global.__TEST_STATE__.app
     auth = global.__TEST_STATE__.config.auth
 })
@@ -21,7 +21,7 @@ describe('Orders API', () => {
                 const payload = {
                     type,
                     bookingId: `booking_${gatewayKey}_create`,
-                    amount: 250.75,
+                    amount: 250.75
                 }
 
                 const res = await request(app)
@@ -91,7 +91,6 @@ describe('Orders API', () => {
 
     describe('GET /orders/:id', () => {
         for (const type of gatewayTypes) {
-
             it(`fetches ${type} order by ID`, async () => {
                 const created = await createOrder(type)
 

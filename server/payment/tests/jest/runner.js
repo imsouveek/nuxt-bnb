@@ -1,10 +1,10 @@
-import { jest } from '@jest/globals'
 import { randomUUID } from 'crypto'
+import { jest } from '@jest/globals'
 
 jest.unstable_mockModule('razorpay', () => ({
     default: jest.fn().mockImplementation(() => ({
         orders: {
-            create: jest.fn().mockImplementation(async (input) => {
+            create: jest.fn().mockImplementation((input) => {
                 if (global.__MOCK_CONFIG__?.Razorpay?.createOrderShouldFail) {
                     throw new Error('Simulated Razorpay order creation failure')
                 }
@@ -19,7 +19,7 @@ jest.unstable_mockModule('razorpay', () => ({
             })
         },
         payments: {
-            fetch: jest.fn().mockImplementation(async (paymentId) => {
+            fetch: jest.fn().mockImplementation((paymentId) => {
                 if (global.__MOCK_CONFIG__?.Razorpay?.fetchPaymentStatusShouldFail) {
                     return { id: paymentId, status: 'failed' }
                 }
@@ -36,15 +36,14 @@ jest.unstable_mockModule('razorpay', () => ({
     }))
 }))
 
-
 jest.unstable_mockModule('axios', () => {
     return {
         default: {
+            // eslint-disable-next-line require-await
             patch: jest.fn(async () => {
                 if (global.__MOCK_CONFIG__?.bookingApi.updateShouldThrowError) {
-                    throw new Error("Mock Booking API Error")
+                    throw new Error('Mock Booking API Error')
                 }
-                return
             })
         },
         __esModule: true

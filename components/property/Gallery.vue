@@ -20,7 +20,7 @@
                 </v-card>
             </template>
             <v-carousel v-model="carouselItem" hide-delimiters height="70vh">
-                <v-carousel-item v-for="(image, i) in images" :key="i" :src="$imageHandler.get(image)"  />
+                <v-carousel-item v-for="(image, i) in images" :key="i" :src="$imageHandler.get(image)" />
             </v-carousel>
         </v-menu>
         <v-overlay :value="showMenu" />
@@ -36,12 +36,12 @@ export default {
             required: true
         }
     },
-    data: () => ({ 
+    data: () => ({
         showMenu: false,
         carouselItem: 0
     }),
     methods: {
-        clickHandler(target) {
+        clickHandler (target) {
             this.carouselItem = target
         }
     }

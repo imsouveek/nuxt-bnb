@@ -1,9 +1,9 @@
 import mongoose from 'mongoose'
 import request from 'supertest'
 import bcrypt from 'bcryptjs'
-import { createUser } from './users.factory.js'
 import { createImage } from '../images/images.factory.js'
 import { getCsrfToken, loginUser, extractCookieValue } from '../../utils/headerHelpers.js'
+import { createUser } from './users.factory.js'
 
 let User, Token, Image, seededUser, refreshCookie, authHeader, csrfValues
 
@@ -180,7 +180,6 @@ describe('User API', () => {
 
             expect(res.statusCode).toBe(500)
         })
-
     })
 
     describe('POST /api/users/token', () => {
@@ -260,7 +259,7 @@ describe('User API', () => {
 
         it('rejects updating disallowed fields on user', async () => {
             const res = await request(global.__TEST_STATE__.app)
-                .patch(`/api/users`)
+                .patch('/api/users')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
                 .set(authHeader())

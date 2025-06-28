@@ -1,4 +1,4 @@
-export function getOrCreateModel(dbClient, name, schema) {
+export function getOrCreateModel (dbClient, name, schema) {
     const existing = dbClient.models[name]
     if (existing) {
         const a = Object.keys(existing.schema.paths).sort()

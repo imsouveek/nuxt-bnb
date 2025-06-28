@@ -6,13 +6,13 @@
 export default {
     name: 'ErrorLayout',
     props: {
-        error:  {
+        error: {
             type: Object,
             required: true
         }
     },
-    mounted( ) {
-        this.$nuxt.context.redirect("/error", this.error)
+    mounted () {
+        this.$nuxt.context.redirect('/error', this.error)
     }
 }
 </script>

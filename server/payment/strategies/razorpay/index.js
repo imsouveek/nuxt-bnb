@@ -12,7 +12,7 @@ export default (config) => {
     return {
         name: 'Razorpay',
         db: dbModule('razorpay'),
-        orderIdMatch: (orderId) => ({ razorpayOrderId: orderId }),
+        orderIdMatch: orderId => ({ razorpayOrderId: orderId }),
         verify: verifyModule(config.razorpay),
         order: orderModule(razorpay)
     }

@@ -21,11 +21,12 @@ jest.unstable_mockModule('google-auth-library', () => ({
 jest.unstable_mockModule('axios', () => {
     return {
         default: {
+            // eslint-disable-next-line require-await
             post: jest.fn(async () => {
                 const paymentMock = global.__MOCK_CONFIG__?.payments
 
                 if (paymentMock?.createOrderShouldThrowException) {
-                    throw new Error("Mock Exception")
+                    throw new Error('Mock Exception')
                 }
 
                 if (paymentMock?.createOrderShouldFail) {
@@ -35,10 +36,10 @@ jest.unstable_mockModule('axios', () => {
                 return {
                     status: 201,
                     data: {
-                        id: "TEST_PAYMENT_ID",
-                        status: "Pending",
+                        id: 'TEST_PAYMENT_ID',
+                        status: 'Pending',
                         gatewayRefs: {
-                            gatewayRefOrderId: "order_123"
+                            gatewayRefOrderId: 'order_123'
                         }
                     }
                 }

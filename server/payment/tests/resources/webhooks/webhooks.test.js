@@ -1,15 +1,15 @@
+import axios from 'axios'
 import request from 'supertest'
-import webhooksFactory from './webhooks.factory.js'
 import dbModule from '../../../strategies/db.js'
 import create from '../orders/orders.factory.js'
-import axios from 'axios'
+import webhooksFactory from './webhooks.factory.js'
 
 const { createOrder } = create()
 
 let app, db, config, createdOrder
 const gatewayNames = ['Razorpay']
 
-async function getOrderInDb(createdOrder, gatewayDbModel) {
+async function getOrderInDb (createdOrder, gatewayDbModel) {
     return await db.order.findUnique({
         where: {
             id: createdOrder.id
@@ -22,7 +22,7 @@ async function getOrderInDb(createdOrder, gatewayDbModel) {
     })
 }
 
-beforeAll(async () => {
+beforeAll(() => {
     app = global.__TEST_STATE__.app
     db = global.__TEST_STATE__.dbClient
     config = global.__TEST_STATE__.config
@@ -52,7 +52,9 @@ describe('Webhooks API', () => {
             gatewayDbModel = dbModule(gateway)
             webhook_secret = config[gateway]?.webhook_secret
             key_secret = config[gateway]?.key_secret
-            if (!webhook_secret || !key_secret) throw new Error(`Missing secrets for ${gateway}`)
+            if (!webhook_secret || !key_secret) {
+                throw new Error(`Missing secrets for ${gateway}`)
+            }
         })
 
         beforeEach(async () => {
@@ -65,7 +67,6 @@ describe('Webhooks API', () => {
         })
 
         describe(`/payment/webhooks/${gateway}`, () => {
-
             it(`should successfully process a valid ${gateway} payment.captured webhook`, async () => {
                 const { rawBody, headers, extracted } = gatewayFactory.createWebhook(webhook_secret, {
                     order: createdOrder
@@ -82,7 +83,7 @@ describe('Webhooks API', () => {
                 const updatedOrder = await getOrderInDb(createdOrder, gatewayDbModel)
 
                 expect(updatedOrder).toBeDefined()
-                expect(updatedOrder.status).toBe('Success');
+                expect(updatedOrder.status).toBe('Success')
                 gatewayFactory.verifyWebhookResult({
                     rawBody,
                     headers,
@@ -121,7 +122,7 @@ describe('Webhooks API', () => {
                 const updatedOrder = await getOrderInDb(createdOrder, gatewayDbModel)
 
                 expect(updatedOrder).toBeDefined()
-                expect(updatedOrder.status).toBe('Success');
+                expect(updatedOrder.status).toBe('Success')
                 gatewayFactory.verifyWebhookResult({
                     rawBody,
                     headers,
@@ -147,12 +148,12 @@ describe('Webhooks API', () => {
                     .set(headers)
                     .send(rawBody)
 
-                expect(res.statusCode).toBe(200);
+                expect(res.statusCode).toBe(200)
 
                 const updatedOrder = await getOrderInDb(createdOrder, gatewayDbModel)
 
-                expect(updatedOrder).toBeDefined();
-                expect(updatedOrder.status).toBe('Failed');
+                expect(updatedOrder).toBeDefined()
+                expect(updatedOrder.status).toBe('Failed')
                 gatewayFactory.verifyWebhookResult({
                     rawBody,
                     headers,
@@ -177,7 +178,7 @@ describe('Webhooks API', () => {
                     .set(headers)
                     .send(rawBody)
 
-                expect(res.statusCode).toBe(500);
+                expect(res.statusCode).toBe(500)
 
                 const webhookInDb = await db.webhookEvent.findUnique({
                     where: {
@@ -194,7 +195,7 @@ describe('Webhooks API', () => {
                     .set(headers)
                     .send(rawBody)
 
-                expect(res.statusCode).toBe(200);
+                expect(res.statusCode).toBe(200)
 
                 const webhookInDb = await db.webhookEvent.findUnique({
                     where: {
@@ -260,8 +261,8 @@ describe('Webhooks API', () => {
 
                 const orderAfterFirstCall = await getOrderInDb(createdOrder, gatewayDbModel)
 
-                expect(orderAfterFirstCall).toBeDefined();
-                expect(orderAfterFirstCall.status).toBe('Failed');
+                expect(orderAfterFirstCall).toBeDefined()
+                expect(orderAfterFirstCall.status).toBe('Failed')
 
                 // Second call with same event ID: should be skipped/not change status again
                 const secondWebhook = gatewayFactory.createWebhook(webhook_secret, {
@@ -277,13 +278,12 @@ describe('Webhooks API', () => {
                     .expect(200)
 
                 const orderAfterSecondCall = await getOrderInDb(createdOrder, gatewayDbModel)
-                expect(orderAfterSecondCall.status).toBe('Failed');
+                expect(orderAfterSecondCall.status).toBe('Failed')
             })
         })
 
         // --- Client-side verification tests ---
         describe(`/payment/webhooks/${gateway}/client`, () => {
-
             it(`should successfully verify a valid ${gateway} client request`, async () => {
                 const payload = gatewayFactory.createClientRequest(key_secret, {
                     order: createdOrder
@@ -297,12 +297,12 @@ describe('Webhooks API', () => {
                 const updatedOrder = await getOrderInDb(createdOrder, gatewayDbModel)
 
                 expect(updatedOrder).toBeDefined()
-                expect(updatedOrder.status).toBe('Success');
+                expect(updatedOrder.status).toBe('Success')
                 gatewayFactory.verifyClientResult({
                     rawBody: payload,
                     orderInDb: updatedOrder
                 })
-            });
+            })
 
             it(`should correctly fail a ${gateway} client if verification fails against gateway`, async () => {
                 global.__MOCK_CONFIG__[gatewayName] = { fetchPaymentStatusShouldFail: true }
@@ -325,8 +325,7 @@ describe('Webhooks API', () => {
                 await request(app)
                     .post(`/payment/webhooks/${gateway}/client`)
                     .send(payload)
-                    .expect(500);
-
+                    .expect(500)
             })
         })
     }

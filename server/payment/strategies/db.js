@@ -1,9 +1,9 @@
 export default (gatewayName) => {
-    const select = (obj) => ({
+    const select = obj => ({
         [gatewayName]: obj ? { ...obj } : true
     })
 
-    const create = (obj) => ({
+    const create = obj => ({
         [gatewayName]: {
             create: {
                 ...obj
@@ -11,7 +11,7 @@ export default (gatewayName) => {
         }
     })
 
-    const update = (obj) => ({
+    const update = obj => ({
         [gatewayName]: {
             update: {
                 data: {
@@ -21,7 +21,7 @@ export default (gatewayName) => {
         }
     })
 
-    const find = async (dbClient, obj) => {
+    const find = (dbClient, obj) => {
         return dbClient[gatewayName].findFirst({
             where: { ...obj }
         })

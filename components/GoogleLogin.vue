@@ -3,9 +3,11 @@
         <div ref="googleButton" style="display: none"></div>
         <v-btn color="primary" depressed block @click="googleLogin">
             <v-img src="/images/google.svg" max-height="20" max-width="20" contain style="filter: invert(1)" />
-             &nbsp; &nbsp; {{ btnText }} 
+             &nbsp; &nbsp; {{ btnText }}
         </v-btn>
-        <div class="divider py-4">&nbsp;or&nbsp;</div>
+        <div class="divider py-4">
+            &nbsp;or&nbsp;
+        </div>
     </div>
 </template>
 
@@ -18,12 +20,12 @@ export default {
             default: 'Sign In with Google'
         }
     },
-    mounted() {
+    mounted () {
         this.$googleAuth.enableAuth(this.$refs.googleButton)
     },
     methods: {
-        googleLogin() {
-            this.$refs.googleButton.querySelector("div[role=button]").click()
+        googleLogin () {
+            this.$refs.googleButton.querySelector('div[role=button]').click()
         }
     }
 }

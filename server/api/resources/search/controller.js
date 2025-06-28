@@ -1,7 +1,7 @@
 import { sendJSON } from '../../utils/response.js'
 
 export default (services) => {
-    async function getHomes(req, res, next) {
+    async function getHomes (req, res, next) {
         try {
             const homes = await services.search.findHomes(req.queryparams)
             sendJSON(res, homes)
@@ -10,7 +10,7 @@ export default (services) => {
         }
     }
 
-    async function getHomeById(req, res, next) {
+    async function getHomeById (req, res, next) {
         try {
             const homeId = req.params.id
             const home = await services.search.getById(homeId, req.queryparams)
@@ -20,7 +20,7 @@ export default (services) => {
         }
     }
 
-    async function getHomePath(req, res, next) {
+    async function getHomePath (req, res, next) {
         try {
             const homeId = req.params.id
             const path = req.params.path

@@ -1,8 +1,7 @@
 import validator from 'validator'
 
 export default (models) => {
-
-    async function getImage(id, queryparams) {
+    async function getImage (id, queryparams) {
         const image = await models.image.findById(id.toString())
 
         if (!image) {
@@ -29,16 +28,14 @@ export default (models) => {
         return await models.image.getModifiedImage(imageData, options)
     }
 
-    async function setImage(imageInfo, tags = null, description = '') {
+    async function setImage (imageInfo, tags = null, description = '') {
         let imageData, url
         if (validator.isURL(imageInfo, { protocols: ['http', 'https'] })) {
             url = imageInfo
+        } else if (imageInfo.startsWith('data:image')) {
+            imageData = imageInfo
         } else {
-            if (imageInfo.startsWith('data:image')) {
-                imageData = imageInfo
-            } else {
-                throw new Error('Invalid image data')
-            }
+            throw new Error('Invalid image data')
         }
         const newImage = new models.image({
             imageData,
@@ -50,7 +47,7 @@ export default (models) => {
         return newImage
     }
 
-    async function deleteImage(id) {
+    async function deleteImage (id) {
         await models.image.findByIdAndDelete(id.toString())
     }
 

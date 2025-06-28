@@ -3,5 +3,7 @@
   "useTabs": false,
   "singleQuote": true,
   "semi": false,
-  "trailingComma": "es5"
+  "trailingComma": "es5",
+  "printWidth": 120,
+  "vueIndentScriptAndStyle": true 
 }

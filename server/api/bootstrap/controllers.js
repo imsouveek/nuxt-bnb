@@ -1,5 +1,3 @@
-import getServices from './services.js'
-
 import authController from '../resources/auth/controller.js'
 import userController from '../resources/users/controller.js'
 
@@ -13,19 +11,20 @@ import imageController from '../resources/images/controller.js'
 import bookingController from '../resources/bookings/controller.js'
 
 import getMiddleware from '../middleware/index.js'
+import getServices from './services.js'
 
 export default (config, dbClient) => {
     const services = getServices(config, dbClient)
     return {
-        auth: authController(services, config.auth),
-        user: userController(services, config.auth),
+        auth: authController(services, config),
+        user: userController(services, config),
         home: homeController(services),
         image: imageController(services),
         review: reviewController(services),
         search: searchController(services),
         availability: availabilityController(services),
         booking: bookingController(services),
-        middleware: getMiddleware(services, config.auth, config.paymentAuth),
+        middleware: getMiddleware(services, config),
         config
     }
 }

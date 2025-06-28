@@ -1,5 +1,5 @@
-import { faker } from '@faker-js/faker'
 import crypto from 'crypto'
+import { faker } from '@faker-js/faker'
 
 export default () => {
     const createWebhook = (secret, overrides = {}) => {
@@ -26,7 +26,7 @@ export default () => {
                         order_id: resolvedOrderId,
                         method: 'netbanking',
                         email: faker.internet.email(),
-                        contact: faker.phone.number({ style: 'international' }),
+                        contact: faker.phone.number({ style: 'international' })
                     }
                 }
             }

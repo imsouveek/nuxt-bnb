@@ -1,31 +1,4 @@
-import { parse } from 'url'
-import querystring from 'querystring'
-
-export default function (req, res, next) {
-    // Middleware to parse query parameters and set them in req.queryparams
-    const parsedUrl = parse(req.url)
-    const rawQuery = parsedUrl.query || ''
-    const reqQuery = req.query || querystring.parse(rawQuery)
-
-    const queryparams = { ...reqQuery }
-    queryparams.options = {}
-
-    if (queryparams.fieldList) {
-        queryparams.fieldList = queryparams.fieldList.replaceAll(',', ' ')
-    } else {
-        queryparams.fieldList = null
-    }
-
-    if (queryparams.sortBy) {
-        const sort = {}
-        queryparams.sortBy.split(',').forEach(item => {
-            const [field, order] = item.split('_')
-            sort[field] = order === 'asc' ? 1 : -1
-        })
-        queryparams.options.sort = sort
-        delete queryparams.sortBy
-    }
-
+export default function (url) {
     const intFields = [
         'limit',
         'skip',
@@ -36,18 +9,49 @@ export default function (req, res, next) {
         'startEpochAfter',
         'startEpochBefore',
         'endEpochAfter',
-        'endEpochBefore']
+        'endEpochBefore'
+    ]
 
-    intFields.forEach((field) => {
-        if (queryparams[field]) {
-            const parsedValue = parseInt(queryparams[field])
-            if (!isNaN(parsedValue)) {
-                queryparams.options[field] = parsedValue
+    return function (req, res, next) {
+        // Middleware to parse query parameters and set them in req.queryparams
+        const parsedUrl = new URL(`${url}${req.url}`)
+        const searchParams = parsedUrl.searchParams
+
+        const queryparams = {
+            fieldList: null,
+            options: {
+                sort: {}
             }
-            delete queryparams[field]
         }
-    })
 
-    req.queryparams = queryparams
-    next()
+        for (const key of searchParams.keys()) {
+            const values = searchParams.getAll(key)
+
+            switch (key) {
+                case 'fieldList':
+                    queryparams.fieldList = values.join(' ')
+                    break
+                case 'sortBy':
+                    queryparams.options.sort = values.reduce((obj, item) => {
+                        const [field, order] = item.split('_')
+                        obj[field] = order === 'asc' ? 1 : -1
+                        return obj
+                    }, {})
+                    break
+                default:
+                    if (intFields.includes(key)) {
+                        const parsedValue = parseInt(values[0])
+                        if (!isNaN(parsedValue)) {
+                            queryparams.options[key] = parsedValue
+                        }
+                    } else {
+                        queryparams[key] = values.length > 1 ? values : values[0]
+                    }
+                    break
+            }
+        }
+
+        req.queryparams = queryparams
+        next()
+    }
 }

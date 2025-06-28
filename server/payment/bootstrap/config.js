@@ -1,4 +1,4 @@
-export default function bootstrapConfig(options) {
+export default function bootstrapConfig (options) {
     const config = {}
     config.paymentDb = options.privateRuntimeConfig.paymentDb
     config.razorpay = {

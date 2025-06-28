@@ -1,6 +1,6 @@
+import { jest } from '@jest/globals'
 import { startTestDb, clearDatabase, stopTestDb } from './testUtils'
 import createApp from './runner'
-import { jest } from '@jest/globals'
 
 global.__TEST_STATE__ = {}
 
@@ -10,7 +10,7 @@ beforeAll(async () => {
         // uncomment to ignore a specific log level
         log: jest.fn(),
         debug: jest.fn(),
-        info: jest.fn(),
+        info: jest.fn()
         // warn: jest.fn(),
         // error: jest.fn(),
     }

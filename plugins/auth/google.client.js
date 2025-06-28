@@ -1,4 +1,4 @@
-import redirectAfterLogin from "../../utils/redirectAfterLogin.js"
+import redirectAfterLogin from '../../utils/redirectAfterLogin.js'
 export default function ({ app, $config, $api, store, error }, inject) {
     let isLoaded = false
     let waiting = []
@@ -11,12 +11,12 @@ export default function ({ app, $config, $api, store, error }, inject) {
         parseUser
     })
 
-    function addScript() {
+    function addScript () {
         const script = document.createElement('script')
-        script.src = "https://accounts.google.com/gsi/client"
+        script.src = 'https://accounts.google.com/gsi/client'
         script.async = true
         document.head.appendChild(script)
-        script.addEventListener("load", () => {
+        script.addEventListener('load', () => {
             isLoaded = true
             waiting.forEach((item) => {
                 if (typeof item.fn === 'function') {
@@ -27,7 +27,7 @@ export default function ({ app, $config, $api, store, error }, inject) {
         })
     }
 
-    function enableAuth(canvas) {
+    function enableAuth (canvas) {
         if (!isLoaded) {
             waiting.push({
                 fn: enableAuth,
@@ -39,24 +39,24 @@ export default function ({ app, $config, $api, store, error }, inject) {
         window.google.accounts.id.initialize({
             client_id: $config.auth.clientId,
             callback: window.handleCredentialResponse,
-            context: "use",
-            ux_mode: "popup",
+            context: 'use',
+            ux_mode: 'popup',
             use_fedcm_for_prompt: true
-        });
+        })
 
         window.google.accounts.id.renderButton(
             canvas, {
-            type: "standard",
-            shape: "rectangular",
-            theme: "outline",
-            size: "large",
-            text: "signin",
-            width: 100
-        }
-        );
+                type: 'standard',
+                shape: 'rectangular',
+                theme: 'outline',
+                size: 'large',
+                text: 'signin',
+                width: 100
+            }
+        )
     }
 
-    async function parseUser(userDetails) {
+    async function parseUser (userDetails) {
         if (!isLoaded) {
             waiting.push({
                 fn: parseUser,
@@ -75,8 +75,6 @@ export default function ({ app, $config, $api, store, error }, inject) {
             redirectAfterLogin(store, app.router)
         } catch (error) {
             console.log(error)
-
         }
     }
-
 }

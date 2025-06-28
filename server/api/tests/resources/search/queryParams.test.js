@@ -32,12 +32,12 @@ describe('Query Parameters (limit, skip, fieldList)', () => {
     it('respects fieldList parameter', async () => {
         const res = await request(global.__TEST_STATE__.app)
             .get('/api/search/homes')
-            .query({ fieldList: 'title,_id' })
+            .query({ fieldList: ['title', '-_id'] })
 
         expect(res.statusCode).toBe(200)
         const home = res.body[0]
         expect(home).toHaveProperty('title')
-        expect(home).toHaveProperty('_id')
+        expect(home).not.toHaveProperty('_id')
         expect(home).not.toHaveProperty('description')
         expect(home).not.toHaveProperty('owner')
         expect(home).not.toHaveProperty('_geoloc')
@@ -56,9 +56,7 @@ describe('Query Parameters (limit, skip, fieldList)', () => {
         expect(resDesc.statusCode).toBe(200)
 
         // Check sorting by comparing first two results
-        if (resAsc.body.length >= 2 && resDesc.body.length >= 2) {
-            expect(resAsc.body[0].pricePerNight).toBeLessThanOrEqual(resAsc.body[1].pricePerNight)
-            expect(resDesc.body[0].pricePerNight).toBeGreaterThanOrEqual(resDesc.body[1].pricePerNight)
-        }
+        expect(resAsc.body[0].pricePerNight).toBeLessThanOrEqual(resAsc.body[1].pricePerNight)
+        expect(resDesc.body[0].pricePerNight).toBeGreaterThanOrEqual(resDesc.body[1].pricePerNight)
     })
 })

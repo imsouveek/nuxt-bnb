@@ -6,40 +6,42 @@
 </template>
 
 <script>
-export default{
+export default {
     name: 'ShortText',
     props: {
         text: {
             type: String,
             required: true
         },
-        target:{
+        target: {
             type: Number,
             required: true
         }
     },
-    data() {
+    data () {
         return {
             isExpanded: false,
             chunks: []
         }
     },
     computed: {
-        isTooLong() {
+        isTooLong () {
             return this.chunks.length === 2
         },
-        displayText() {
-            if (!this.isTooLong || this.isExpanded) return this.chunks.join(' ')
+        displayText () {
+            if (!this.isTooLong || this.isExpanded) {
+                return this.chunks.join(' ')
+            }
             return this.chunks[0] + '...'
         }
     },
-    created() {
+    created () {
         this.chunks = this.getChunks()
     },
     methods: {
-        getChunks() {
+        getChunks () {
             const position = this.text.indexOf(' ', this.target)
-            if(this.text.length <= this.target || position === -1) {
+            if (this.text.length <= this.target || position === -1) {
                 return [this.text]
             } else {
                 return [

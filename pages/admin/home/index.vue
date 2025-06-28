@@ -2,7 +2,9 @@
     <div>
         <v-card flat>
             <v-card-title>
-                <div class="text-h4 primary--text">List of Homes</div>
+                <div class="text-h4 primary--text">
+                    List of Homes
+                </div>
             </v-card-title>
             <v-card-text>
                 <v-card>
@@ -32,12 +34,18 @@
             <v-progress-circular v-if="!dialogDelete" indeterminate color="secondary" />
             <v-dialog v-model="dialogDelete" light max-width="500px">
                 <v-card>
-                    <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+                    <v-card-title class="text-h5">
+                        Are you sure you want to delete this item?
+                    </v-card-title>
                     <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn depressed outlined @click="cancelDelete">Cancel</v-btn>
-                        <v-btn depressed color="error" @click="deleteHome">Delete</v-btn>
-                        <v-spacer></v-spacer>
+                        <v-spacer />
+                        <v-btn depressed outlined @click="cancelDelete">
+                            Cancel
+                        </v-btn>
+                        <v-btn depressed color="error" @click="deleteHome">
+                            Delete
+                        </v-btn>
+                        <v-spacer />
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -48,9 +56,9 @@
 <script>
 export default {
     name: 'UserHomes',
-    async asyncData({$api}) {
-        return {    
-            homeList: await $api.$get('/homes?fieldList=_id,title')
+    async asyncData ({ $api }) {
+        return {
+            homeList: await $api.$get('/homes?fieldList=_id&fieldList=title')
         }
     },
     data: () => ({
@@ -60,26 +68,26 @@ export default {
         headers: [{
             text: 'Home Title',
             value: 'title'
-        }, { 
-            text: 'Actions', 
-            value: 'actions', 
+        }, {
+            text: 'Actions',
+            value: 'actions',
             sortable: false,
             align: 'center',
-            width: '100px' 
+            width: '100px'
         }]
     }),
     methods: {
-        showDeleteDialog(item) { 
+        showDeleteDialog (item) {
             this.isUploading = true
             this.dialogDelete = true
             this.deletedItem = item
         },
-        cancelDelete() {
+        cancelDelete () {
             this.isUploading = false
             this.dialogDelete = false
             this.deletedItem = null
         },
-        async deleteHome() {
+        async deleteHome () {
             await this.$api.delete(`/homes/${this.deletedItem._id}`)
             this.homeList = this.homeList.filter(home => home._id !== this.deletedItem._id)
             this.isUploading = false

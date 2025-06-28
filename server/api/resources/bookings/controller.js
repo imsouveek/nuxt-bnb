@@ -1,12 +1,11 @@
 import { sendJSON } from '../../utils/response.js'
 
 export default (services) => {
-    async function create(req, res, next) {
+    async function create (req, res, next) {
         try {
-
             const home = await services.home.get({ homeId: req.body.homeId })
             if (!home) {
-                throw new Error("Home not found")
+                throw new Error('Home not found')
             }
 
             const availableHomes = await services.search.filterAvailableHomes([home], {
@@ -22,7 +21,7 @@ export default (services) => {
             })
 
             if (availableUnBookedHomes.length === 0) {
-                throw new Error("Home is not available")
+                throw new Error('Home is not available')
             }
 
             const newBooking = await services.booking.create(req.user._id, home, req.body)
@@ -32,13 +31,15 @@ export default (services) => {
         }
     }
 
-    async function get(req, res, next) {
+    async function get (req, res, next) {
         try {
             const bookingId = req.params.id
             const homeId = req.queryparams.homeId
             const searchParams = {}
 
-            if (bookingId) searchParams.bookingId = bookingId
+            if (bookingId) {
+                searchParams.bookingId = bookingId
+            }
             if (homeId) {
                 searchParams.homeId = homeId
                 delete req.queryparams.homeId
@@ -52,7 +53,7 @@ export default (services) => {
         }
     }
 
-    async function update(req, res, next) {
+    async function update (req, res, next) {
         try {
             let booking
 
@@ -63,7 +64,7 @@ export default (services) => {
             }
 
             if (!booking) {
-                throw new Error("Booking not found")
+                throw new Error('Booking not found')
             }
 
             const result = await services.booking.update(booking, req.body)

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
+import { jest } from '@jest/globals'
 import connectDb, { __test__clientMap } from '../../bootstrap/connectDb.js'
 import { getOrCreateModel } from '../../utils/getModel.js'
-import { jest } from '@jest/globals'
 
 let dbUrl, dbName
 
@@ -68,7 +68,9 @@ describe('getOrCreateModel', () => {
     })
 
     afterEach(async () => {
-        if (conn.readyState === 1) await conn.close()
+        if (conn.readyState === 1) {
+            await conn.close()
+        }
     })
 
     it('creates a model if it does not exist', () => {

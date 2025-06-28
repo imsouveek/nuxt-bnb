@@ -104,7 +104,7 @@ Additional notes:
   - Statements: 99.47 %
   - Branches: 96.36 %
   - Functions: 100 % 
-  - Lines: 99.43 %
+  - Lines: 99.46 %
 
 To run tests with coverage, use the following command from project root:
 ```bash

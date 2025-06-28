@@ -1,8 +1,8 @@
 <template>
     <v-row class="mx-auto">
-        <v-col v-for="home in homes" :key="home._id" sm="12" md="6" lg="4" xl="3" >
+        <v-col v-for="home in homes" :key="home._id" sm="12" md="6" lg="4" xl="3">
             <nuxt-link :to="`/home/${home._id}`" prefetch>
-                <home-card :home="home"/>
+                <home-card :home="home" />
             </nuxt-link>
         </v-col>
     </v-row>
@@ -10,9 +10,9 @@
 
 <script>
 export default {
-    name: "AllHomesPage",
+    name: 'AllHomesPage',
 
-    async asyncData({ $api }) {
+    async asyncData ({ $api }) {
         try {
             return {
                 homes: await $api.$get('/search/homes')
@@ -20,10 +20,9 @@ export default {
         } catch (e) {
             console.log(e)
         }
-
     },
 
-    head() {
+    head () {
         return {
             title: 'Homepage',
             meta: [{

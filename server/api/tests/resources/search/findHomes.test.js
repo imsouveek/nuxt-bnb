@@ -38,6 +38,7 @@ describe('GET /api/search/homes - Location and Availability filters', () => {
                 startEpoch: epoch,
                 endEpoch: epoch + 1
             })
+
         expect(res.statusCode).toBe(200)
         const ids = res.body.map(h => h._id)
         expect(ids).not.toContain(homes[1]._id.toString()) // this one has availability
@@ -76,19 +77,13 @@ describe('GET /api/search/homes - Location and Availability filters', () => {
 
     it('excludes homes with overlapping confirmed/pending bookings, but not cancelled ones, when excludeBooked=true', async () => {
         const res = await request(global.__TEST_STATE__.app)
-            .get('/api/search/homes')
-            .query({
-                excludeBooked: 'true',
-                startEpoch: 20001,
-                endEpoch: 20002
-            })
-    
+            .get('/api/search/homes?excludeBooked=true&startEpoch=20001&endEpoch=20002')
+
         expect(res.statusCode).toBe(200)
         expect(res.body.length).toBe(4)
-        
+
         const ids = res.body.map(h => h._id)
         expect(ids).not.toContain(homes[3]._id.toString()) // has pending booking
         expect(ids).toContain(homes[4]._id.toString())     // has cancelled booking
     })
-    
 })

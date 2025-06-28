@@ -17,6 +17,6 @@ export default (dbClient) => {
         review: reviewModel(dbClient),
         image: imageModel(dbClient),
         availability: availabilityModel(dbClient),
-        booking: bookingsModel(dbClient),
+        booking: bookingsModel(dbClient)
     }
 }

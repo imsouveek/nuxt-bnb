@@ -4,10 +4,11 @@
             <div class="d-flex flex-row">
                 <v-avatar size="100" rounded>
                     <img
-:src="$imageHandler.get(user.image, {
-                        width: 200, 
-                        height: 200
-                    })" />
+                        :src="$imageHandler.get(user.image, {
+                            width: 200,
+                            height: 200
+                        })"
+                    />
                 </v-avatar>
                 <div class="pl-4">
                     <div class="font-weight-bold text-h6">
@@ -17,7 +18,9 @@
                         Joined in {{ shortDate(user.joined) }}
                     </div>
                     <div class="text-h6 d-flex ml-n1">
-                        <v-icon class="align-self-center">mdi-star-outline</v-icon>
+                        <v-icon class="align-self-center">
+                            mdi-star-outline
+                        </v-icon>
                         <span class="align-self-center font-weight-light">
                             {{ user.reviewCount }} reviews
                         </span>
@@ -28,22 +31,21 @@
                 {{ user.description }}
             </div>
         </v-card>
-        
     </div>
 </template>
 
 <script>
-import { shortDate } from '~/utils/dateUtils';
+import { shortDate } from '~/utils/dateUtils'
 
 export default {
     name: 'PropertyHost',
     props: {
-        user:{
+        user: {
             type: Object,
             required: true
         }
     },
-    methods:{
+    methods: {
         shortDate
     }
 }

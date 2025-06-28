@@ -1,10 +1,10 @@
 import Vue from 'vue'
 
-function isPlainObject(obj) {
+function isPlainObject (obj) {
     return Object.prototype.toString.call(obj) === '[object Object]'
 }
 
-function deepMergeReactive(target, source) {
+function deepMergeReactive (target, source) {
     for (const key in source) {
         const newVal = source[key]
         const oldVal = target[key]
@@ -50,17 +50,17 @@ const defaultEmptyHome = () => ({
 export const state = () => defaultEmptyHome()
 
 export const mutations = {
-    setAll(state, payload) {
+    setAll (state, payload) {
         deepMergeReactive(state, payload)
     },
-    reset(state) {
+    reset (state) {
         Object.assign(state, defaultEmptyHome())
     }
 }
 
 export const getters = {
-    getAll: (state) => (field) => state[field],
-    home(state) {
+    getAll: state => field => state[field],
+    home (state) {
         return {
             _id: state._id,
             title: state.title,
@@ -89,7 +89,7 @@ export const getters = {
 }
 
 export const actions = {
-    async fetchHome({ commit }, id) {
+    async fetchHome ({ commit }, id) {
         if (id === 'add') {
             commit('reset')
         } else {
@@ -102,7 +102,7 @@ export const actions = {
         }
     },
 
-    async saveHome({ commit, getters }) {
+    async saveHome ({ commit, getters }) {
         const { _id, ...home } = getters.home
         const safehome = JSON.parse(JSON.stringify(home))
 
@@ -113,7 +113,7 @@ export const actions = {
             commit('setAll', updated)
             return updated
         } else {
-            const created = await this.$api.$post(`/homes`, safehome)
+            const created = await this.$api.$post('/homes', safehome)
             commit('setAll', created)
             return created
         }

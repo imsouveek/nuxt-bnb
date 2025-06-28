@@ -1,10 +1,12 @@
 export default ({ $api, store }, inject) => {
     inject('initSession', async () => {
-        if (store.state.auth.isLoggedIn) return
+        if (store.state.auth.isLoggedIn) {
+            return
+        }
         try {
             await $api.$get('/users')
         } catch (err) {
-            console.log("Could not login user")
+            console.log('Could not login user')
         }
     })
 }

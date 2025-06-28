@@ -1,5 +1,4 @@
 export default (strategies, dbClient) => {
-
     const create = async (type, data) => {
         const { bookingId, amount, status = 'New' } = data
         const strategy = strategies[type.toLowerCase()]
@@ -50,15 +49,19 @@ export default (strategies, dbClient) => {
         const base = await dbClient.order.findUnique({
             where: { id },
             include: {
-                gateway: true,
-            },
+                gateway: true
+            }
         })
 
-        if (!base) return null
+        if (!base) {
+            return null
+        }
 
         const strategyKey = base.gateway?.type?.toLowerCase()
         const strategy = strategies[strategyKey]
-        if (!strategy) return base
+        if (!strategy) {
+            return base
+        }
 
         const gatewayId = base.gateway?.id
         const extra = await strategy.db.find(dbClient, { gatewayId })
@@ -73,7 +76,9 @@ export default (strategies, dbClient) => {
     }
 
     const processResponse = (order) => {
-        if (!order) return null
+        if (!order) {
+            return null
+        }
 
         const response = JSON.parse(JSON.stringify(order))
         delete response.gatewayId

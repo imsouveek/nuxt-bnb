@@ -1,8 +1,10 @@
 let csrfInitPromise = null
 
-function getCookie(name, cookieSource) {
+function getCookie (name, cookieSource) {
     if (!cookieSource) {
-        if (typeof document === 'undefined') return null
+        if (typeof document === 'undefined') {
+            return null
+        }
         cookieSource = document.cookie
     }
 
@@ -18,13 +20,15 @@ function getCookie(name, cookieSource) {
 
     const match = cookies.find(c => c.startsWith(name + '='))
 
-    if (!match) return null
+    if (!match) {
+        return null
+    }
 
     const value = match.split('=')[1]
     return value
 }
 
-function extractCsrfToken(raw) {
+function extractCsrfToken (raw) {
     try {
         const dot = raw.lastIndexOf('.')
         const payload = decodeURIComponent(raw.slice(0, dot))
@@ -36,8 +40,10 @@ function extractCsrfToken(raw) {
     }
 }
 
-async function ensureCsrfReady(instance, cookieName) {
-    if (getCookie(cookieName)) return
+async function ensureCsrfReady (instance, cookieName) {
+    if (getCookie(cookieName)) {
+        return
+    }
     if (!csrfInitPromise) {
         csrfInitPromise = instance.post('/csrf-token')
             .catch((e) => {

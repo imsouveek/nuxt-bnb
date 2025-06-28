@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const clientMap = new Map()
-export const __test__clientMap = clientMap;
+export const __test__clientMap = clientMap
 
 export default async function ({ dbUrl, dbName }) {
     if (!dbUrl || !dbName) {

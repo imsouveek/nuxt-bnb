@@ -1,5 +1,5 @@
 export default (models, auth) => {
-    async function create(userData, authStrategy) {
+    async function create (userData, authStrategy) {
         const newUser = new models.user({
             ...userData,
             authStrategy
@@ -9,7 +9,7 @@ export default (models, auth) => {
         return newUser
     }
 
-    async function get(userId, fieldList) {
+    async function get (userId, fieldList) {
         const user = await models.user.findOne({
             _id: userId
         }, fieldList)
@@ -17,10 +17,10 @@ export default (models, auth) => {
         return user
     }
 
-    async function patch(user, updateData) {
-        const updates = Object.keys(updateData);
-        const allowedUpdates = ['name', 'email', 'password', 'image', 'description', 'reviewCount'];
-        const isValid = updates.every((update) => allowedUpdates.includes(update));
+    async function patch (user, updateData) {
+        const updates = Object.keys(updateData)
+        const allowedUpdates = ['name', 'email', 'password', 'image', 'description', 'reviewCount']
+        const isValid = updates.every(update => allowedUpdates.includes(update))
         if (!isValid) {
             throw new Error('Invalid Request')
         }
@@ -30,12 +30,14 @@ export default (models, auth) => {
             await models.image.findByIdAndDelete(user.image.toString())
         }
 
-        updates.forEach((update) => user[update] = updateData[update])
+        updates.forEach((update) => {
+            user[update] = updateData[update]
+        })
         await user.save()
         return user
     }
 
-    async function remove(user) {
+    async function remove (user) {
         await Promise.all([
             models.user.findByIdAndDelete(user._id.toString()),
             models.home.deleteMany({
@@ -47,31 +49,30 @@ export default (models, auth) => {
         return user
     }
 
-    async function removeToken(user, token) {
-        user.tokens = user.tokens.filter((t) => t.token !== token)
+    async function removeToken (user, token) {
+        user.tokens = user.tokens.filter(t => t.token !== token)
         await user.save()
         return user
     }
 
-    async function removeAllTokens(user) {
+    async function removeAllTokens (user) {
         user.tokens = []
         await user.save()
         return user
-
     }
 
-    async function validateUser(email, password, strategy) {
+    async function validateUser (email, password, strategy) {
         return await models.user.getCredentials(email, password, strategy)
     }
 
-    async function validateToken(userId, token) {
+    async function validateToken (userId, token) {
         return await models.user.findOne({
             _id: userId,
             'tokens.token': token
         })
     }
 
-    async function getNewToken(user, refresh_token) {
+    async function getNewToken (user, refresh_token) {
         return await user.getAuthToken(auth, refresh_token)
     }
 

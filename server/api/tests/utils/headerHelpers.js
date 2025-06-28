@@ -1,6 +1,6 @@
 import request from 'supertest'
 
-export async function getCsrfToken(app) {
+export async function getCsrfToken (app) {
     const csrfCookieName = global.__TEST_STATE__.config.auth.csrf_cookie
     const csrfHeaderName = global.__TEST_STATE__.config.auth.csrf_header
     const csrfRes = await request(app)
@@ -40,7 +40,7 @@ export async function getCsrfToken(app) {
     }
 }
 
-export async function loginUser(app, email, password) {
+export async function loginUser (app, email, password) {
     const refreshCookieName = global.__TEST_STATE__.config.auth.refresh_cookie
     const { csrfCookie, csrfHeader } = await getCsrfToken(app)
 
@@ -60,11 +60,11 @@ export async function loginUser(app, email, password) {
     return {
         accessToken,
         refreshCookie: `${refreshCookieName}=${refreshCookie}`,
-        authHeader: () => ({ Authorization: `Bearer ${accessToken}` }),
+        authHeader: () => ({ Authorization: `Bearer ${accessToken}` })
     }
 }
 
-export function extractCookieValue(setCookieHeader, cookieName) {
+export function extractCookieValue (setCookieHeader, cookieName) {
     const cookie = (Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader])
         .find(str => str.startsWith(`${cookieName}=`))
 

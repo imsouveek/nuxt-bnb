@@ -7,10 +7,14 @@ export default function (services, auth) {
     const refreshCookieName = auth.refresh_cookie
 
     return async function (req, res, next) {
-        if (req.internalAuth) return next()
+        if (req.internalAuth) {
+            return next()
+        }
         try {
             const access_token = req.headers.authorization?.replace('Bearer ', '')
-            if (!access_token) throw new Error()
+            if (!access_token) {
+                throw new Error('Please Authenticate')
+            }
 
             const cookies = cookie.parse(req.headers.cookie || '')
             const refresh_token = cookies[refreshCookieName]
@@ -21,8 +25,8 @@ export default function (services, auth) {
             req.token = refresh_token
             req.user = user
             next()
-        } catch {
-            sendJSON(res, { error: 'Please Authenticate' }, 401)
+        } catch (err) {
+            sendJSON(res, { error: err.message }, 401)
         }
     }
 }

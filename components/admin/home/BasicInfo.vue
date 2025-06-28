@@ -2,18 +2,22 @@
     <v-card flat>
         <v-card-text>
             <v-text-field
-v-model="title" dense outlined persistent-placeholder placeholder="Give your home a title"
-                type="text" label="Title" :rules="[rules.required]"/>
+                v-model="title" dense outlined persistent-placeholder placeholder="Give your home a title"
+                type="text" label="Title" :rules="[rules.required]"
+            />
             <v-textarea
-v-model="description" persistent-placeholder outlined label="Description"
-                placeholder="Describe your home" :rules="[rules.required]"/>
+                v-model="description" persistent-placeholder outlined label="Description"
+                placeholder="Describe your home" :rules="[rules.required]"
+            />
             <v-textarea
-v-model="note" persistent-placeholder outlined label="Note"
-                placeholder="Add notes for guest" />
+                v-model="note" persistent-placeholder outlined label="Note"
+                placeholder="Add notes for guest"
+            />
             <v-combobox
-v-model="features" label="Features" :items="commonFeatures" dense
+                v-model="features" label="Features" :items="commonFeatures" dense
                 :search-input.sync="search" hide-selected multiple small-chips outlined persistent-placeholder
-                placeholder="Select or add your home features">
+                placeholder="Select or add your home features"
+            >
                 <template #no-data>
                     <v-list>
                         <v-list-item>
@@ -29,8 +33,9 @@ v-model="features" label="Features" :items="commonFeatures" dense
                 </template>
             </v-combobox>
             <v-text-field
-v-model="pricePerNight" dense outlined type="text" label="Price Per Night"
-                persistent-placeholder placeholder="Set price per night" :rules="[rules.required]"/>
+                v-model="pricePerNight" dense outlined type="text" label="Price Per Night"
+                persistent-placeholder placeholder="Set price per night" :rules="[rules.required]"
+            />
             <div class="d-flex">
                 <number-input v-model="guests" dense outlined label="Guests" class="mr-2" integer positive />
                 <number-input v-model="bedrooms" dense outlined label="Rooms" class="mr-2" integer positive />
@@ -46,13 +51,13 @@ import { mapWritableFields } from '~/utils/vuexBindings'
 
 export default {
     name: 'AdminHomeBasicInfo',
-    data() {
+    data () {
         return {
             rules: {
                 required: value => !!value || 'Required'
             },
             search: null,
-            commonFeatures: ['Electric Kettle', 'Air-conditioning', 'City View'],
+            commonFeatures: ['Electric Kettle', 'Air-conditioning', 'City View']
         }
     },
     computed: {

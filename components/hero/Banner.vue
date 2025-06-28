@@ -1,7 +1,7 @@
 <template>
     <v-container class="mt-8">
         <v-row>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-col cols="12" md="9">
                 <v-card flat outlined>
                     <v-img
@@ -10,7 +10,7 @@
                     />
                 </v-card>
             </v-col>
-            <v-spacer></v-spacer>
+            <v-spacer />
         </v-row>
     </v-container>
 </template>

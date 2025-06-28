@@ -4,7 +4,7 @@ export default function ({ $api, $config, redirect, store }, inject) {
         initPayment
     })
 
-    function loadScript(src) {
+    function loadScript (src) {
         return new Promise((resolve) => {
             const script = document.createElement('script')
             script.src = src
@@ -18,10 +18,10 @@ export default function ({ $api, $config, redirect, store }, inject) {
         })
     }
 
-    async function initPayment(bookingApiResponse) {
+    async function initPayment (bookingApiResponse) {
         console.log(bookingApiResponse)
         if (!store.state.auth.isLoggedIn) {
-            throw new Error("User needs to be logged in to initiate payment")
+            throw new Error('User needs to be logged in to initiate payment')
         }
         const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js')
         if (!res) {
@@ -78,6 +78,5 @@ export default function ({ $api, $config, redirect, store }, inject) {
             console.error(response.error)
         })
         rzp.open()
-
     }
 }

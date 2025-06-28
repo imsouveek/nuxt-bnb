@@ -6,7 +6,7 @@
                     <v-card flat outlined>
                         <v-img src="/images/logo.svg" contain width="150" />
                         <v-card-text>
-                            <nuxt-child/>
+                            <nuxt-child />
                         </v-card-text>
                     </v-card>
                 </v-flex>
@@ -20,19 +20,19 @@ export default {
     name: 'AuthPage',
     layout: 'blank',
 
-    async asyncData( {from, store} ) {
-        if(! store.state.auth.redirectUrl) {
+    asyncData ({ from, store }) {
+        if (!store.state.auth.redirectUrl) {
             store.commit('auth/setRedirectUrl', from?.fullPath)
         }
     },
 
-     head() {
+     head () {
         return {
             title: 'Auth'
         }
     },
 
-    beforeDestroy() {
+    beforeDestroy () {
         this.$store.commit('auth/setRedirectUrl', null)
     }
 }

@@ -6,18 +6,51 @@ module.exports = {
         es2021: true,
         jest: true
     },
-    extends: [
-        'eslint:recommended',
-        'plugin:vue/recommended', // Use 'vue/vue3-recommended' later
-        'prettier'
-    ],
+    parser: 'vue-eslint-parser',
     parserOptions: {
+        parser: '@babel/eslint-parser',
+        requireConfigFile: false,
         ecmaVersion: 2022,
         sourceType: 'module'
     },
-    plugins: ['vue'],
+    extends: [
+        '@nuxtjs',
+        'plugin:nuxt/recommended',
+        'plugin:vue/recommended',
+        'plugin:jest/recommended'
+    ],
+    plugins: [
+        'vue',
+        'prettier',
+        'jest'
+    ],
     rules: {
-        'no-console': 'warn',
-        'no-unused-vars': 'warn'
+        'camelcase': 'off',
+        'import/no-named-as-default-member': 'off',
+        'indent': 'off',
+        'new-cap': 'off',
+        'no-console': 'off',
+        'no-multi-spaces': 'off',
+        'unicorn/prefer-type-error': 'off',
+        'vue/html-indent': 'off',
+        'vue/html-self-closing': ['error', {
+            'html': {
+                'void': 'always',
+                'normal': 'never',
+                'component': 'always'
+            },
+            'svg': 'always',
+            'math': 'always'
+        }],
+        'vue/max-attributes-per-line': 'off'
+    },
+    overrides: [{
+        files: ['server/payment/tests/resources/**/*.test.js'],
+        rules: {
+            'jest/expect-expect': 'off'
+        }
+    }],
+    globals: {
+        '$nuxt': true
     }
-}
+};

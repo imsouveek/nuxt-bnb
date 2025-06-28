@@ -1,5 +1,5 @@
-import dbConnection, { __test__clientMap } from '../../bootstrap/connectDb.js'
 import { jest } from '@jest/globals'
+import dbConnection, { __test__clientMap } from '../../bootstrap/connectDb.js'
 
 let dbUrl, dbName
 
@@ -19,7 +19,6 @@ describe('connectDb (Postgres)', () => {
         expect(client).toBeDefined()
         const result = await client.$queryRaw`SELECT 1`
         expect(result).toBeDefined()
-
     })
 
     it('returns cached Prisma client on second call', async () => {

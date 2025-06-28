@@ -4,13 +4,14 @@ import ms from 'ms'
 import { OAuth2Client } from 'google-auth-library'
 import { sendJSON } from '../../utils/response.js'
 
-export default (services, auth) => {
-    const refreshCookieName = auth.refresh_cookie
-    const refreshSecret = auth.refresh_secret
-    const googleClientId = auth.clientId
-    const passwordTokenExpiry = auth.password_token_expiry
+export default (services, config) => {
+    const refreshCookieName = config.auth.refresh_cookie
+    const refreshSecret = config.auth.refresh_secret
+    const refreshLife = config.auth.refresh_life
+    const googleClientId = config.auth.clientId
+    const passwordTokenExpiry = config.auth.password_token_expiry
 
-    async function login(req, res) {
+    async function login (req, res) {
         try {
             const user = await services.user.validateUser(req.body.email, req.body.password, 'local')
             await sendLoginResponse(user, res)
@@ -19,7 +20,7 @@ export default (services, auth) => {
         }
     }
 
-    async function googleLogin(req, res) {
+    async function googleLogin (req, res) {
         try {
             const client = new OAuth2Client()
             const ticket = await client.verifyIdToken({
@@ -48,9 +49,9 @@ export default (services, auth) => {
         }
     }
 
-    async function sendLoginResponse(user, res, token = null) {
+    async function sendLoginResponse (user, res, token = null) {
         const tokens = await services.user.getNewToken(user, token)
-        const expires = new Date(Date.now() + ms(auth.refresh_life))
+        const expires = new Date(Date.now() + ms(refreshLife))
 
         const refresh_cookie = cookie.serialize(refreshCookieName, tokens.refresh_token, {
             path: '/',
@@ -67,7 +68,7 @@ export default (services, auth) => {
         })
     }
 
-    async function forgotPassword(req, res) {
+    async function forgotPassword (req, res) {
         try {
             const token = await services.token.getNewToken(req.body.email, 'password', passwordTokenExpiry)
             await services.email.sendForgottenPasswordEmail(token)
@@ -77,7 +78,7 @@ export default (services, auth) => {
         }
     }
 
-    async function resetPassword(req, res) {
+    async function resetPassword (req, res) {
         try {
             const user = await services.token.validateToken(req.body.token, 'password')
             if (user.authStrategy !== 'local') {
@@ -90,18 +91,20 @@ export default (services, auth) => {
         }
     }
 
-    async function refreshAccessToken(req, res) {
+    async function refreshAccessToken (req, res) {
         try {
             const cookies = cookie.parse(req.headers.cookie)
             const token = cookies[refreshCookieName]
-            if (!token) throw new Error()
+            if (!token) {
+                throw new Error('Please Authenticate')
+            }
 
             const decoded = jwt.verify(token, refreshSecret)
             const user = await services.user.validateToken(decoded._id, token)
 
             await sendLoginResponse(user, res, token)
-        } catch {
-            sendJSON(res, { error: 'Please Authenticate' }, 401)
+        } catch (err) {
+            sendJSON(res, { error: err.message }, 401)
         }
     }
 

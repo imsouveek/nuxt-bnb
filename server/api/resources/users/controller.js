@@ -1,8 +1,8 @@
 import cookie from 'cookie'
 import { sendJSON } from '../../utils/response.js'
 
-export default (services, auth) => {
-    async function create(req, res, next) {
+export default (services, config) => {
+    async function create (req, res, next) {
         try {
             const user = await services.user.create({ ...req.body }, 'local')
             sendJSON(res, user, 201)
@@ -14,7 +14,7 @@ export default (services, auth) => {
         }
     }
 
-    async function get(req, res, next) {
+    async function get (req, res, next) {
         try {
             const user = await services.user.get(req.user._id, req.queryparams?.fieldList)
             sendJSON(res, user)
@@ -23,7 +23,7 @@ export default (services, auth) => {
         }
     }
 
-    async function patch(req, res, next) {
+    async function patch (req, res, next) {
         try {
             const updatedUser = await services.user.patch(req.user, req.body)
             sendJSON(res, updatedUser)
@@ -32,7 +32,7 @@ export default (services, auth) => {
         }
     }
 
-    async function remove(req, res, next) {
+    async function remove (req, res, next) {
         try {
             const deletedUser = await services.user.remove(req.user)
             sendJSON(res, deletedUser)
@@ -41,7 +41,7 @@ export default (services, auth) => {
         }
     }
 
-    async function logout(req, res, next) {
+    async function logout (req, res, next) {
         try {
             await services.user.removeToken(req.user, req.token)
             logOutCookie(res)
@@ -50,7 +50,7 @@ export default (services, auth) => {
         }
     }
 
-    async function logoutAll(req, res, next) {
+    async function logoutAll (req, res, next) {
         try {
             await services.user.removeAllTokens(req.user)
             logOutCookie(res)
@@ -59,19 +59,19 @@ export default (services, auth) => {
         }
     }
 
-    function logOutCookie(res) {
+    function logOutCookie (res) {
         const expires = new Date()
         expires.setDate(expires.getDate() - 1)
 
         const refresh_cookie = cookie.serialize(
-            auth.refresh_cookie,
+            config.auth.refresh_cookie,
             '',
             {
                 path: '/',
                 secure: true,
                 httpOnly: true,
                 sameSite: true,
-                expires,
+                expires
             }
         )
 
@@ -79,19 +79,19 @@ export default (services, auth) => {
         sendJSON(res, { status: 'Logged out successfully' })
     }
 
-    async function getToken(req, res, next) {
+    async function getToken (req, res, next) {
         try {
             if (!req.body.type) {
                 throw new Error('Token type is required')
             }
 
-            const { image_token_expiry } = auth
+            const { image_token_expiry } = config.auth
             let token_life
 
             switch (req.body.type) {
                 case 'image':
                     token_life = image_token_expiry
-                    break;
+                    break
                 default:
                     throw new Error('Unsupported token type')
             }

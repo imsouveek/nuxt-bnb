@@ -10,7 +10,7 @@ import bookingRouter from './resources/bookings/route.js'
 import csrf from './services/csrf.js'
 import { sendJSON } from './utils/response.js'
 
-export default function createApiRouter(controllers) {
+export default function createApiRouter (controllers) {
     const router = express.Router()
 
     router.use(cors({
@@ -39,7 +39,6 @@ export default function createApiRouter(controllers) {
     router.use('/bookings', bookingRouter(controllers))
 
     // Catch errors
-    // eslint-disable-next-line no-unused-vars
     router.use((err, req, res, next) => {
         const message = err?.message || 'Unexpected error'
         const status = err?.status || 500
@@ -48,4 +47,4 @@ export default function createApiRouter(controllers) {
     })
 
     return router
-} 
+}

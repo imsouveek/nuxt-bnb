@@ -6,7 +6,7 @@
                     <v-card flat outlined>
                         <v-img src="/images/logo.svg" contain width="150" />
                         <v-card-text>
-                            <nuxt-child/>
+                            <nuxt-child />
                         </v-card-text>
                     </v-card>
                 </v-flex>
@@ -22,9 +22,9 @@ export default {
     meta: {
         authRequired: true
     },
-    async asyncData({ store, error }) {
+    asyncData ({ store, error }) {
         if (!store.state.auth.isLoggedIn) {
-                error( {statusCode: 401, message: "No Access!! Please log in!"})
+                error({ statusCode: 401, message: 'No Access!! Please log in!' })
         }
     }
 }

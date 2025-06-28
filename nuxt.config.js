@@ -63,7 +63,7 @@ export default {
                 options: {
                     customProperties: true,
                     variations: false
-                },
+                }
             },
             customVariables: ['~/assets/sass/variables.scss'],
             treeShake: true
@@ -96,7 +96,7 @@ export default {
     privateRuntimeConfig: {
         apiDb: {
             dbUrl: process.env.API_DB_URL,
-            dbName: process.env.API_DB_NAME,
+            dbName: process.env.API_DB_NAME
         },
         auth: {
             access_secret: process.env.ACCESS_SECRET,
@@ -115,7 +115,7 @@ export default {
         },
         paymentDb: {
             dbUrl: process.env.PAYMENT_DB_URL,
-            dbName: process.env.PAYMENT_DB_NAME,
+            dbName: process.env.PAYMENT_DB_NAME
         },
         razorpay: {
             key_secret: process.env.RAZORPAY_KEY_SECRET,

@@ -6,8 +6,7 @@ export default (smtp, appUrl) => {
         port: smtp.port
     })
 
-
-    async function sendForgottenPasswordEmail(reset) {
+    async function sendForgottenPasswordEmail (reset) {
         const url = `${appUrl}/auth/reset/${reset.token}`
 
         await transporter.sendMail({

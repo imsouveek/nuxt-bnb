@@ -1,7 +1,7 @@
 import request from 'supertest'
+import cookie from 'cookie'
 import { getCsrfToken, loginUser } from '../utils/headerHelpers.js'
 import { signCSRF } from '../../services/csrf.js'
-import cookie from 'cookie'
 import { createUser } from '../resources/users/users.factory.js'
 
 let seededUser, csrfValues, authHeader

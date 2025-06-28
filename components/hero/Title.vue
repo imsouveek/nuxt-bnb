@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-parallax src="/images/hero.jpg" height="600">
-            <v-overlay absolute color="primary" opacity="0.4"></v-overlay>
+            <v-overlay absolute color="primary" opacity="0.4" />
             <v-layout
                 fill-height
                 align-center
@@ -22,7 +22,7 @@
 
 <script>
 export default {
-    name: "HeroTitle"
+    name: 'HeroTitle'
 }
 </script>
 

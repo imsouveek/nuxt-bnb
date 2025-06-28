@@ -150,7 +150,7 @@ describe('Auth API', () => {
     })
 
     describe('Forgot Password', () => {
-        it('sends reset email ', async () => {
+        it('sends reset email', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/forgot')
                 .set('Cookie', csrfValues.csrfCookie)
@@ -253,7 +253,7 @@ describe('Auth API', () => {
             })
 
             const res = await request(global.__TEST_STATE__.app)
-                .post(`/api/auth/reset`)
+                .post('/api/auth/reset')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
                 .send({
@@ -277,7 +277,7 @@ describe('Auth API', () => {
             })
 
             const res = await request(global.__TEST_STATE__.app)
-                .post(`/api/auth/reset`)
+                .post('/api/auth/reset')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
                 .send({
@@ -296,7 +296,7 @@ describe('Auth API', () => {
             })
 
             const res = await request(global.__TEST_STATE__.app)
-                .post(`/api/auth/reset`)
+                .post('/api/auth/reset')
                 .set('Cookie', csrfValues.csrfCookie)
                 .set(csrfValues.csrfHeader())
                 .send({
@@ -327,7 +327,7 @@ describe('Auth API', () => {
             expect(user.name).toBe('Google User')
         })
 
-        it('logs in or creates user using valid Google token', async () => {
+        it('fails log in or creates userif Google Login fails', async () => {
             const res = await request(global.__TEST_STATE__.app)
                 .post('/api/auth/google-auth')
                 .set('Cookie', csrfValues.csrfCookie)

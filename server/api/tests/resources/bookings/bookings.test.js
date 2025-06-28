@@ -1,11 +1,11 @@
 import mongoose from 'mongoose'
 import request from 'supertest'
+import { faker } from '@faker-js/faker'
 import { createUser } from '../users/users.factory.js'
 import { createHome } from '../homes/homes.factory.js'
 import { createAvailability } from '../homes/availabilities/availabilities.factory.js'
-import { createBooking } from './bookings.factory.js'
 import { getCsrfToken, loginUser } from '../../utils/headerHelpers.js'
-import { faker } from '@faker-js/faker'
+import { createBooking } from './bookings.factory.js'
 
 let Booking, csrfValues
 
@@ -194,7 +194,7 @@ describe('Booking API', () => {
                 startEpoch: 20000,
                 endEpoch: 20002,
                 guestCount: 2,
-                gateway: "Razorpay"
+                gateway: 'Razorpay'
             }
 
             const res = await request(global.__TEST_STATE__.app)
@@ -222,7 +222,7 @@ describe('Booking API', () => {
                 startEpoch: 20000,
                 endEpoch: 20002,
                 guestCount: 2,
-                gateway: "Razorpay"
+                gateway: 'Razorpay'
             }
 
             const res = await request(global.__TEST_STATE__.app)
@@ -248,7 +248,7 @@ describe('Booking API', () => {
                 startEpoch: 20000,
                 endEpoch: 20002,
                 guestCount: 2,
-                gateway: "Razorpay"
+                gateway: 'Razorpay'
             }
 
             const res = await request(global.__TEST_STATE__.app)
@@ -273,7 +273,7 @@ describe('Booking API', () => {
                 startEpoch: 20000,
                 endEpoch: 20002,
                 guestCount: 2,
-                gateway: "Razorpay"
+                gateway: 'Razorpay'
             }
 
             const res = await request(global.__TEST_STATE__.app)
@@ -294,7 +294,7 @@ describe('Booking API', () => {
                 endEpoch: 20002,
                 guestCount: 2,
                 paymentId: 'TEST_PAYMENT_ID',
-                gateway: "Razorpay"
+                gateway: 'Razorpay'
             }
 
             const res = await request(global.__TEST_STATE__.app)
@@ -313,7 +313,7 @@ describe('Booking API', () => {
                 user: otherUser._id,
                 status: 'Success',
                 startEpoch: 20001,
-                endEpoch: 20002,
+                endEpoch: 20002
             })
 
             const payload = {
@@ -321,7 +321,7 @@ describe('Booking API', () => {
                 startEpoch: 20000,
                 endEpoch: 20002,
                 guestCount: 2,
-                gateway: "Razorpay"
+                gateway: 'Razorpay'
             }
 
             const res = await request(global.__TEST_STATE__.app)

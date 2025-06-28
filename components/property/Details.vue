@@ -12,10 +12,14 @@
             <v-container>
                 <v-row>
                     <v-col cols="7" class="pl-0 pr-14 align-self-center">
-                        <div class="text-h4 font-weight-medium pb-6"> {{ home.title }}</div>
+                        <div class="text-h4 font-weight-medium pb-6">
+                            {{ home.title }}
+                        </div>
                         <div class="d-flex">
                             <div class="py-3 d-flex">
-                                <v-icon color="primary" class="align-self-center">mdi-map-marker-outline</v-icon>
+                                <v-icon color="primary" class="align-self-center">
+                                    mdi-map-marker-outline
+                                </v-icon>
                                 <span class="text-decoration-underline align-self-center primary--text">
                                     {{ home.location.address }} {{ home.location.city }} {{ home.location.state }} {{
                                         home.location.country }}
@@ -24,8 +28,9 @@
                             <v-spacer />
                             <div>
                                 <v-rating
-:value="home.reviewValue" color="orange" dense half-increments readonly
-                                    size="14" />
+                                    :value="home.reviewValue" color="orange" dense half-increments readonly
+                                    size="14"
+                                />
                                 <div class="ms-4 text-right text--seconary">
                                     {{ home.reviewValue }} ({{ home.reviewCount }})
                                 </div>
@@ -60,13 +65,13 @@
 </template>
 
 <script>
-import pluralize from '~/utils/pluralize';
-import { ISODate, addDays, toEpochDate } from '~/utils/dateUtils';
+import pluralize from '~/utils/pluralize'
+import { ISODate, addDays, toEpochDate } from '~/utils/dateUtils'
 
 export default {
     name: 'PropertyDetails',
     props: {
-        home:{
+        home: {
             type: Object,
             required: true
         }
@@ -75,20 +80,20 @@ export default {
         bookingDates: [ISODate(addDays(Date.now(), 7)), ISODate(addDays(Date.now(), 9))],
         snackbar: false,
         snackText: ''
-    }), 
+    }),
     methods: {
         pluralize,
-        showSnack(msg) {
-            this.snackText = msg,
+        showSnack (msg) {
+            this.snackText = msg
             this.snackbar = true
         },
-        submitBooking() {
+        submitBooking () {
             if (!this.bookingDates[1]) {
-                this.showSnack("Please select both check-in and check-out dates")
+                this.showSnack('Please select both check-in and check-out dates')
                 return
             }
             this.$router.push({
-                name: "booking",
+                name: 'booking',
                 query: {
                     homeId: this.home._id,
                     startEpoch: toEpochDate(this.bookingDates[0]),

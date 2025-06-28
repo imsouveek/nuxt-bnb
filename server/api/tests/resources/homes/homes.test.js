@@ -132,7 +132,7 @@ describe('Homes API', () => {
     describe('GET /api/homes', () => {
         it('fetches a specific home', async () => {
             const res = await request(global.__TEST_STATE__.app)
-                .get(`/api/homes`)
+                .get('/api/homes')
                 .set(authHeader)
 
             expect(res.statusCode).toBe(200)
@@ -160,7 +160,7 @@ describe('Homes API', () => {
 
         it('returns 500 for invalid home id', async () => {
             const res = await request(global.__TEST_STATE__.app)
-                .get(`/api/homes/asdfg`)
+                .get('/api/homes/asdfg')
                 .set(authHeader)
 
             expect(res.statusCode).toBe(500)

@@ -9,13 +9,14 @@ export default ({ $api }, inject) => {
         remove
     })
 
-    function get(id, options = {}) {
+    function get (id, options = {}) {
         let imageParams
         const keys = Object.keys(options)
         const str = keys.reduce((result, item) => {
-            return result += item + '=' + options[item] + '&'
+            result += item + '=' + options[item] + '&'
+            return result
         }, '?')
-        if (keys.length == 0) {
+        if (keys.length === 0) {
             imageParams = ''
         } else {
             imageParams = str.substring(0, str.length - 1)
@@ -28,9 +29,11 @@ export default ({ $api }, inject) => {
         }
     }
 
-    function read(file) {
+    function read (file) {
         return new Promise((resolve) => {
-            if (!file) resolve('')
+            if (!file) {
+                resolve('')
+            }
 
             const reader = new FileReader()
             reader.onloadend = () => resolve(reader.result)
@@ -38,8 +41,10 @@ export default ({ $api }, inject) => {
         })
     }
 
-    async function put(str) {
-        if (!str) return ''
+    async function put (str) {
+        if (!str) {
+            return ''
+        }
 
         // Step 1: Generate upload token
         const tokenResponse = await $api.$post('/users/token', {
@@ -59,8 +64,10 @@ export default ({ $api }, inject) => {
         return { id: res.id }
     }
 
-    async function remove(id) {
-        if (!id) return
+    async function remove (id) {
+        if (!id) {
+            return
+        }
 
         // Step 1: Generate delete token (same endpoint)
         const tokenResponse = await $api.$post('/users/token', {
@@ -77,5 +84,4 @@ export default ({ $api }, inject) => {
 
         return res
     }
-
 }

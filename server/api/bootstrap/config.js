@@ -1,4 +1,4 @@
-export default function bootstrapConfig(options) {
+export default function bootstrapConfig (options) {
     const config = {}
     config.apiDb = options.privateRuntimeConfig.apiDb
     config.smtp = options.privateRuntimeConfig.smtp
