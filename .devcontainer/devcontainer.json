@@ -1,21 +1,27 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/universal
+// README at: https://github.com/devcontainers/templates/tree/main/src/alpine
 {
-	"name": "Default Linux Universal",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/universal:3-linux",
-	
+	"name": "Alpine",
+
+    "dockerComposeFile": [
+        "../tooling/dev/compose.yaml",
+        "./compose-override.yaml"
+    ],
+    "service": "app",
+    "workspaceFolder": "/app",
+
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"forwardPorts": [1025, 3000, 4040, 5432, 8025, 8080, 8081, 27017],
+    "runServices": ["mongodb", "postgresdb", "mailserver", "ngrok"],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "uname -a",
+	"postCreateCommand": "./scripts/envtool dev --split-sample",
 
 	// Configure tool-specific properties.
-    "customizations": {
+	"customizations": {
         "vscode": {
             "extensions": [
                 "dbaeumer.vscode-eslint",
