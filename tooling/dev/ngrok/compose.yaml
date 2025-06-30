@@ -1,5 +1,5 @@
 services:
   ngrok:
     image: ngrok/ngrok:latest
-    command: http https://app:3000 --url https://frank-powerful-pegasus.ngrok-free.app
+    command: http ${WEBHOOK_SERVICE_URL} --url https://frank-powerful-pegasus.ngrok-free.app
     env_file: ./.env

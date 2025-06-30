@@ -16,6 +16,7 @@
 
     // Use 'postCreateCommand' to run commands after the container is created.
     "initializeCommand": "scripts/envtool dev --split-sample",
+    "postCreateCommand": "npm install",    
 
     // Configure tool-specific properties
     "customizations": {

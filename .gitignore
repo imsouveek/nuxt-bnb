@@ -2,11 +2,6 @@
 **/.env
 **/.env.*.merged
 
-# Ignore secrets and certs
-keys.json
-sslCerts/*
-!sslCerts/.gitkeep
-
 # Generated files
 .nuxt
 node_modules/

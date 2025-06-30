@@ -15,7 +15,6 @@ ENV PRISMA_SCHEMA=$PRISMA_SCHEMA
 RUN npm install -g nodemon
 
 COPY package.json ./
-RUN npm install
 
 COPY . .
 
