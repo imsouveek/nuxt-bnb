@@ -6,7 +6,7 @@ services:
       args:
         PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
 
-    postgresdb:
+  postgresdb:
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "localhost"]
       interval: 10s
