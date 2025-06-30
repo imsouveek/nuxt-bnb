@@ -1,8 +1,8 @@
 <template>
     <div>
         <div class="px-16">
-            <v-card flat>
-                <v-card-title>
+            <v-card flat class="pb-4">
+                <v-card-title class="py-0">
                     <span v-if="bookingStatus" class="text-h6 success--text">Booking Confirmed</span>
                     <span v-else class="text-h6 error--text">Booking Failed</span>
                 </v-card-title>

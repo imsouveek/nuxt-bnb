@@ -7,8 +7,10 @@ keys.json
 sslCerts/*
 !sslCerts/.gitkeep
 
-# Node modules
+# Generated files
+.nuxt
 node_modules/
+server/payment/bootstrap/prisma/generated
 
 # DB files
 db/mongodb/*

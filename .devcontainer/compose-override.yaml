@@ -1,4 +1,0 @@
-services:
-  app:
-    build:
-      dockerfile: .devcontainer/Dockerfile.codespace.app
