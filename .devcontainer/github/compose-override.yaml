@@ -1,4 +1,7 @@
 services:
   app:
     build:
+      context: ../../../
       dockerfile: .devcontainer/local/Dockerfile.codespace.app
+      args:
+        PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
