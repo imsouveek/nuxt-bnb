@@ -1,6 +1,8 @@
 # Use lightweight Alpine-based Node image with musl libc
 FROM node:current-alpine
 
+RUN sudo apk add bash
+
 WORKDIR /app
 
 ARG NODE_PLATFORM=linuxmusl
