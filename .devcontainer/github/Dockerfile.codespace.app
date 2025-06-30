@@ -1,5 +1,4 @@
-# Use lightweight Alpine-based Node image with musl libc
-FROM node:current-alpine
+FROM node:20-bookworm
 
 RUN apk add bash
 
@@ -19,7 +18,5 @@ RUN npm install -g nodemon
 COPY package.json ./
 
 COPY . .
-
-RUN npx prisma generate --schema=$PRISMA_SCHEMA
 
 EXPOSE ${NUXT_PORT}
