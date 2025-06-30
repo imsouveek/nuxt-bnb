@@ -1,7 +1,5 @@
 FROM node:20-bookworm
 
-RUN apk add bash
-
 WORKDIR /app
 
 ARG NODE_PLATFORM=linuxmusl
