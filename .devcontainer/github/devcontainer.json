@@ -15,9 +15,9 @@
     "runServices": ["mongodb", "postgresdb", "mailserver", "ngrok"],
 
     // Use 'postCreateCommand' to run commands after the container is created.
-    "postCreateCommand": "scripts/envtool dev --split-sample",
+    "initializeCommand": "scripts/envtool dev --split-sample",
 
-    // Configure tool-specific properties.
+    // Configure tool-specific properties
     "customizations": {
         "vscode": {
             "extensions": [
