@@ -5,3 +5,10 @@ services:
       dockerfile: .devcontainer/github/Dockerfile.codespace.app
       args:
         PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
+
+    postgresdb:
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
