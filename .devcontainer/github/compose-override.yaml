@@ -6,9 +6,20 @@ services:
       args:
         PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
 
+  mongodb:
+    image: 'mongo'
+    volumes:
+      - mongodata:/data/db
+
   postgresdb:
+    volumes: 
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+volumes:
+  pgdata:
+  mongodata:

@@ -4,7 +4,7 @@
     "name": "NuxtBnB",
 
     "dockerComposeFile": ["../../tooling/dev/compose.yaml", "./compose-override.yaml"],
-    "service": "postgresdb",
+    "service": "app",
     "workspaceFolder": "/workspaces/nuxt-bnb",
 
     // Features to add to the dev container. More info: https://containers.dev/features.
@@ -12,7 +12,7 @@
 
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     "forwardPorts": [1025, 3000, 4040, 5432, 8025, 8080, 8081, 27017],
-    "runServices": ["base"],
+    "runServices": ["base", "mongodb", "postgresdb", "mailserver", "ngrok"],
 
     // Use 'postCreateCommand' to run commands after the container is created.
     "initializeCommand": "scripts/envtool dev --split-sample",
