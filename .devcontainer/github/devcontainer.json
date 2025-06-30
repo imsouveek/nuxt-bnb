@@ -8,9 +8,9 @@
     "workspaceFolder": "/workspaces/nuxt-bnb",
 
     // Features to add to the dev container. More info: https://containers.dev/features.
-    // "features": {
-    //     "ghcr.io/devcontainers/features/github-cli:1": {}
-    // },
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
 
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     "forwardPorts": [1025, 3000, 4040, 5432, 8025, 8080, 8081, 27017],

@@ -3,9 +3,9 @@ services:
     build:
       context: ../../
       dockerfile: .devcontainer/github/Dockerfile.codespace.app
-    environment:
-      HOST: ${CODESPACE_NAME}-3000.app.github.dev
-      PORT: 80
+    # environment:
+    #   HOST: ${CODESPACE_NAME}.app.github.dev
+    #   PORT: 3000
 
   base:
     build:
