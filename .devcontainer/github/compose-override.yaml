@@ -5,6 +5,14 @@ services:
       dockerfile: .devcontainer/github/Dockerfile.codespace.app
       args:
         PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
+    environment:
+      HOST: ${CODESPACE_NAME}-3000.app.github.dev
+      PORT: 80
+
+  base:
+    build:
+      context: ../../
+      dockerfile: .devcontainer/github/Dockerfile.codespace.base
 
   mongodb:
     image: 'mongo'

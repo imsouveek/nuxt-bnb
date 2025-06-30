@@ -1,0 +1,2 @@
+# Seems like npm install has to be executed after codespace container is created
+FROM node:current-alpine
