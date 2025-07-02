@@ -1,32 +1,35 @@
 services:
-  app:
-    build:
-      context: ../../
-      dockerfile: .devcontainer/github/Dockerfile.codespace.app
-    command: sh
-    # environment:
-    #   HOST: ${CODESPACE_NAME}.app.github.dev
-    #   PORT: 3000
+    app:
+        build:
+            context: ../../
+            dockerfile: .devcontainer/github/Dockerfile.codespace.app
+            args:
+                PRISMA_SCHEMA: server/payment/bootstrap/prisma/schema.prisma
+        environment:
+            HOST: ${CODESPACE_NAME}-3000.app.github.dev
+            NUXT_LOCAL_PORT: 443
+        volumes:
+            - ../../:/app
 
-  base:
-    build:
-      context: ../../
-      dockerfile: .devcontainer/github/Dockerfile.codespace.base
+    base:
+        build:
+            context: ../../
+            dockerfile: .devcontainer/github/Dockerfile.codespace.base
 
-  mongodb:
-    image: 'mongo'
-    volumes:
-      - mongodata:/data/db
+    mongodb:
+        image: 'mongo'
+        volumes:
+            - mongodata:/data/db
 
-  postgresdb:
-    volumes: 
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    postgresdb:
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ['CMD', 'pg_isready', '-h', 'localhost']
+            interval: 10s
+            timeout: 5s
+            retries: 5
 
 volumes:
-  pgdata:
-  mongodata:
+    pgdata:
+    mongodata:

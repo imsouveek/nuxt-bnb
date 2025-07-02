@@ -10,18 +10,27 @@ import bookingRouter from './resources/bookings/route.js'
 import csrf from './services/csrf.js'
 import { sendJSON } from './utils/response.js'
 
-export default function createApiRouter (controllers) {
+export default function createApiRouter(controllers) {
     const router = express.Router()
 
-    router.use(cors({
-        origin: (origin, callback) => {
-            if (!origin || origin === controllers.config.url.app || origin === controllers.config.url.payment) {
-                return callback(null, true)
-            }
-            return callback(new Error(`Not allowed by CORS: ${origin}, ${controllers.config.url.app}`))
-        },
-        credentials: true
-    }))
+    router.use(
+        cors({
+            origin: (origin, callback) => {
+                if (
+                    !origin || 
+                    origin === controllers.config.url.app ||
+                    origin === controllers.config.url.payment ||
+                    (origin === controllers.config.url.local && controllers.config.auth.skip_cors)
+                ) {
+                    return callback(null, true)
+                }
+                console.log('Incoming Origin:', origin)
+                console.log('Expected Origin:', controllers.config.url.app)
+                return callback(new Error(`Not allowed by CORS: ${origin}, ${controllers.config.url.app}`))
+            },
+            credentials: true,
+        })
+    )
     router.use(helmet())
 
     const { csrfRouter, csrfMiddleware } = csrf(controllers.config.auth)

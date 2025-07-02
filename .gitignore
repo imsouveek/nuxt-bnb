@@ -5,6 +5,7 @@
 # Generated files
 .nuxt
 node_modules/
+package-lock.json
 server/payment/bootstrap/prisma/generated
 
 # DB files

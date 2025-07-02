@@ -8,9 +8,7 @@
     "workspaceFolder": "/workspaces/nuxt-bnb",
 
     // Features to add to the dev container. More info: https://containers.dev/features.
-    // "features": {
-    //     "ghcr.io/devcontainers/features/github-cli:1": {}
-    // },
+    // "features": {},
 
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     "forwardPorts": [1025, 3000, 4040, 5432, 8025, 8080, 8081, 27017],
@@ -18,7 +16,7 @@
 
     // Use 'postCreateCommand' to run commands after the container is created.
     "initializeCommand": "scripts/envtool dev --split-sample",
-    "postCreateCommand": "./postCreate.sh",    
+    "postCreateCommand": "npm install",    
 
     // Configure tool-specific properties
     "customizations": {
