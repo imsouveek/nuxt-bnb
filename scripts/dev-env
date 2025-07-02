@@ -1,296 +1,182 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
+import argparse
+import json
+import subprocess
+import sys
+from pathlib import Path
 
-set -euo pipefail
+ROOT_DIR = Path(__file__).resolve().parents[1]
+COMPOSE_FILE = ROOT_DIR / "tooling" / "dev" / "compose.yaml"
+TARGETS_FILE = ROOT_DIR / "tooling" / "dev" / "targets.json"
+HELP_FILE = ROOT_DIR / "scripts" / "dev-env.help"
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COMPOSE_FILE="${ROOT_DIR}/tooling/dev/compose.yaml"
-TARGETS_FILE="${ROOT_DIR}/tooling/dev/targets.json"
+def load_targets():
+    with open(TARGETS_FILE) as f:
+        raw = json.load(f)
 
-# Argument buckets
-JEST_ARGS=()
-EXTRA_ARGS=()
-PASSTHROUGH_CMD=()
-FILTERED_ARGS=()
-JEST_MODE=false
-PASSTHROUGH_MODE=false
+    targets = {}
+    for name, conf in raw.items():
+        if isinstance(conf, list):
+            targets[name] = {
+                "commands": conf,
+                "containers": [name],
+            }
+        else:
+            targets[name] = {
+                "commands": conf.get("commands", []),
+                "containers": conf.get("containers", [name]),
+                "jest_config": conf.get("jest_config"),
+            }
+    return targets
 
-# -----------------------------------------------
-# Auto-detect platform/arch/libc
-# -----------------------------------------------
-detect_platform_args() {
-    local arch="$(uname -m)"
-    local libc=""
 
-    # Default values. NODE_PLATFORM and NODE_LIBC can stay as is because the build target is node:alpine
-    NODE_ARCH="arm64"
-    NODE_PLATFORM="linuxmusl"
-    NODE_LIBC="musl"
+def run_compose(command_args):
+    print(f"→ Running: {' '.join(command_args)}")
+    subprocess.run(command_args, check=True)
 
-    case "$arch" in
-        aarch64 | arm64)
-            NODE_ARCH="arm64"
-            ;;
-        x86_64 | amd64)
-            NODE_ARCH="amd64"
-            ;;
-        *)
-            echo "Unsupported architecture: $arch"
-            exit 1
-            ;;
-    esac
-}
 
-# Call immediately so the variables are ready
-detect_platform_args
+def handle_start(target, containers, docker_args):
+    for c in containers:
+        run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "up"] + docker_args + [c])
 
-# -------------------------
-# Load targets and schemas
-# -------------------------
-declare -A COMMANDS CONTAINERS JEST_CONFIG
+def handle_stop(target, containers, docker_args):
+    for c in containers:
+        run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "down"] + docker_args + [c])
 
-if [[ ! -f "$TARGETS_FILE" ]]; then
-    echo "Error: Target list file not found: $TARGETS_FILE"
-    exit 1
-fi
+def handle_test(container, config_path, jest_args, docker_args):
+    if not config_path:
+        print(f"No jest config found")
+        sys.exit(1)
 
-# key           = target name
-# commands      = supported commands (start|stop|...)
-# containers    = container names (separated by |)
-# rest          = optional Jest config path
-# Load JSON using Python 3
-eval "$(
-  python3 - "$TARGETS_FILE" <<EOF
-import sys, json
-with open(sys.argv[1]) as f:
-    targets = json.load(f)
+    jest_cmd = ["NODE_OPTIONS=--experimental-vm-modules", "npx", "jest", "--config", config_path] + (jest_args or ["--coverage"])
+    run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "run", "--rm"] + docker_args + [container, "sh", "-c", " ".join(jest_cmd)])
 
-for name, conf in targets.items():
-    if isinstance(conf, list):
-        print(f'COMMANDS[{name}]="{"|".join(conf)}"')
-        print(f'CONTAINERS[{name}]="{name}"')
-    elif isinstance(conf, dict):
-        print(f'COMMANDS[{name}]="{"|".join(conf.get("commands", []))}"')
-        print(f'CONTAINERS[{name}]="{" ".join(conf.get("containers", [name]))}"')
-        if "jest_config" in conf:
-            print(f'JEST_CONFIG[{name}]="{conf["jest_config"]}"')
-EOF
-)"
+def handle_run(container, passthrough_args, docker_args):
+    if passthrough_args:
+        shell_cmd = " ".join(passthrough_args)
+        run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "run", "--rm"] + docker_args + [container, "sh", "-c", shell_cmd])
+    else:
+        run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "run", "--rm"] + docker_args + [container])
 
-# --------------------------------------------------
-# Helpers to show usage instructions
-# --------------------------------------------------
-print_targets_for_command() {
-    local command="$1"
-    local found=false
 
-    for key in "${!COMMANDS[@]}"; do
-        IFS='|' read -ra actions <<< "${COMMANDS[$key]}"
-        for action in "${actions[@]}"; do
-            if [[ "$action" == "$command" ]]; then
-                if [[ $found == false ]]; then
-                    echo ""
-                    echo "Available targets:"
-                    found=true
-                fi
+def handle_connect(target):
+    run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "exec", target, "sh"])
 
-                echo "  - $key"
+
+def handle_status():
+    run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "ps"])
+
+
+def print_help_section(section):
+    if not HELP_FILE.exists():
+        print("Help file not found:", HELP_FILE)
+        sys.exit(1)
+
+    header = f"## {section}"
+    in_section = False
+    printed = False
+
+    with HELP_FILE.open() as f:
+        for line in f:
+            if line.strip() == header:
+                in_section = True
+                continue
+            if line.startswith("## ") and in_section:
                 break
-            fi
-        done
-    done
-    
-    echo ""
-    echo ""
-}
+            if in_section:
+                print(line, end="")
+                printed = True
 
-print_help() {
-    local section="${1:-index}"
-    local help_file="$ROOT_DIR/scripts/dev-env.help"
+    if not printed:
+        print(f"No help found for command: {section}")
 
-    if [[ ! -f "$help_file" ]]; then
-        echo "Help file not found: $help_file"
-        exit 1
-    fi
 
-    awk -v section="## $section" '
-        $0 == section {found=1; next}
-        /^## / && found {exit}
-        found {print}
-    ' "$help_file"
+def print_targets_for_command(command, targets):
+    print("\nAvailable targets:")
+    for name, conf in targets.items():
+        if command in conf.get("commands", []):
+            print(f"  - {name}")
+    print()
 
-    print_targets_for_command "$section"
-}
+def partition_args(raw_args):
+    passthrough_index = raw_args.index("--") if "--" in raw_args else None
+    jest_index = raw_args.index("--jest") if "--jest" in raw_args else None
 
-# --------------------------------------------------
-# Helpers to show validate command and target
-# --------------------------------------------------
-is_valid_target() {
-    local key="${1:-}"
-    [[ -n "$key" && -n "${COMMANDS[$key]+_}" ]]
-}
+    passthrough_args = []
+    jest_args = []
+    cleaned_args = []
 
-is_valid_command() {
-    local target="${1:-}"
-    local command="${2:-}"
-    [[ "${COMMANDS[$target]}" == *"$command"* ]]
-}
+    i = 0
+    while i < len(raw_args):
+        if i == jest_index:
+            i += 1
+            while i < len(raw_args) and raw_args[i] not in ("--", "--jest"):
+                jest_args.append(raw_args[i])
+                i += 1
+        elif i == passthrough_index:
+            i += 1
+            while i < len(raw_args) and raw_args[i] not in ("--", "--jest"):
+                passthrough_args.append(raw_args[i])
+                i += 1
+        else:
+            cleaned_args.append(raw_args[i])
+            i += 1
 
-has_test_config() {
-    [[ -n "${JEST_CONFIG[$1]}" ]]
-}
+    return cleaned_args, jest_args, passthrough_args
 
-# --------------------------------------------------
-# Helper to parse command args
-# --------------------------------------------------
-parse_extra_args() {
-    for arg in "$@"; do
-        case "$arg" in
-            --jest)
-                JEST_MODE=true
-                PASSTHROUGH_MODE=false
-                continue
-                ;;
-            -- ) 
-                PASSTHROUGH_MODE=true
-                JEST_MODE=false
-                continue
-                ;;
-        esac
+def main():
+    targets = load_targets()
 
-        if $JEST_MODE; then
-            JEST_ARGS+=("$arg")
-        elif $PASSTHROUGH_MODE; then
-            PASSTHROUGH_CMD+=("$arg")
-        else
-            FILTERED_ARGS+=("$arg")
-        fi
-    done
-}
+    # Pre-parse to find `--` and `--jest`
+    raw_args = sys.argv[1:]
+    cleaned_args, jest_args, passthrough_args = partition_args(raw_args)
 
-# -------------------------
-# Main CLI handling
-# -------------------------
-COMMAND="${1:-}"
-TARGET="${2:-}"
-shift 2 || true
-EXTRA_ARGS=("$@")
-parse_extra_args "${EXTRA_ARGS[@]}"
+    parser = argparse.ArgumentParser(description="Dev Environment CLI")
+    parser.add_argument("command", choices=["start", "stop", "test", "run", "connect", "status", "help"])
+    parser.add_argument("target", nargs="?", help="Target to run command against")
+    parser.add_argument("docker_args", nargs=argparse.REMAINDER, help="Docker Compose args")
 
-if [[ "$COMMAND" != "test" && ${#JEST_ARGS[@]} -gt 0 ]]; then
-    echo "Error: --jest can only be used with the 'test' command"
-    exit 1
-fi
+    args = parser.parse_args(cleaned_args)
 
-if [[ "$COMMAND" != "run" && ${#PASSTHROUGH_CMD[@]} -gt 0 ]]; then
-    echo "Error: -- can only be used with the 'run' command"
-    exit 1
-fi
+    if args.command == "status":
+        handle_status()
+        return
 
-case "$COMMAND" in
-    start)
-        if ! is_valid_target "$TARGET" || ! is_valid_command "$TARGET" start; then
-            echo "Invalid target: $TARGET"
-            exit 1
-        fi
-        echo "Starting $TARGET..."
-        
-        IFS=' ' read -r -a containers <<< "${CONTAINERS[$TARGET]}"
-        for container in "${containers[@]}"; do
-            echo " → Starting container: $container"
-            docker compose -f "$COMPOSE_FILE" up "${FILTERED_ARGS[@]}" "$container"
-        done
-        ;;
+    if args.command == "help":
+        section = args.target or "index"
+        print_help_section(section)
+        if section in ["start", "stop", "test", "run", "connect"]:
+            print_targets_for_command(section, targets)
+        return
 
-    stop)
-        if ! is_valid_target "$TARGET" || ! is_valid_command "$TARGET" stop; then
-            echo "Invalid target: $TARGET"
-            exit 1
-        fi
-        
-        IFS=' ' read -r -a containers <<< "${CONTAINERS[$TARGET]}"
-        for container in "${containers[@]}"; do
-            echo " → Stopping container: $container"
-            docker compose -f "$COMPOSE_FILE" down "${FILTERED_ARGS[@]}" "$container"
-        done
-        ;;
+    if not args.target:
+        print("Missing target for command:", args.command)
+        sys.exit(1)
 
-    test)
-        run_test_target() {
-            if ! is_valid_target "$TARGET" || ! is_valid_command "$TARGET" test; then
-                echo "Invalid target: $TARGET"
-                exit 1
-            fi
-            if ! has_test_config "$TARGET"; then
-                echo "No test config set up for $TARGET"
-                exit 1
-            fi
+    if args.target not in targets:
+        print(f"Unknown target: {args.target}")
+        sys.exit(1)
 
-            IFS=' ' read -r -a containers <<< "${CONTAINERS[$TARGET]}"
-            local targetContainer="${containers[0]}"
+    target_info = targets[args.target]
+    containers = target_info["containers"]
+    main_container = containers[0]
 
-            echo "Running test $TARGET..."
+    if args.command not in target_info["commands"]:
+        print(f"Command '{args.command}' not allowed for target '{args.target}'")
+        sys.exit(1)
 
-            local config_path="${JEST_CONFIG[$TARGET]}"
-            local jest_command="NODE_OPTIONS=--experimental-vm-modules npx jest --config $config_path"
+    # Delegate
+    if args.command == "start":
+        handle_start(args.target, containers, args.docker_args)
+    elif args.command == "stop":
+        handle_stop(args.target, containers, args.docker_args)
+    elif args.command == "test":
+        handle_test(main_container, target_info.get("jest_config"), jest_args, args.docker_args)
+    elif args.command == "run":
+        handle_run(main_container, passthrough_args, args.docker_args)
+    elif args.command == "connect":
+        handle_connect(main_container)
 
-            if [[ ${#JEST_ARGS[@]} -eq 0 ]]; then
-                jest_command="$jest_command --coverage"
-            else
-                jest_command="$jest_command ${JEST_ARGS[*]}"
-            fi
 
-            docker compose -f "$COMPOSE_FILE" run --rm --build "${FILTERED_ARGS[@]}" "$targetContainer" \
-                sh -c "$jest_command"
-
-        }
-        run_test_target
-        ;;
-
-    connect)
-        if ! is_valid_target "$TARGET" || ! is_valid_command "$TARGET" connect; then
-            echo "Cannot connect to target: $TARGET"
-            exit 1
-        fi
-        echo "Connecting to running container: $TARGET..."
-        docker compose -f "$COMPOSE_FILE" exec "$TARGET" sh
-        ;;
-
-    run)
-        run_run_target() {
-            if ! is_valid_target "$TARGET" || ! is_valid_command "$TARGET" run; then
-                echo "Invalid target: $TARGET"
-                exit 1
-            fi
-
-            IFS=' ' read -r -a containers <<< "${CONTAINERS[$TARGET]}"
-            local targetContainer="${containers[0]}"
-
-            echo "Running command in container: $targetContainer"
-
-            if [[ ${#PASSTHROUGH_CMD[@]} -eq 0 ]]; then
-                echo " → Opening interactive shell..."
-                docker compose -f "$COMPOSE_FILE" run --rm "${FILTERED_ARGS[@]}" "$targetContainer"
-            else
-                docker compose -f "$COMPOSE_FILE" run --rm "${FILTERED_ARGS[@]}" "$targetContainer" \
-                    sh -c "$(printf '%q ' "${PASSTHROUGH_CMD[@]}")"
-            fi
-        }
-        run_run_target
-        ;;
-
-    status)
-        echo "Showing container status..."
-        docker compose -f "$COMPOSE_FILE" ps
-        ;;
-
-    help)
-        print_help "${TARGET:-index}"
-        exit 0
-        ;;
-
-    *)
-        echo "Wrong usage"
-        echo "Run ./scripts/dev-env help <command> for more info"
-        exit 1
-        ;;
-esac
+if __name__ == "__main__":
+    main()

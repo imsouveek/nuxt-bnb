@@ -14,7 +14,7 @@ module.exports = {
         sourceType: 'module'
     },
     extends: [
-        '@nuxtjs',
+        '@nuxtjs/eslint-config',
         'plugin:nuxt/recommended',
         'plugin:vue/recommended',
         'plugin:jest/recommended'

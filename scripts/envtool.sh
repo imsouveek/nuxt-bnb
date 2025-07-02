@@ -1,0 +1,264 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# === config ===
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ENV_DIR="${ROOT_DIR}/tooling"
+MERGED_FILE_EXTENSION="merged"
+SAMPLE_FILE_EXTENSION="sample"
+
+# === functions ===
+usage() {
+    echo "Usage:"
+    echo "  $0 [env] --merge          Merge env files into .env.${ENV_NAME}.${MERGED_FILE_EXTENSION}"
+    echo "  $0 [env] --split          Split .env.${ENV_NAME}.${MERGED_FILE_EXTENSION} into env files"
+    echo "  $0 [env] --sample         Create *.sample files with masked secrets"
+    echo "  $0 [env] --split-sample   Generate .env from sample merged file with no masked keys"
+    echo "  $0 [env] --clean          Remove all merged/sample files"
+    exit 1
+}
+
+check_config() {
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo "Missing $CONFIG_FILE"
+        exit 1
+    fi
+}
+
+merge_env_files() {
+    if [ ${#env_files[@]} -eq 0 ]; then
+        echo "No .env files found to merge in $ENV_PATH"
+        exit 1
+    fi
+    echo "Merging files into $merged_file"
+    : > "$merged_file"
+
+    for f in "${env_files[@]}"; do
+        rel_path="${f#$ENV_PATH/}"
+        echo "# From $rel_path" >> "$merged_file"
+        cat "$f" >> "$merged_file"
+        echo "" >> "$merged_file"
+        echo "" >> "$merged_file"
+    done
+
+    awk 'BEGIN{blank=0} NF{blank=0; print; next} !blank{blank=1; print}' \
+        "$merged_file" > "${merged_file}.tmp" && mv "${merged_file}.tmp" "$merged_file"
+
+    echo "Merged env written to $merged_file"
+}
+
+split_env_file() {
+    if [ ! -f "$merged_file" ]; then
+        echo "Error: Merged file not found: $merged_file"
+        exit 1
+    fi
+
+    echo "Validating directories in $merged_file..."
+    missing_paths=()
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        if echo "$line" | grep -q '^# From '; then
+            rel_path="${line#\# From }"
+            target_dir="$(dirname "$ENV_PATH/$rel_path")"
+
+            case "$rel_path" in
+                ../*|*/../*)
+                    echo "Error: Unsafe relative path in merged file → $rel_path"
+                    exit 1
+                    ;;
+            esac
+
+            if [ ! -d "$target_dir" ]; then
+                missing_paths+=("$target_dir")
+            fi
+        fi
+    done < "$merged_file"
+
+    if [ ${#missing_paths[@]} -gt 0 ]; then
+        echo "Error: The following directories are missing:"
+        for d in "${missing_paths[@]}"; do
+            echo "  - $d"
+        done
+        echo "Aborting. No .env files were created."
+        exit 1
+    fi
+
+    echo "All directories exist. Proceeding to split..."
+    current_file=""
+    while IFS= read -r line || [ -n "$line" ]; do
+        if echo "$line" | grep -q '^# From '; then
+            rel_path="${line#\# From }"
+            current_file="$ENV_PATH/$rel_path"
+            : > "$current_file"
+            echo "  → Writing to $current_file"
+        elif [ -n "$current_file" ]; then
+            echo "$line" >> "$current_file"
+        fi
+    done < "$merged_file"
+
+    echo "Split complete."
+}
+
+generate_sample_files() {
+    echo "Generating .sample files for envs under $ENV_PATH..."
+
+    MASK_KEYS=()
+    while IFS= read -r line; do
+        MASK_KEYS+=("$line")
+    done < <(python3 - "$CONFIG_FILE" <<EOF
+import sys, json
+cfg = json.load(open(sys.argv[1]))
+for k in cfg.get("mask_keys", []):
+    print(k)
+EOF
+)
+
+    if [ ${#MASK_KEYS[@]} -eq 0 ]; then
+        echo "No mask_keys found in $CONFIG_FILE"
+        exit 1
+    fi
+
+    top_level_sample="${ENV_PATH}/.env.${ENV_NAME}.${MERGED_FILE_EXTENSION}.${SAMPLE_FILE_EXTENSION}"
+    : > "$top_level_sample"
+
+    for f in "${env_files[@]}"; do
+        sample_file="${f}.${SAMPLE_FILE_EXTENSION}"
+        echo "  → Writing masked $sample_file"
+
+        awk -v keys="$(IFS="|"; echo "${MASK_KEYS[*]}")" '
+            BEGIN { split(keys, klist, "|"); for (i in klist) keymap[klist[i]] = 1 }
+            $0 ~ /^[A-Za-z_][A-Za-z0-9_]*=.*/ {
+                split($0, parts, "=")
+                key = parts[1]
+                if (key in keymap) {
+                    print key "=xxxxx"
+                } else {
+                    print
+                }
+                next
+            }
+            { print }
+        ' "$f" > "$sample_file"
+
+        rel_path="${f#$ENV_PATH/}"
+        {
+            echo "# From $rel_path"
+            cat "$sample_file"
+            echo ""
+            echo ""
+        } >> "$top_level_sample"
+    done
+
+    awk 'BEGIN{blank=0} NF{blank=0; print; next} !blank{blank=1; print}' \
+        "$top_level_sample" > "${top_level_sample}.tmp" && mv "${top_level_sample}.tmp" "$top_level_sample"
+
+    echo "Sample files generated, including top-level: $top_level_sample"
+}
+
+clean_env_files() {
+    echo "Cleaning merged and sample files in $ENV_PATH..."
+    deleted_any=false
+
+    find "$ENV_PATH" -type f \( \
+        -name ".env.${ENV_NAME}.${MERGED_FILE_EXTENSION}" -o \
+        -name ".env.${ENV_NAME}.${MERGED_FILE_EXTENSION}.${SAMPLE_FILE_EXTENSION}" -o \
+        -name ".env*.${SAMPLE_FILE_EXTENSION}" \) | while read -r f; do
+        echo "  → Deleting $f"
+        rm -f "$f"
+        deleted_any=true
+    done
+
+    if ! "$deleted_any"; then
+        echo "No merged or sample files found to delete."
+    else
+        echo "Cleanup complete."
+    fi
+}
+
+split_sample_file() {
+    sample_file="${ENV_PATH}/.env.${ENV_NAME}.${MERGED_FILE_EXTENSION}.${SAMPLE_FILE_EXTENSION}"
+    if [ ! -f "$sample_file" ]; then
+        echo "Error: Sample merged file not found: $sample_file"
+        exit 1
+    fi
+
+    echo "Splitting $sample_file into per-service .env files, skipping masked secrets..."
+
+    MASK_KEYS=()
+    while IFS= read -r line; do
+        MASK_KEYS+=("$line")
+    done < <(python3 - "$CONFIG_FILE" <<EOF
+import sys, json
+cfg = json.load(open(sys.argv[1]))
+for k in cfg.get("mask_keys", []):
+    print(k)
+EOF
+)
+    MASK_LOOKUP_KEYS="|$(IFS="|"; echo "${MASK_KEYS[*]}")|"
+    is_masked_key() {
+        case "$MASK_LOOKUP_KEYS" in
+            *"|$1|"*) return 0 ;;
+            *) return 1 ;;
+        esac
+    }
+
+    current_file=""
+    while IFS= read -r line || [ -n "$line" ]; do
+        if echo "$line" | grep -q '^# From '; then
+            rel_path="${line#\# From }"
+            current_file="$ENV_PATH/$rel_path"
+            : > "$current_file"
+            echo "  → Writing to $current_file"
+        elif [ -n "$current_file" ] && echo "$line" | grep -q '^[A-Za-z_][A-Za-z0-9_]*='; then
+            key="${line%%=*}"
+            if is_masked_key "$key"; then
+                continue
+            fi
+            echo "$line" >> "$current_file"
+        elif [ -n "$current_file" ]; then
+            echo "$line" >> "$current_file"
+        fi
+    done < "$sample_file"
+
+    echo "Split-sample complete."
+}
+
+# === command parsing ===
+ENV_NAME="${1:-}"
+ACTION="${2:-}"
+
+[ -z "$ENV_NAME" ] || [ -z "$ACTION" ] && usage
+
+ENV_PATH="${ENV_DIR}/${ENV_NAME}"
+CONFIG_FILE="${ENV_PATH}/envconfig.json"
+
+if [ ! -d "$ENV_PATH" ]; then
+    echo "Environment directory not found: $ENV_PATH"
+    exit 1
+fi
+
+check_config
+
+env_files=( $(find "$ENV_PATH" -type f -name ".env" ! -name "*.${MERGED_FILE_EXTENSION}" ! -name "*.${SAMPLE_FILE_EXTENSION}" | sort) )
+merged_file="${ENV_PATH}/.env.${ENV_NAME}.${MERGED_FILE_EXTENSION}"
+
+case "$ACTION" in
+    --merge)
+        merge_env_files
+        ;;
+    --split)
+        split_env_file
+        ;;
+    --sample)
+        generate_sample_files
+        ;;
+    --clean)
+        clean_env_files
+        ;;
+    --split-sample)
+        split_sample_file
+        ;;
+    *)
+        usage
+        ;;
+esac

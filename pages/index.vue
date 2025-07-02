@@ -44,7 +44,7 @@
     export default {
         name: 'HomePage',
         layout: 'blank',
-        async asyncData({ $config, $api }) {
+        async asyncData ({ $config, $api }) {
             let res, config
             try {
                 res = await fetch(`${$config.url.app}/hero.json`)
@@ -63,41 +63,39 @@
                 }, '/search/homes?')
                 .slice(0, -1)
             const homes = await $api.$get(homeListUrl)
-            const homeMap = Object.fromEntries(homes.map((h) => [h._id, h]))
+            const homeMap = Object.fromEntries(homes.map(h => [h._id, h]))
 
             const allHomes = {}
             for (const category in recommendationsList) {
-                allHomes[category] = recommendationsList[category].map((id) => homeMap[id]).filter(Boolean)
+                allHomes[category] = recommendationsList[category].map(id => homeMap[id]).filter(Boolean)
             }
 
             return {
                 banner: config.banner,
                 topDestinations: config.topDestinations,
-                allHomes,
+                allHomes
             }
         },
-        data() {
+        data () {
             return {
                 inputText: '',
-
                 dates: [ISODate(addDays(Date.now(), 7)), ISODate(addDays(Date.now(), 9))],
-
-                place: null,
+                place: null
             }
         },
-        async mounted() {
+        async mounted () {
             await this.$initSession()
             this.$maps.makeAutoComplete(document.getElementById('citySearch'))
         },
         methods: {
-            dateChange(val) {
+            dateChange (val) {
                 this.$set(this.dates, 0, val[0])
                 this.$set(this.dates, 1, val[1])
             },
-            getHomes(tab) {
+            getHomes (tab) {
                 return this.allHomes[tab] || []
-            },
-        },
+            }
+        }
     }
 </script>
 
