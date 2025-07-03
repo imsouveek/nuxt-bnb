@@ -11,9 +11,9 @@ You're welcome to:
 
 ---
 
-## Contributions
+## Guidelines
 
-> **Note:** Pull requests are not accepted.
+> **Note:** Pull requests are not accepted, because it is meant for personal learning
 
 This project follows a personal roadmap and evolves frequently.
 
