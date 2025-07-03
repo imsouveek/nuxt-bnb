@@ -10,14 +10,14 @@ import bookingRouter from './resources/bookings/route.js'
 import csrf from './services/csrf.js'
 import { sendJSON } from './utils/response.js'
 
-export default function createApiRouter(controllers) {
+export default function createApiRouter (controllers) {
     const router = express.Router()
 
     router.use(
         cors({
             origin: (origin, callback) => {
                 if (
-                    !origin || 
+                    !origin ||
                     origin === controllers.config.url.app ||
                     origin === controllers.config.url.payment ||
                     (origin === controllers.config.url.local && controllers.config.auth.skip_cors)
@@ -28,7 +28,7 @@ export default function createApiRouter(controllers) {
                 console.log('Expected Origin:', controllers.config.url.app)
                 return callback(new Error(`Not allowed by CORS: ${origin}, ${controllers.config.url.app}`))
             },
-            credentials: true,
+            credentials: true
         })
     )
     router.use(helmet())

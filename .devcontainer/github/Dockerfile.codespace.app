@@ -1,6 +1,7 @@
 FROM node:current-alpine
 
 RUN apk add --no-cache git
+RUN apk add --no-cache python3
 
 WORKDIR /app
 

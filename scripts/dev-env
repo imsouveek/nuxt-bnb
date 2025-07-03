@@ -3,6 +3,8 @@ import argparse
 import json
 import subprocess
 import sys
+import os
+import platform
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -10,6 +12,21 @@ COMPOSE_FILE = ROOT_DIR / "tooling" / "dev" / "compose.yaml"
 TARGETS_FILE = ROOT_DIR / "tooling" / "dev" / "targets.json"
 HELP_FILE = ROOT_DIR / "scripts" / "dev-env.help"
 
+# Set environment variables that docker needs to build
+os.environ["COMPOSE_BAKE"] = "true"
+os.environ["NODE_PLATFORM"] = "linuxmusl"
+os.environ["NODE_LIBC"] = "musl"
+
+arch = platform.machine()
+if arch in ("aarch64", "arm64"):
+    os.environ["NODE_ARCH"] = "arm64"
+elif arch in ("x86_64", "amd64"):
+    os.environ["NODE_ARCH"] = "amd64"
+else:
+    print(f"Unsupported architecture: {arch}", file=sys.stderr)
+    sys.exit(1)
+
+# Process targets and container configuration
 def load_targets():
     with open(TARGETS_FILE) as f:
         raw = json.load(f)
@@ -29,44 +46,75 @@ def load_targets():
             }
     return targets
 
-
+# Call subprocess.run to execute command in shell
 def run_compose(command_args):
     print(f"→ Running: {' '.join(command_args)}")
     subprocess.run(command_args, check=True)
 
-
-def handle_start(target, containers, docker_args):
+# Sets up docker compose up command for one or more containers with compose options
+def handle_start(containers, docker_args):
     for c in containers:
-        run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "up"] + docker_args + [c])
+        run_compose(
+            ["docker", "compose", "-f", str(COMPOSE_FILE), "up", "--build"]
+            + docker_args
+            + [c]
+        )
 
-def handle_stop(target, containers, docker_args):
+# Sets up docker compose down command for one or more containers with compose options
+def handle_stop(containers, docker_args):
     for c in containers:
-        run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "down"] + docker_args + [c])
+        run_compose(
+            ["docker", "compose", "-f", str(COMPOSE_FILE), "down"]
+            + docker_args
+            + [c]
+        )
 
+# Sets up unit test wtih jest configuration as per target
 def handle_test(container, config_path, jest_args, docker_args):
     if not config_path:
         print(f"No jest config found")
         sys.exit(1)
 
-    jest_cmd = ["NODE_OPTIONS=--experimental-vm-modules", "npx", "jest", "--config", config_path] + (jest_args or ["--coverage"])
-    run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "run", "--rm"] + docker_args + [container, "sh", "-c", " ".join(jest_cmd)])
+    jest_cmd = [
+        "NODE_OPTIONS=--experimental-vm-modules",
+        "npx",
+        "jest",
+        "--config",
+        config_path,
+    ] + (jest_args or ["--coverage"])
+    run_compose(
+        ["docker", "compose", "-f", str(COMPOSE_FILE), "run", "--rm", "--build"]
+        + docker_args
+        + [container, "sh", "-c", " ".join(jest_cmd)]
+    )
 
+# Sets up container for one off commands or an alpine shell
 def handle_run(container, passthrough_args, docker_args):
     if passthrough_args:
         shell_cmd = " ".join(passthrough_args)
-        run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "run", "--rm"] + docker_args + [container, "sh", "-c", shell_cmd])
+        run_compose(
+            ["docker", "compose", "-f", str(COMPOSE_FILE), "run", "--rm", "--build"]
+            + docker_args
+            + [container, "sh", "-c", shell_cmd]
+        )
     else:
-        run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "run", "--rm"] + docker_args + [container])
+        run_compose(
+            ["docker", "compose", "-f", str(COMPOSE_FILE), "run", "--rm", "--build"]
+            + docker_args
+            + [container]
+        )
 
-
+# Log in to running container
 def handle_connect(target):
-    run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "exec", target, "sh"])
+    run_compose(
+        ["docker", "compose", "-f", str(COMPOSE_FILE), "exec", target, "sh"]
+    )
 
-
+# Display container status
 def handle_status():
     run_compose(["docker", "compose", "-f", str(COMPOSE_FILE), "ps"])
 
-
+# Print dev-env help 
 def print_help_section(section):
     if not HELP_FILE.exists():
         print("Help file not found:", HELP_FILE)
@@ -90,7 +138,7 @@ def print_help_section(section):
     if not printed:
         print(f"No help found for command: {section}")
 
-
+# Shows available targets for each command
 def print_targets_for_command(command, targets):
     print("\nAvailable targets:")
     for name, conf in targets.items():
@@ -98,50 +146,63 @@ def print_targets_for_command(command, targets):
             print(f"  - {name}")
     print()
 
+# Breaks down commandline options to jest args, passthrough args and docker command
 def partition_args(raw_args):
-    passthrough_index = raw_args.index("--") if "--" in raw_args else None
-    jest_index = raw_args.index("--jest") if "--jest" in raw_args else None
+    jest_mode = False
+    passthrough_mode = False
 
-    passthrough_args = []
     jest_args = []
+    passthrough_args = []
     cleaned_args = []
 
-    i = 0
-    while i < len(raw_args):
-        if i == jest_index:
-            i += 1
-            while i < len(raw_args) and raw_args[i] not in ("--", "--jest"):
-                jest_args.append(raw_args[i])
-                i += 1
-        elif i == passthrough_index:
-            i += 1
-            while i < len(raw_args) and raw_args[i] not in ("--", "--jest"):
-                passthrough_args.append(raw_args[i])
-                i += 1
+    for arg in raw_args:
+        if arg == "--jest":
+            jest_mode = True
+            passthrough_mode = False
+            continue
+        elif arg == "--":
+            passthrough_mode = True
+            jest_mode = False
+            continue
+
+        if jest_mode:
+            jest_args.append(arg)
+        elif passthrough_mode:
+            passthrough_args.append(arg)
         else:
-            cleaned_args.append(raw_args[i])
-            i += 1
+            cleaned_args.append(arg)
 
     return cleaned_args, jest_args, passthrough_args
+
 
 def main():
     targets = load_targets()
 
-    # Pre-parse to find `--` and `--jest`
+    # Pre-parse to separate docker args, jest args and passthrough args
     raw_args = sys.argv[1:]
     cleaned_args, jest_args, passthrough_args = partition_args(raw_args)
 
+    # The main parser
     parser = argparse.ArgumentParser(description="Dev Environment CLI")
-    parser.add_argument("command", choices=["start", "stop", "test", "run", "connect", "status", "help"])
-    parser.add_argument("target", nargs="?", help="Target to run command against")
-    parser.add_argument("docker_args", nargs=argparse.REMAINDER, help="Docker Compose args")
+    parser.add_argument(
+        "command",
+        choices=["start", "stop", "test", "run", "connect", "status", "help"],
+    )
+    parser.add_argument(
+        "target", nargs="?", help="Target to run command against"
+    )
+    parser.add_argument(
+        "docker_args", nargs=argparse.REMAINDER, help="Docker Compose args"
+    )
 
     args = parser.parse_args(cleaned_args)
 
+    # Status command needs no target
     if args.command == "status":
         handle_status()
         return
 
+    # Help command may or may not have a target
     if args.command == "help":
         section = args.target or "index"
         print_help_section(section)
@@ -149,6 +210,7 @@ def main():
             print_targets_for_command(section, targets)
         return
 
+    # All other commands do need a target
     if not args.target:
         print("Missing target for command:", args.command)
         sys.exit(1)
@@ -162,16 +224,23 @@ def main():
     main_container = containers[0]
 
     if args.command not in target_info["commands"]:
-        print(f"Command '{args.command}' not allowed for target '{args.target}'")
+        print(
+            f"Command '{args.command}' not allowed for target '{args.target}'"
+        )
         sys.exit(1)
 
     # Delegate
     if args.command == "start":
-        handle_start(args.target, containers, args.docker_args)
+        handle_start(containers, args.docker_args)
     elif args.command == "stop":
-        handle_stop(args.target, containers, args.docker_args)
+        handle_stop(containers, args.docker_args)
     elif args.command == "test":
-        handle_test(main_container, target_info.get("jest_config"), jest_args, args.docker_args)
+        handle_test(
+            main_container,
+            target_info.get("jest_config"),
+            jest_args,
+            args.docker_args,
+        )
     elif args.command == "run":
         handle_run(main_container, passthrough_args, args.docker_args)
     elif args.command == "connect":

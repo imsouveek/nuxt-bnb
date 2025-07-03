@@ -1,159 +1,243 @@
 #!/usr/bin/env python3
+import argparse
 import sys
+import os
 import json
 import re
 from pathlib import Path
 
+ROOT_DIR = Path(__file__).resolve().parents[1]
+ENV_DIR = ROOT_DIR / "tooling"
 MERGED_FILE_EXTENSION = "merged"
 SAMPLE_FILE_EXTENSION = "sample"
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-ENV_DIR = ROOT_DIR / "tooling"
+# Generate list of env files for each container / container groups
+def find_env_files(env_path):
+    env_path = Path(env_path)
+    files = sorted(
+        f for f in env_path.rglob(".env")
+        if not f.name.endswith(f".{MERGED_FILE_EXTENSION}") and not f.name.endswith(f".{SAMPLE_FILE_EXTENSION}")
+    )
+    return files
 
-def usage():
-    print("Usage:")
-    print("  envtool.py [env] --merge")
-    print("  envtool.py [env] --split")
-    print("  envtool.py [env] --sample")
-    print("  envtool.py [env] --split-sample")
-    print("  envtool.py [env] --clean")
-    sys.exit(1)
+# Utility to delete multiple blank lines from a file
+def remove_multiple_blank_lines(src_file):
+    with src_file.open("r") as f:
+        lines = f.readlines()
 
-def check_config(config_path):
-    if not config_path.exists():
-        print(f"Missing {config_path}")
-        sys.exit(1)
+    output_lines = []
+    blank = False
+    for line in lines:
+        if line.strip():
+            blank = False
+            output_lines.append(line)
+        elif not blank:
+            blank = True
+            output_lines.append(line)
 
-def load_mask_keys(config_file):
-    with open(config_file) as f:
-        cfg = json.load(f)
-    return set(cfg.get("mask_keys", []))
+    tmp_file = src_file.with_suffix(src_file.suffix + ".tmp")
+    tmp_file.write_text("".join(output_lines))
+    tmp_file.replace(src_file)
 
-def merge_env_files(env_name, env_path, env_files, merged_file):
+# This generates a merged env file with secrets. Helps users to easily define secrets and variables for all containers
+def merge_env_files(env_files, merged_file):
     if not env_files:
-        print(f"No .env files found to merge in {env_path}")
+        print(f"No .env files found to merge in {merged_file.parent}")
         sys.exit(1)
+
     print(f"Merging files into {merged_file}")
-    with open(merged_file, "w") as out:
-        for f in env_files:
-            rel = f.relative_to(env_path)
-            out.write(f"# From {rel}\n")
-            out.write(f.read_text())
+    merged_file = Path(merged_file)
+    merged_file.write_text("")  # Clear file
+
+    for f in env_files:
+        f = Path(f)
+        rel_path = f.relative_to(merged_file.parent)
+        with merged_file.open("a") as out, f.open("r") as src:
+            out.write(f"# From {rel_path}\n")
+            out.write(src.read())
             out.write("\n\n")
 
-    # collapse extra blank lines
-    lines = merged_file.read_text().splitlines()
-    with open(merged_file, "w") as f:
-        blank = False
-        for line in lines:
-            if line.strip():
-                f.write(line + "\n")
-                blank = False
-            elif not blank:
-                f.write("\n")
-                blank = True
+    remove_multiple_blank_lines(merged_file)
     print(f"Merged env written to {merged_file}")
 
-def split_env_file(env_name, env_path, merged_file):
-    if not merged_file.exists():
-        print(f"Merged file not found: {merged_file}")
+# Split a merged env file into env files by container groups
+def split_env_file(merged_file, env_path):
+    if not merged_file.is_file():
+        print(f"Error: Merged file not found: {merged_file}")
         sys.exit(1)
 
+    print(f"Validating directories in {merged_file}...")
+    missing_paths = set()
+    rel_paths = []
+
+    # First pass: validate paths
+    with merged_file.open("r") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if line.startswith("# From "):
+                rel_path = line[7:]
+
+                # Disallow unsafe paths
+                if rel_path.startswith("../") or "/../" in rel_path:
+                    print(f"Error: Unsafe relative path in merged file → {rel_path}")
+                    sys.exit(1)
+
+                rel_paths.append(rel_path)
+                target_dir = (env_path / rel_path).parent
+                if not target_dir.is_dir():
+                    missing_paths.add(target_dir)
+
+    if missing_paths:
+        print("Error: The following directories are missing:")
+        for d in sorted(missing_paths):
+            print(f"  - {d}")
+        print("Aborting. No .env files were created.")
+        sys.exit(1)
+
+    print("All directories exist. Proceeding to split...")
+
+    # Second pass: split files
     current_file = None
-    for line in merged_file.read_text().splitlines():
-        if line.startswith("# From "):
-            rel_path = line.replace("# From ", "").strip()
-            if rel_path.startswith("../") or "/../" in rel_path:
-                print(f"Unsafe relative path: {rel_path}")
-                sys.exit(1)
-            target_path = env_path / rel_path
-            target_path.parent.mkdir(parents=True, exist_ok=True)
-            current_file = target_path
-            current_file.write_text("")
-        elif current_file:
-            current_file.write_text(current_file.read_text() + line + "\n")
+    with merged_file.open("r") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if line.startswith("# From "):
+                rel_path = line[7:]
+                current_file = env_path / rel_path
+                current_file.write_text("")  # truncate
+                print(f"  → Writing to {current_file}")
+            elif current_file:
+                with current_file.open("a") as out:
+                    out.write(line + "\n")
+
     print("Split complete.")
 
-def generate_sample_files(env_name, env_path, env_files, config_file):
-    mask_keys = load_mask_keys(config_file)
-    top_sample = env_path / f".env.{env_name}.{MERGED_FILE_EXTENSION}.{SAMPLE_FILE_EXTENSION}"
+# This helps to generate sample files by masking secrets
+def generate_sample_files(env_files, env_path, config_file, env_name):
+    print(f"Generating .sample files for envs under {env_path}...")
 
-    with open(top_sample, "w") as top_out:
-        for f in env_files:
-            sample_file = f.with_suffix(f.suffix + f".{SAMPLE_FILE_EXTENSION}")
-            lines = []
-            for line in f.read_text().splitlines():
-                if re.match(r'^[A-Za-z_][A-Za-z0-9_]*=.*', line):
-                    k, _ = line.split("=", 1)
-                    line = f"{k}=xxxxx" if k in mask_keys else line
-                lines.append(line)
-            sample_file.write_text("\n".join(lines))
-            rel = f.relative_to(env_path)
-            top_out.write(f"# From {rel}\n" + "\n".join(lines) + "\n\n")
-    print(f"Sample files generated: {top_sample}")
+    # Load mask_keys from config
+    try:
+        with open(config_file, "r") as f:
+            config = json.load(f)
+            mask_keys = config.get("mask_keys", [])
+    except Exception as e:
+        print(f"Error loading config file: {e}")
+        sys.exit(1)
 
-def clean_env_files(env_name, env_path):
-    pattern = f".env.{env_name}.{MERGED_FILE_EXTENSION}"
-    deleted = False
-    for p in env_path.rglob(f".env*{MERGED_FILE_EXTENSION}*"):
-        print(f"Deleting {p}")
-        p.unlink()
-        deleted = True
-    if not deleted:
-        print("No merged or sample files found.")
-    else:
-        print("Cleanup complete.")
+    if not mask_keys:
+        print(f"No mask_keys found in {config_file}")
+        sys.exit(1)
 
-def split_sample_file(env_name, env_path, config_file):
+    key_set = set(mask_keys)
+    key_pattern = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)$')
+
+    top_level_sample = env_path / f".env.{env_name}.{MERGED_FILE_EXTENSION}.{SAMPLE_FILE_EXTENSION}"
+    top_level_sample.write_text("")  # truncate
+
+    for f in env_files:
+        f = Path(f)
+        sample_file = f.with_suffix(f.suffix + f".{SAMPLE_FILE_EXTENSION}")
+        print(f"  → Writing masked {sample_file}")
+
+        lines = []
+        with f.open("r") as src:
+            for line in src:
+                line = line.rstrip("\n")
+                match = key_pattern.match(line)
+                if match:
+                    key, _ = match.groups()
+                    if key in key_set:
+                        lines.append(f"{key}=xxxxx")
+                    else:
+                        lines.append(line)
+                else:
+                    lines.append(line)
+
+        sample_file.write_text("\n".join(lines) + "\n")
+
+        rel_path = f.relative_to(env_path)
+        with top_level_sample.open("a") as out, sample_file.open("r") as sf:
+            out.write(f"# From {rel_path}\n")
+            out.write(sf.read())
+            out.write("\n\n")
+
+    # Collapse extra blank lines
+    remove_multiple_blank_lines(top_level_sample)
+    print(f"Sample files generated, including top-level: {top_level_sample}")
+
+# This generates container level .env files from merged sample file. Useful for codespaces
+def split_sample_file(env_path, env_name, config_file):
     sample_file = env_path / f".env.{env_name}.{MERGED_FILE_EXTENSION}.{SAMPLE_FILE_EXTENSION}"
     if not sample_file.exists():
-        print(f"Sample merged file not found: {sample_file}")
+        print(f"Error: Sample merged file not found: {sample_file}")
         sys.exit(1)
-    mask_keys = load_mask_keys(config_file)
+
+    print(f"Splitting {sample_file} into per-service .env files, skipping masked secrets...")
+
+    # Load mask_keys
+    try:
+        with open(config_file, "r") as f:
+            config = json.load(f)
+            mask_keys = set(config.get("mask_keys", []))
+    except Exception as e:
+        print(f"Error reading config file: {e}")
+        sys.exit(1)
+
+    # Regex for ENV lines
+    env_line_pattern = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)=(.*)$')
 
     current_file = None
-    for line in sample_file.read_text().splitlines():
-        if line.startswith("# From "):
-            rel_path = line.replace("# From ", "").strip()
-            current_file = env_path / rel_path
-            current_file.write_text("")
-        elif current_file and re.match(r'^[A-Za-z_][A-Za-z0-9_]*=', line):
-            k = line.split("=", 1)[0]
-            if k not in mask_keys:
-                current_file.write_text(current_file.read_text() + line + "\n")
-        elif current_file:
-            current_file.write_text(current_file.read_text() + line + "\n")
+    with sample_file.open("r") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if line.startswith("# From "):
+                rel_path = line[7:]
+                if rel_path.startswith("../") or "/../" in rel_path:
+                    print(f"Error: Unsafe path in sample file → {rel_path}")
+                    sys.exit(1)
+
+                current_file = env_path / rel_path
+                current_file.write_text("")  # truncate
+                print(f"  → Writing to {current_file}")
+            elif current_file:
+                match = env_line_pattern.match(line)
+                if match:
+                    key = match.group(1)
+                    if key in mask_keys:
+                        continue  # skip masked keys
+                with current_file.open("a") as out:
+                    out.write(line + "\n")
+
     print("Split-sample complete.")
 
 def main():
-    if len(sys.argv) != 3:
-        usage()
-    env_name = sys.argv[1]
-    action = sys.argv[2]
+    parser = argparse.ArgumentParser(description="Envtool CLI")
+    parser.add_argument(
+        "env",
+        choices=["dev", "stg", "prod"],
+        help="Environment to be used"
+    )
+    parser.add_argument(
+        "command",
+        choices=["--merge", "--split", "--sample", "--split-sample"],
+        help="Command to run"
+    )
+    args = parser.parse_args(['--'] + sys.argv[1:])
 
-    env_path = ENV_DIR / env_name
+    env_path = ENV_DIR / args.env
     config_file = env_path / "envconfig.json"
-    merged_file = env_path / f".env.{env_name}.{MERGED_FILE_EXTENSION}"
+    env_files = find_env_files(env_path)
+    merged_file = env_path / f".env.{args.env}.{MERGED_FILE_EXTENSION}"
 
-    if not env_path.exists():
-        print(f"Environment directory not found: {env_path}")
-        sys.exit(1)
-    check_config(config_file)
-
-    env_files = sorted(p for p in env_path.glob("**/.env") if MERGED_FILE_EXTENSION not in str(p) and SAMPLE_FILE_EXTENSION not in str(p))
-
-    if action == "--merge":
-        merge_env_files(env_name, env_path, env_files, merged_file)
-    elif action == "--split":
-        split_env_file(env_name, env_path, merged_file)
-    elif action == "--sample":
-        generate_sample_files(env_name, env_path, env_files, config_file)
-    elif action == "--clean":
-        clean_env_files(env_name, env_path)
-    elif action == "--split-sample":
-        split_sample_file(env_name, env_path, config_file)
-    else:
-        usage()
+    if args.command == '--merge': 
+        merge_env_files(env_files, merged_file)
+    elif args.command == '--split':
+        split_env_file(merged_file, env_path)
+    elif args.command == '--sample':
+        generate_sample_files(env_files, env_path, config_file, args.env)
+    elif args.command == '--split-sample':
+        split_sample_file(env_path, args.env, config_file)
 
 if __name__ == "__main__":
     main()
