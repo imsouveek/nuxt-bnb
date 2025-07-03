@@ -7,13 +7,35 @@ This is the backend API for NuxtBnB — a simplified Airbnb clone built with **E
 ## Folder Structure
 
 ```
-server/api                      # API service root
-├── bootstrap                   # Bootstraps models, services, controllers
-├── middleware                  # Auth, query, and CSRF middleware
-├── resources                   # RESTful modules (auth, users, homes, etc.)
-├── services                    # Shared services (email, tokens, etc.)
-├── tests                       # Jest test suite (scoped by resource)
-└── utils                       # Stateless helper utilities
+server/api/                           # API service root
+├── bootstrap                         # Bootstraps models, services, controllers and middleware
+├── middleware                        # Auth, query, and CSRF middleware
+├── resources                         # RESTful modules (auth, users, homes, etc.)
+│   ├── auth
+│   ├── bookings
+│   ├── homes
+│   │   ├── availabilities
+│   │   └── reviews
+│   ├── images
+│   ├── search
+│   ├── tokens
+│   └── users
+├── services                          # Shared services (email, csrf, etc.)
+├── tests                             # Jest test suite (scoped by resource)
+│   ├── bootstrap                     # Unit tests for db connection
+│   ├── jest                          # Setup for unit tests
+│   ├── resources
+│   │   ├── auth
+│   │   ├── bookings
+│   │   ├── homes
+│   │   │   ├── availabilities
+│   │   │   └── reviews
+│   │   ├── images
+│   │   ├── search
+│   │   └── users
+│   ├── services                      # Tests for shared services
+│   └── utils                         # Stateless utilities for testing
+└── utils                             # Stateless helper utilities
 ```
 
 ---
