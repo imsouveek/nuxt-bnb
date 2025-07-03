@@ -157,7 +157,7 @@ This roadmap tracks functional and architectural development. Infra/config-level
 - [x] Deploy to GitHub
 - [x] Add CSRF, CORS and other security validations
 - [x] Add a landing page
-- [ ] Add support for DevContainers for GitHub Codespaces
+- [x] Add support for DevContainers for GitHub Codespaces
 - [ ] Build test-env and prod-env scripts to provision UX, API and Payment separately
 - [ ] Deploy to K3s cluster
 - [ ] Use Ansible for basic cluster maintenance
