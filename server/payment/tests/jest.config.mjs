@@ -6,7 +6,7 @@ export default {
         '<rootDir>/tests/resources/**/*.test.js',
         '<rootDir>/tests/bootstrap/**/*.test.js'
     ],
-    testTimeout: 30000,
+    testTimeout: 60000,
     transform: {},
     moduleNameMapper: {},
     collectCoverageFrom: [

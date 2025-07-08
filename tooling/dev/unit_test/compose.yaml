@@ -11,3 +11,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       NODE_ENV: test
+    depends_on:
+      - base
+    network_mode: host
