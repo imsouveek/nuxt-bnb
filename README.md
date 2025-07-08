@@ -12,7 +12,7 @@ Built using:
 cp tooling/dev/.env.dev.merged.sample tooling/dev/.env.dev.merged
 ./scripts/envtool dev --split
 ./scripts/dev-env start services -d
-./scripts/dev-env start app -d
+./scripts/dev-env start app --watch
 ```
 
 ## Testing

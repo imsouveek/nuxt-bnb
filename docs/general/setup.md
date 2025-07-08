@@ -116,6 +116,22 @@ Note: Unit tests are built so that specific sections of the app can be tested in
 
 ---
 
+## Common Issues
+
+- *Database containers fail to start*
+
+  Here are the steps to resolve:
+  1. Delete `.gitkeep` files in `db/mongodb` and `db/postgres` folders
+  2. If you are on WSL, you may need to update compose files to use named volumes instead of mounting folders (This is not required on MacOS or Linux)
+
+- *Running dev-env or envtool throws error `/usr/bin/env: 'python3/r': No such file or directory`*
+
+  This error does occur on WSL 2, depending on environment setup. Run the scripts as follows:
+  `python3 ./scripts/dev-env ...` or
+  `python ./scripts/dev-env ...`
+
+---
+
 ## Tips for Advanced Users
 
 - `dev-env` supports passthrough of Docker and Compose arguments
