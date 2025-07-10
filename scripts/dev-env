@@ -4,7 +4,6 @@ import json
 import subprocess
 import sys
 import os
-import platform
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -14,17 +13,6 @@ HELP_FILE = ROOT_DIR / "scripts" / "dev-env.help"
 
 # Set environment variables that docker needs to build
 os.environ["COMPOSE_BAKE"] = "true"
-os.environ["NODE_PLATFORM"] = "linuxmusl"
-os.environ["NODE_LIBC"] = "musl"
-
-arch = platform.machine()
-if arch in ("aarch64", "arm64"):
-    os.environ["NODE_ARCH"] = "arm64"
-elif arch in ("x86_64", "amd64"):
-    os.environ["NODE_ARCH"] = "amd64"
-else:
-    print(f"Unsupported architecture: {arch}", file=sys.stderr)
-    sys.exit(1)
 
 # Process targets and container configuration
 def load_targets():
@@ -174,7 +162,6 @@ def partition_args(raw_args):
 
     return cleaned_args, jest_args, passthrough_args
 
-
 def main():
     targets = load_targets()
 
@@ -245,7 +232,6 @@ def main():
         handle_run(main_container, passthrough_args, args.docker_args)
     elif args.command == "connect":
         handle_connect(main_container)
-
 
 if __name__ == "__main__":
     main()

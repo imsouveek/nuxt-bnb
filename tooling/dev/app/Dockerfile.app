@@ -9,7 +9,6 @@ COPY . .
 
 # Accept build-time PRISMA_SCHEMA
 ARG PRISMA_SCHEMA
-
 ENV PRISMA_SCHEMA=$PRISMA_SCHEMA
 
 # # Migrate Prisma and generate client during build
