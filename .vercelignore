@@ -8,17 +8,16 @@ node_modules/
 package-lock.json
 server/payment/bootstrap/prisma/generated
 
-# DB files
-db/mongodb/*
-!db/mongodb/.gitkeep
-
-db/pgadmin/*
-!db/pgadmin/.gitkeep
-
-db/postgres/*
-!db/postgres/.gitkeep
-
 backups
+LICENSE
+README.md
 TODOs.md
-.vercel
-.vercel_cache
+nodemon.json
+
+docs/*
+db/*
+.vscode/*
+.devcontainer/*
+scripts/*
+tooling/*
+sslCerts/*

@@ -43,5 +43,11 @@
     "prettier.singleQuote": true,
     "prettier.trailingComma": "es5",
     "prettier.printWidth": 120,
-    "prettier.semi": false
+    "prettier.semi": false,
+    "mdb.presetConnections": [
+        {
+            "name": "Preset Connection",
+            "connectionString": "mongodb://localhost:27017"
+        }
+    ]
 }

@@ -5,7 +5,10 @@
     "scripts": {
         "dev": "nodemon",
         "build": "nuxt build",
-        "start": "nuxt start"
+        "start": "nuxt start",
+        "vercel-build": "npm run prisma-reset && npm run prisma-migrate && nuxt build",
+        "prisma-reset": "npx prisma migrate reset --force --schema=server/payment/bootstrap/prisma/schema.prisma",
+        "prisma-migrate": "npx prisma migrate dev --schema=server/payment/bootstrap/prisma/schema.prisma"
     },
     "dependencies": {
         "@mdi/font": "^7.4.47",
@@ -33,6 +36,7 @@
         "@jest/globals": "^29.7.0",
         "@nuxtjs/eslint-config": "12.0.0",
         "@nuxtjs/vuetify": "^1.12.3",
+        "@nuxtjs/vercel-builder": "0.25.0",
         "eslint": "^8.57.0",
         "eslint-config-prettier": "^8.10.0",
         "eslint-config-standard": "^17.1.0",

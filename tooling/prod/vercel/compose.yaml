@@ -1,0 +1,14 @@
+services:     
+  vercel:
+    build: 
+      context: ../../../
+      dockerfile: tooling/prod/vercel/Dockerfile.app
+    working_dir: /app
+    volumes:
+      - ../../../:/app
+      - /app/node_modules
+      - /app/.vercel
+      - /app/.vercel_cache
+    stdin_open: true
+    tty: true
+    command: sh
