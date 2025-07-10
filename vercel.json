@@ -7,7 +7,6 @@
         "serverFiles": [
             "modules/**",
             "server/**",
-            "static/**",
             "utils/**"
         ],
         "internalServer": true,
