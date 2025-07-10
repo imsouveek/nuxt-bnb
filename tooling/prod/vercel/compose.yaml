@@ -4,6 +4,7 @@ services:
       context: ../../../
       dockerfile: tooling/prod/vercel/Dockerfile.app
     working_dir: /app
+    env_file: ./.env
     volumes:
       - ../../../:/app
       - /app/node_modules
