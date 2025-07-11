@@ -1,7 +1,7 @@
-const path = require('path')
-const fs = require('fs')
+import path from 'path'
+import fs from 'fs'
 
-module.exports = {
+export default {
     // Auto discover components
     components: true,
     head: {
