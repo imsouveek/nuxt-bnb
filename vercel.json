@@ -1,17 +1,17 @@
 {
-  "builds": [
-    {
-      "src": "nuxt.config.js",
-      "use": "@nuxtjs/vercel-builder",
-      "config": {
-        "serverFiles": [
-            "modules/**",
-            "server/**",
-            "utils/**"
-        ],
-        "internalServer": true,
-        "buildCommand": "npm run vercel-build"
-      }
-    }
-  ]
+    "version": 2,
+    "builds": [
+        {
+        "src": "nuxt.config.js",
+        "use": "@nuxtjs/vercel-builder",
+        "config": {
+            "serverFiles": [
+                "modules/**",
+                "server/**",
+                "utils/**"
+            ],
+            "buildCommand": "npm run vercel-build"
+        }
+        }
+    ]
 }
