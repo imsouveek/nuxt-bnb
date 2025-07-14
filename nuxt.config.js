@@ -22,13 +22,17 @@ export default {
         prefetchLinks: false,
         middleware: 'auth'
     },
+    // server: {
+    //     host: process.env.NUXT_HOST,
+    //     port: process.env.NUXT_PORT,
+    //     https: {
+    //         key: fs.readFileSync(path.resolve('./sslCerts', 'key.pem')),
+    //         cert: fs.readFileSync(path.resolve('./sslCerts', 'cert.pem'))
+    //     }
+    // },
     server: {
-        host: process.env.NUXT_HOST,
-        port: process.env.NUXT_PORT,
-        https: {
-            key: fs.readFileSync(path.resolve('./sslCerts', 'key.pem')),
-            cert: fs.readFileSync(path.resolve('./sslCerts', 'cert.pem'))
-        }
+        host: 0.0.0.0,
+        port: process.env.PORT || process.env.NUXT_PORT
     },
     plugins: [
         '~/plugins/axios.api',
