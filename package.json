@@ -1,11 +1,11 @@
 {
     "name": "nuxt-bnb",
     "author": "Souveek Bose",
+    "type": "module",
     "scripts": {
         "dev": "nodemon",
         "build": "nuxt build",
         "start": "nuxt start",
-        "vercel-build": "npm run prisma-reset && npm run prisma-migrate && nuxt build",
         "prisma-reset": "npx prisma migrate reset --force --schema=server/payment/bootstrap/prisma/schema.prisma",
         "prisma-migrate": "npx prisma migrate dev --schema=server/payment/bootstrap/prisma/schema.prisma"
     },
