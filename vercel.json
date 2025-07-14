@@ -23,7 +23,7 @@
                     "utils/**"
                 ],
                 "internalServer": true,
-                "buildCommand": "npm run prisma-reset && npm run prisma-migrate && nuxt build"
+                "buildCommand": "npm run vercel-build"
             }
         }
     ]
