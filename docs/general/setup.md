@@ -65,6 +65,17 @@ tooling/dev/targets.json
 
 Note: Unit tests are built so that specific sections of the app can be tested individually.
 
+> **Why is this approach preferred**
+> 
+> 1. This approach produces app containers without any additional items such as git, github cli, etc. 
+> 2. Container spins up fast if package.json file is not modified
+> 3. Can connect easily to other containers using dev-env CLI
+> 4. Developer brings his own toolkit for non-essential preferences, e.g., database connectivity, editor enhancements, etc
+>
+> **Why this may not work for everyone**
+> 
+> 1. npm install ... will not add and activate new packages inside running containers and containers need to be built fresh 
+
 ### Dev Containers
 
 **Best for:**
@@ -75,7 +86,7 @@ Note: Unit tests are built so that specific sections of the app can be tested in
 
 **Notes:**
 
-- `.env` files must be created manually
+- `.env` files must be created manually (Follow steups 3 and 4 in Local setup above)
 - Can’t run Python-based CLIs unless Python is installed inside the container
 
 ### Codespaces
@@ -87,7 +98,7 @@ Note: Unit tests are built so that specific sections of the app can be tested in
 
 **Notes:**
 
-- Uses ` envtool dev --split-sample` to generate `.env` files (excluding masked secrets)
+- Automatically runs `envtool dev --split-sample` to generate `.env` files (excluding masked secrets). 
 - Masked secrets must be set using [user-level Codespaces secrets](https://docs.github.com/en/codespaces/managing-your-codespaces/managing-secrets-for-your-codespaces)
 - The full list of masked secrets is defined in `tooling/dev/envconfig.json`
 
