@@ -1,4 +1,0 @@
-name: nuxt-bnb-prod 
-
-include:
-  - ./vercel/compose.yaml

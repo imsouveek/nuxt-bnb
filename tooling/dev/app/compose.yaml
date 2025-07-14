@@ -45,6 +45,8 @@ services:
     env_file: ./.env
     environment:
       DATABASE_URL: ${PAYMENT_DB_URL}${PAYMENT_DB_NAME}
+    depends_on:
+      - base
     stdin_open: true
     tty: true
     command: sh

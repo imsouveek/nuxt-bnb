@@ -1,6 +1,11 @@
 import path from 'path'
 import fs from 'fs'
 
+const isRender = process.env.RENDER === 'true'
+const baseUrl = isRender
+  ? 'https://nuxt-bnb.onrender.com'
+  : `https://${process.env.HOST || 'localhost'}:${process.env.NUXT_LOCAL_PORT}`
+
 export default {
     // Auto discover components
     components: true,
@@ -22,17 +27,18 @@ export default {
         prefetchLinks: false,
         middleware: 'auth'
     },
-    // server: {
-    //     host: process.env.NUXT_HOST,
-    //     port: process.env.NUXT_PORT,
-    //     https: {
-    //         key: fs.readFileSync(path.resolve('./sslCerts', 'key.pem')),
-    //         cert: fs.readFileSync(path.resolve('./sslCerts', 'cert.pem'))
-    //     }
-    // },
     server: {
-        host: '0.0.0.0',
-        port: process.env.PORT || process.env.NUXT_PORT
+        port: process.env.PORT || process.env.NUXT_PORT,
+        host: isRender ? '0.0.0.0' : process.env.NUXT_HOST,
+        ...(isRender
+            ? {}
+            : {
+                https: {
+                    key: fs.readFileSync(path.resolve('./sslCerts', 'key.pem')),
+                    cert: fs.readFileSync(path.resolve('./sslCerts', 'cert.pem'))
+                }
+            }
+        )
     },
     plugins: [
         '~/plugins/axios.api',
@@ -96,10 +102,10 @@ export default {
             key_id: process.env.RAZORPAY_KEY_ID
         },
         url: {
-            local: 'https://localhost:3000',
-            app: `https://${process.env.HOST}:${process.env.NUXT_LOCAL_PORT}`,
-            api: `https://${process.env.HOST}:${process.env.NUXT_LOCAL_PORT}/api`,
-            payment: `https://${process.env.HOST}:${process.env.NUXT_LOCAL_PORT}/payment`
+            local: baseUrl,
+            app: baseUrl,
+            api: `${baseUrl}/api`,
+            payment: `${baseUrl}/payment`
         }
     },
     privateRuntimeConfig: {
