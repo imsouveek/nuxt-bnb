@@ -1,11 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 
-// export default {
-import { defineNuxtConfig } from '@nuxt/bridge'
-
-export default defineNuxtConfig({
-    bridge: false,
+export default {
     // Auto discover components
     components: true,
     head: {
@@ -135,4 +131,4 @@ export default defineNuxtConfig({
             port: process.env.SMTP_PORT
         }
     }
-})
+}
