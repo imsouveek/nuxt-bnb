@@ -6,8 +6,6 @@
         <property-map :home="home" />
         <property-reviews :reviews="reviews" />
         <property-host :user="user" />
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <script type="application/ld+json" v-html="getSchema"></script>
     </div>
 </template>
 
@@ -46,30 +44,29 @@ export default {
                 { hid: 't-title', name: 'twitter:title', content: this.home.title },
                 { hid: 't-description', name: 'twitter:description', content: this.home.description },
                 { hid: 't-image', property: 'twitter:image', content: `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}` }
-            ]
-        }
-    },
-    computed: {
-        getSchema () {
-            return JSON.stringify({
-                '@context': 'http://schema.org',
-                '@type': 'BedAndBreakfast',
-                name: this.home.title,
-                image: `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}`,
-                address: {
-                    '@type': 'PostalAddress',
-                    addressLocality: this.home.location.city,
-                    addressRegion: this.home.location.state,
-                    postalCode: this.home.location.postalCode,
-                    streetAddress: this.home.location.address,
-                    addressCountry: this.home.country
-                },
-                aggregateRating: {
-                    '@type': 'AggregateRating',
-                    ratingValue: this.home.reviewValue,
-                    reviewCount: this.home.reviewCount
+            ],
+            script: {
+                type: 'application/ld+json',
+                json: {
+                    '@context': 'http://schema.org',
+                    '@type': 'BedAndBreakfast',
+                    name: this.home.title,
+                    image: `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}`,
+                    address: {
+                        '@type': 'PostalAddress',
+                        addressLocality: this.home.location.city,
+                        addressRegion: this.home.location.state,
+                        postalCode: this.home.location.postalCode,
+                        streetAddress: this.home.location.address,
+                        addressCountry: this.home.country
+                    },
+                    aggregateRating: {
+                        '@type': 'AggregateRating',
+                        ratingValue: this.home.reviewValue,
+                        reviewCount: this.home.reviewCount
+                    }
                 }
-            })
+            }
         }
     }
 }
