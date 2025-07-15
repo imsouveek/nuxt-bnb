@@ -6,6 +6,7 @@
         <property-map :home="home" />
         <property-reviews :reviews="reviews" />
         <property-host :user="user" />
+        <script type="application/ld+json" v-html="getSchema"></script>
     </div>
 </template>
 
@@ -40,8 +41,21 @@ export default {
                 {hid: 'og-desc', property: 'og:description', content: this.home.description},
                 {hid: 'og-image', property: 'og:image', content: `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}`},
                 {hid: 'og-url', property: 'og:url', content: `${this.$config.url.app}/home/${this.home._id}`},
-                {hid: 't-type', name: 'twitter:card', content: 'summary_large_image'}
+                {hid: 't-type', name: 'twitter:card', content: 'summary_large_image'},
+                {hid: 't-title', name: 'twitter:title', content: this.home.title},
+                {hid: 't-description', name: 'twitter:description', content: this.home.description},
+                {hid: 't-image', property: 'twitter:image', content: `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}`}
             ]
+        }
+    },
+    computed: {
+        getSchema() {
+            return JSON.stringify({
+                '@context': 'http://schema.org',
+                '@type': 'BedAndBreakfast',
+                'name': this.home.title,
+                'image': `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}`
+            })
         }
     }
 }
