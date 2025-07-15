@@ -60,7 +60,8 @@ export default {
                     addressLocality: this.home.location.city,
                     addressRegion: this.home.location.state,
                     postalCode: this.home.location.postalCode,
-                    streetAddress: this.home.location.address
+                    streetAddress: this.home.location.address,
+                    addressCountry: this.home.country
                 },
                 aggregateRating: {
                     '@type': 'AggregateRating',
