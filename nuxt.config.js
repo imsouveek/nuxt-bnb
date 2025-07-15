@@ -29,8 +29,10 @@ export default {
             class: ['my-style']
         },
         meta: [
+            {charset: 'utf-8'},
             {
-                charset: 'utf-8'
+                name: 'google-site-verification',
+                content: 'YgPqOgbselqoFP2C_c5m19a90'
             }
         ]
     },
