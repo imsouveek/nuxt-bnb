@@ -54,7 +54,19 @@ export default {
                 '@context': 'http://schema.org',
                 '@type': 'BedAndBreakfast',
                 'name': this.home.title,
-                'image': `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}`
+                'image': `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}`,
+                'address': {
+                    '@type': 'PostalAddress',
+                    'addressLocality': this.home.location.city,
+                    'addressRegion': this.home.location.state,
+                    'postalCode': this.home.location.postalCode,
+                    'streetAddress': this.home.location.address
+                },
+                'aggregateRating': {
+                    '@type': 'AggregateRating',
+                    'ratingValue': this.home.reviewValue,
+                    'reviewCount': this.home.reviewCount
+                }
             })
         }
     }
