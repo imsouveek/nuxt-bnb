@@ -6,6 +6,7 @@
         <property-map :home="home" />
         <property-reviews :reviews="reviews" />
         <property-host :user="user" />
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <script type="application/ld+json" v-html="getSchema"></script>
     </div>
 </template>
