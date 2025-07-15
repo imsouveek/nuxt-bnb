@@ -39,7 +39,8 @@ export default {
                 {hid: 'og-title', property: 'og:title', content: this.home.title},
                 {hid: 'og-desc', property: 'og:description', content: this.home.description},
                 {hid: 'og-image', property: 'og:image', content: `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}`},
-                {hid: 'og-url', property: 'og:url', content: `${this.$config.url.app}/home/${this.home._id}`}
+                {hid: 'og-url', property: 'og:url', content: `${this.$config.url.app}/home/${this.home._id}`},
+                {hid: 't-type', name: 'twitter:card', content: 'summary_large_image'}
             ]
         }
     }
