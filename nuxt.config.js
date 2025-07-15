@@ -6,6 +6,17 @@ const baseUrl = isRender
   ? 'https://nuxt-bnb.onrender.com'
   : `https://${process.env.HOST || 'localhost'}:${process.env.NUXT_LOCAL_PORT}`
 
+let httpsConfig
+try {
+    httpsConfig = {
+        key: fs.readFileSync(path.resolve('./sslCerts', 'key.pem')),
+        cert: fs.readFileSync(path.resolve('./sslCerts', 'cert.pem'))
+    }
+    console.log('✅ HTTPS config loaded')
+} catch (e) {
+    console.log('❌ Failed to load HTTPS certs:', e.message)
+}
+
 export default {
     // Auto discover components
     components: true,
@@ -30,15 +41,7 @@ export default {
     server: {
         port: process.env.PORT || process.env.NUXT_PORT,
         host: isRender ? '0.0.0.0' : process.env.NUXT_HOST,
-        ...(isRender
-            ? {}
-            : {
-                https: {
-                    key: fs.readFileSync(path.resolve('./sslCerts', 'key.pem')),
-                    cert: fs.readFileSync(path.resolve('./sslCerts', 'cert.pem'))
-                }
-            }
-        )
+        ...(isRender ? {} : { https: httpsConfig })
     },
     plugins: [
         '~/plugins/axios.api',

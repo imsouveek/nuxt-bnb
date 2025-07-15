@@ -20,5 +20,3 @@ db/postgres/*
 
 backups
 TODOs.md
-.vercel
-.vercel_cache
