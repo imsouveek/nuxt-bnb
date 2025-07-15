@@ -38,7 +38,7 @@ export default {
                 {hid: 'og-type', property: 'og:type', content: 'website'},
                 {hid: 'og-title', property: 'og:title', content: this.home.title},
                 {hid: 'og-desc', property: 'og:description', content: this.home.description},
-                {hid: 'og-image', property: 'og:image', content: this.$imageHandler.get(this.home.images[0])},
+                {hid: 'og-image', property: 'og:image', content: `${this.$config.url.app}${this.$imageHandler.get(this.home.images[0])}`},
                 {hid: 'og-url', property: 'og:url', content: `${this.$config.url.app}/home/${this.home._id}`}
             ]
         }
