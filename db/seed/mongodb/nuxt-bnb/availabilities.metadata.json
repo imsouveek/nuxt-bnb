@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"homeId":{"$numberInt":"1"},"epochDate":{"$numberInt":"1"}},"name":"homeId_1_epochDate_1","background":true,"unique":true}],"uuid":"4e28dbf973a34498a73091f29799011b","collectionName":"availabilities","type":"collection"}
