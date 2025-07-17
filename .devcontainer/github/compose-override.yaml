@@ -10,6 +10,7 @@ services:
             NUXT_LOCAL_PORT: 443
         volumes:
             - ../../:/app
+        command: sh
 
     base:
         build:
