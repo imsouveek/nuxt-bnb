@@ -16,7 +16,7 @@
 
     // Use 'postCreateCommand' to run commands after the container is created.
     "initializeCommand": "scripts/envtool dev --split-sample",
-    // "postCreateCommand": "./postCreate.sh",    
+    "postCreateCommand": ".devcontainer/github/postCreate.sh",    
 
     // Configure tool-specific properties
     "customizations": {
