@@ -21,6 +21,8 @@ RUN npm install -g nodemon
 COPY package.json ./
 COPY .npmrc ./
 
+RUN npm install
+
 COPY . .
 
 EXPOSE ${NUXT_PORT}

@@ -1,9 +1,9 @@
 services:
-  app:
-    build:
-      dockerfile: .devcontainer/local/Dockerfile.codespace.app
-    volumes:
-      - ../../:/app
-      - /app/node_modules
-      - /app/server/payment/bootstrap/prisma/generated
-      - /app/.nuxt
+    app:
+        build:
+            dockerfile: .devcontainer/local/Dockerfile.devcontainer.app
+        volumes:
+            - ../../:/app
+            - /app/node_modules
+            - /app/server/payment/bootstrap/prisma/generated
+            - /app/.nuxt
