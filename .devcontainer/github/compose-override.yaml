@@ -11,6 +11,8 @@ services:
         volumes:
             - ../../:/app
         command: sh
+        stdin_open: true
+        tty: true
 
     base:
         build:
