@@ -10,7 +10,9 @@ npx prisma generate --schema=server/payment/bootstrap/prisma/schema.prisma
 mongorestore -u sobo -p secret --host mongodb --port 27017 --drop db/seed/mongodb/
 
 # Restore Postgres DB data
+export PGPASSWORD="secret"
 psql -h postgresdb -p 5432 -U sobo -d nuxtbnb -f db/seed/postgres/nuxtbnb_seed.sql
+unset PGPASSWORD
 
 # Start dev server
 npm run dev
