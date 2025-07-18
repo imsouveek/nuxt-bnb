@@ -1,7 +1,14 @@
-# Use lightweight Alpine-based Node image with musl libc
-FROM node:current-alpine
+FROM node:current-slim
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gnupg \
+    git \
+    python3 \
+    && rm -rf /var/lib/apt/lists/* 
 
 ARG PRISMA_SCHEMA
 ENV PRISMA_SCHEMA=$PRISMA_SCHEMA

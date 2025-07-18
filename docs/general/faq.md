@@ -7,7 +7,7 @@ Frequently Asked Questions about the NuxtBnB project.
 ## What is this project?
 
 NuxtBnB is a full-featured, production-grade clone of Airbnb, built for learning and experimentation.  
-It includes SSR frontend (Nuxt), API and payment services (Express Router + ConnectJS), MongoDB, PostgreSQL, and Razorpay integration — all containerized for local and cloud-based development.
+It includes SSR frontend (Nuxt), with API and payment services running as **Nuxt server middleware (using Connect.js and Express Router for routing)**, along with MongoDB, PostgreSQL, and Razorpay integration — all containerized for local and cloud-based development.
 
 ---
 
@@ -54,7 +54,7 @@ The backend services have deep unit test coverage:
 - API: 98.7% coverage (Jest + Supertest + Dockerized Mongo/Mailpit)
 - Payment: 99.4% coverage (Jest + Supertest + Dockerized Postgres)
 
-Tests run via a custom CLI using Docker Compose for full service isolation.
+I try to get close to 100% in test coverage and also get clean eslint output to ensure that I have clean code that is not redundant. I also test only routes, with backend db and mailpit running in test containers to get behavior close to production runtime. I run tests via a custom CLI using Docker Compose for full service isolation, and the tests use Express App (which leverages Express Router already used in Nuxt server middleware)
 The frontend has been tested manually.
 
 ---
@@ -64,7 +64,7 @@ The frontend has been tested manually.
 This project includes custom tooling to improve DX:
 - `dev-env`: CLI wrapper around Docker Compose for starting/stopping/testing services
 - `envtool`: Tool to merge, split, and mask `.env` files for dev, prod, and Codespaces
-- Supports Raspberry Pi development and M1/M2 Macs
+- Both CLIs have been written in python to support most environments that also support Docker. I have tested the scripts in Raspberry PI (Debian-based Linux ARM64), M1 Mac (ARM64) and WSL2 (AMD64)
 
 ---
 
